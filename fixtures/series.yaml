@@ -1,0 +1,31 @@
+App\Entity\Series:
+  a_1:
+    tenant: '@tenant_1'
+    code: 'A'
+    source: 'WEB'
+    description: 'Factura WEB'
+    isActive: true
+  b_1:
+    tenant: '@tenant_1'
+    code: 'B'
+    source: 'API'
+    description: 'Recibo de Arrendamiento API'
+    isActive: true
+  t_1:
+    tenant: '@tenant_1'
+    code: 'T'
+    source: 'API'
+    description: 'Recibo de Arrendamiento API'
+    isActive: true
+  rp_1:
+    tenant: '@tenant_1'
+    code: 'RP'
+    source: 'WEB'
+    description: 'Recibo Electrónico de Pago WEB'
+    isActive: true
+  a_2:
+    tenant: '@tenant_2'
+    code: 'A'
+    source: 'WEB'
+    description: 'Factura WEB'
+    isActive: true

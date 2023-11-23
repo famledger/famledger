@@ -1,0 +1,48 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}
+    Statement inconsistencies
+{% endblock %}
+
+{% block page_content %}
+
+    <table class="table table-hover">
+        <tr>
+            <th>#</th>
+            <th>Month</th>
+            <th>Status</th>
+        </tr>
+        {% for statement in statements %}
+            <tr class="bg-info text-white">
+                <td>{{ loop.index }}</td>
+                <td>{{ statement.month|month_name }} {{ statement.year }}</td>
+                <td>{{ statement.status }}</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td colspan="2">
+                    <div id="custom-transaction-section">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <td>#</td>
+                                <td>Date</td>
+                                <td>Description</td>
+                                <td>Amount</td>
+                                <td>Status</td>
+                            </tr>
+                            </thead>
+                            {% for transaction in statement.transactions %}
+                                {{ include('admin/Statement/detail_transaction.html.twig', {transaction:transaction}) }}
+                                {% if transaction.status != 'consolidated' %}
+                                {% endif %}
+                            {% endfor %}
+                        </table>
+                    </div>
+
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endblock %}

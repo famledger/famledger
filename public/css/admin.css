@@ -1,0 +1,166 @@
+:root {
+    /* make the backend contents as wide as the browser window */
+    --body-max-width: 100%;
+    /* change the background color of the <body> */
+    --body-bg: #f5f5f5;
+    /* make the base font size smaller */
+    --font-size-base: 13px;
+    /* remove all border radius to make corners straight */
+    --border-radius: 0px;
+}
+
+/* overwrite default spacing between action buttons on index page */
+.content-header .page-actions .btn+.btn {
+    margin-left: 0;
+}
+
+#flash-messages {
+    /* use a very light red as the background color */
+    background-color: #18d7da;
+}
+
+a.highlight.menu-item-contents i {
+    color: #E46F4A !important;
+}
+
+a.highlight.menu-item-contents i.menu-icon {
+    filter: opacity(1) !important;
+}
+
+.datagrid td.actions a:not(.dropdown-item) + a:not(.dropdown-item) {
+    margin-left: 0
+}
+
+.datagrid td.actions {
+    white-space: nowrap;
+}
+
+.nowrap {
+    white-space: nowrap;
+}
+
+span.tenant-caption {
+    color: #b46b05;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+}
+
+form.e-doc.dropzone {
+    border: 1px solid rgba(0, 0, 0, .8);
+    border-radius: 5px;
+    padding: 10px 20px;
+}
+
+form.e-doc.dropzone .dz-message {
+    margin: 0 !important;
+}
+
+.dropzone {
+    min-height: 40px;
+    border: 2px dashed rgba(0, 0, 0, .8);
+    border-radius: 5px;
+    padding: 10px 20px;
+}
+
+button.delete-eDoc {
+    border: none;
+    background: none;
+}
+
+.main-header #header-logo a {
+    padding: 8px 0;
+    margin: 15px 0;
+    border-top: 1px solid #999;
+    border-bottom: 1px solid #999;
+}
+
+div.data-row.substitute-invoice dt {
+    color: #9b0000 !important;
+}
+
+td.substitute-invoice a {
+    padding: 2px 4px;
+    background-color: #fef9c3;
+}
+
+div.app-name {
+    color: #666;
+}
+
+.content-header-title .title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0;
+    padding-right: 15px;
+    color: #b46b05;
+}
+
+div.card-header i.fa, div.card-header i.fas {
+    color: #5f3030;
+}
+
+.card-body .field-group {
+    margin-bottom: 10px;
+}
+
+.card-body .field-group .caption {
+    font-weight: bold;
+    color: #90b1da;
+}
+
+.field-group .value {
+    font-weight: normal;
+    color: #333;
+}
+
+div#clipboard-popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 25%;
+    width: 50%;
+    z-index: 999999;
+    padding: 10px;
+    background-color: lightgreen;
+    border-radius: 0 0 15px 15px;
+    text-align: center;
+}
+
+a.copy-to-clipboard {
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
+
+.text-super-muted {
+    opacity: .4;
+}
+
+span.transaction-description {
+    color: #426799;
+}
+
+.card.collapsible .card-header {
+    cursor: pointer;
+    background-color: #e8f4ff;
+}
+
+.card.collapsible .card-body {
+    transition: padding 0.5s ease;
+    overflow: hidden;
+}
+
+
+.card.collapsible.collapsed {
+    margin-top: .5rem !important;
+}
+
+.card.collapsible.collapsed .card-header {
+    padding-top: 0.2rem;
+    padding-bottom: 0.2rem;
+    background-color:  #ccc;
+    color: #fff;
+}

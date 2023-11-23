@@ -1,0 +1,27 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}
+    Document Detector
+{% endblock %}
+
+{% block page_content %}
+
+    <div id="dropzone">
+        <form action="{{ path('admin_document_detect') }}" method="post" class="dropzone document-detector-dropzone"
+              id="document-dropzone" enctype="multipart/form-data">
+            <div class="fallback">
+                <input name="file" type="file" multiple/>
+            </div>
+        </form>
+    </div>
+
+    <div id="document-detector-protocol">
+        <!-- Render your protocol here -->
+    </div>
+
+{% endblock %}
+
+{% block body_javascript %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('detect_page') }}
+{% endblock %}

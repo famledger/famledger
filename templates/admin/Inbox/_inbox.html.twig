@@ -1,0 +1,32 @@
+{% set hasFiles = files|length > 0 %}
+<div class="card mb-3">
+    <div class="card-header text-white bg-info">Files</div>
+    <div class="card-body">
+        <div class="text-right">
+        <span style="font-family: monospace" id="inbox-path">{{ inbox_folder_path() }}
+        </span>&nbsp;<a class="copy-to-clipboard" data-target="#inbox-path">
+                <i class="fa fa-clipboard"></i>
+            </a>
+        </div>
+
+        {% if not hasFiles %}
+            <div class="alert alert-info">No files to process</div>
+        {% else %}
+            <div class="card-text">
+                <table class="table table-hover">
+                    {% for file in files %}
+                        <tr>
+                            <td>{{ file }}</td>
+                            <td class="text-right">
+                                <a href="{{ path('admin_inbox_download', {filename:file}) }}"><i
+                                            class="fa fa-file text-super-muted"></i></a>
+                                <a href="{{ path('admin_inbox_delete', {filename:file}) }}"><i
+                                            class="fa fa-trash text-danger"></i></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</div>

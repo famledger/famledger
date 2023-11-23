@@ -1,0 +1,13 @@
+App\Entity\User:
+  jorgo:
+    email: 'jorgo@miridis.com'
+    firstname: 'Jorgo'
+    lastname: 'Miridis'
+    password: '\$2y\$13\$7XEOTxt1IrwHnGD6h8AGfeIF3jznJlgZhs2uxzMszUebP5qOE8Ope'
+    roles: ['ROLE_ADMIN']
+  mayela:
+    email: 'mayela@miridis.com'
+    firstname: 'Mayela'
+    lastname: 'Monroy Pacheco'
+    password: '\$2y\$13\$.86ZJqrdXgRLP8S5/Nxq/.dI/Oggaa9Ep3miQPlk4AsBAQXzuZoLS'
+    roles: ['ROLE_ADMIN']

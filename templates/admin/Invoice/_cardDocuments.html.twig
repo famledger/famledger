@@ -1,0 +1,35 @@
+{% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-link', title: 'Associations' } %}
+
+    {% block card_header %}
+        <div class="card-header">
+            <span class="fa-stack" style="width: 1em;">
+                <i class="fas fa-file fa-stack-1x" style="bottom: 6px;"></i>
+                <i class="fas fa-file fa-stack-1x" style="left: -6px;"></i>
+            </span>
+            Original Documents
+        </div>
+    {% endblock %}
+
+    {% block card_body %}
+
+        <div class="field-group">
+            <div class="caption">Invoice PDF</div>
+            <div class="value"><a href="{{ invoice.urlPdf }}"><i
+                            class="fa fa-file-pdf"></i> {{ invoice.urlPdf|default('')|truncate }}</a></div>
+        </div>
+        <div class="field-group">
+            <div class="caption">Invoice XML</div>
+            <div class="value"><a href="{{ invoice.urlXml }}"><i
+                            class="fa fa-file-o"></i> {{ invoice.urlXml|default('')|truncate }}</a></div>
+        </div>
+        <div class="field-group">
+            <div class="caption">PDF checksum</div>
+            <div class="value"><code style="color:#999">{{ invoice.checksumPdf }}</code></div>
+        </div>
+        <div class="field-group">
+            <div class="caption">XML checksum</div>
+            <div class="value"><code style="color:#999">{{ invoice.checksumXml }}</code></div>
+        </div>
+
+    {% endblock %}
+{% endembed %}

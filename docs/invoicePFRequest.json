@@ -1,0 +1,66 @@
+{
+  "CFDi": {
+    "versionEF": "6.5",
+    "versionCFDi": "4.0",
+    "modo": "debug",
+    "serie": "T",
+    "folioInterno": 3,
+    "fechaEmision": "2023-10-08 11:40:14",
+    "subTotal": "9500.00",
+    "total": "9500.00",
+    "tipoMoneda": "MXN",
+    "nombreDisenio": "Diseño predeterminado",
+    "rfc": "MOPM670510J8A",
+    "Receptor": {
+      "rfc": "XAXX010101000",
+      "nombre": "Público en general",
+      "usoCfdi": "S01",
+      "regimenFiscal": "616"
+    },
+    "Partidas": [
+      {
+        "agrupador": "Arrendamiento PF",
+        "cantidad": "1",
+        "claveUnidad": "E48",
+        "unidad": "Unidad de servicio",
+        "claveProdServ": "80131500",
+        "noIdentificacion": "Oyamel",
+        "descripcion": "Renta mensual de departamento situado en Calle Oyamel #14, Depto. 2, MZA 13, SM 43 de esta Ciudad Periodo: 15 de julio 2023 al 14 de agosto 2023",
+        "valorUnitario": "9500.00",
+        "importe": "9500.00",
+        "CuentaPredial": {
+          "numero": [
+            "601201501202300006"
+          ]
+        },
+        "objetoDeImpuesto": "02",
+        "Impuestos": [
+          {
+            "tipo": "traslado",
+            "claveImpuesto": "IVA",
+            "tipoFactor": "exento",
+            "baseImpuesto": "9500.00"
+          }
+        ]
+      }
+    ],
+    "Impuestos": {
+      "Totales": {
+        "traslados": "0.00"
+      },
+      "Impuestos": [
+        {
+          "tipo": "traslado",
+          "claveImpuesto": "IVA",
+          "tipoFactor": "exento",
+          "baseImpuesto": "9500.00"
+        }
+      ]
+    },
+    "exportacion": "01",
+    "DatosDePago": {
+      "metodoDePago": "PUE",
+      "formaDePago": "03"
+    }
+  }
+}

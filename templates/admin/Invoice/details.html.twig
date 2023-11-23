@@ -1,0 +1,70 @@
+{% extends '@EasyAdmin/crud/detail.html.twig' %}
+{% set invoice = entity.instance %}
+
+{% block content_header %}
+    <div class="content-header-title">
+        <div class="d-flex align-items-center">
+            <h1 class="title">
+                Invoice {{ invoice.series }}-{{ invoice.number }}
+            </h1>
+            <span class="text-white badge ms-3 {{ invoice.status|lower == 'vigente' ? 'bg-success' : 'bg-danger' }}">
+                {{ invoice.status | capitalize }}
+            </span>
+            {% if invoice.cancellationStatus is not empty %}
+                <span class="text-white badge ms-3 bg-warning }}">
+                {{ invoice.cancellationStatus }}
+            </span>
+            {% endif %}
+        </div>
+    </div>
+
+    {% block page_actions_wrapper %}
+        {{ parent() }}
+    {% endblock %}
+{% endblock %}
+
+{% block main %}
+    {% set invoice = entity.instance %}
+
+    <div class="row">
+        <!-- Left column of cards -->
+        <div class="col-md-6">
+            {{ include('admin/Invoice/_cardAssociation.html.twig') }}
+            {{ include('admin/Invoice/_cardInvoice.html.twig') }}
+        </div>
+        <!-- Right column of cards -->
+        <div class="col-md-6">
+            {{ include('admin/Invoice/_cardCancellation.html.twig') }}
+            {{ include('admin/Invoice/_cardClient.html.twig') }}
+            {{ include('admin/Invoice/_cardDocuments.html.twig') }}
+        </div>
+    </div>
+
+    <div class="col-md-12 mt-3">
+        {{ include('admin/Invoice/_cardData.html.twig') }}
+    </div>
+
+    {% if cancelForm is not null %}
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            const cancelInvoiceBtn = document.getElementById('cancelInvoiceBtn')
+            const cancelForm = document.getElementById('cancelForm')
+
+            cancelInvoiceBtn.addEventListener('click', function(event) {
+              // Trigger validation
+              if (cancelForm.checkValidity()) {
+                const userConfirmed = confirm('Are you sure you want to cancel this invoice?')
+
+                if (userConfirmed) {
+                  cancelForm.submit() // Submit the form if the user clicked "OK"
+                }
+              } else {
+                alert('Please fill in all required fields.')
+                // Optionally, trigger the form's native error UI
+                cancelForm.reportValidity()
+              }
+            })
+          })
+        </script>
+    {% endif %}
+{% endblock %}

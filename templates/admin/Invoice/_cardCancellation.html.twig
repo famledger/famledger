@@ -1,0 +1,66 @@
+{% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-cancel', title: 'Cancelation' } %}
+    {% block card_body %}
+
+        {% if invoice.status|lower == 'vigente' %}
+            {% if false and invoice.substitutedByInvoice is not null %}
+                <span class="text-danger">Already substituted by invoice</span> <a href="{{ ea_url()
+                .setController('App\\Controller\\Admin\\InvoiceCrudController')
+                .setAction('detail')
+                .setEntityId(invoice.substitutedByInvoice.id) }}">{{ invoice.substitutedByInvoice }}</a>
+                <div class="mt-2">Please cancel without reference on <a target="enlace-fiscal"
+                                                                        href="https://portal.enlacefiscal.com/comprobantes/factura">EnlaceFiscal</a>
+                </div>
+            {% elseif cancelForm is not null %}
+                {{ form_start(cancelForm, {attr:{id:'cancelForm'}}) }}
+
+                <div class="form-group">
+                    {{ form_label(cancelForm.substitutedByInvoice, null, {label_attr: {class: 'control-label'}}) }}
+                    {% if invoice.substitutedByInvoice %}
+                        {% set substituteInvoice = invoice.substitutedByInvoice %}
+                        <div class="form-control" style="background-color: #CCC;">{{ substituteInvoice }} | {{ substituteInvoice.invoicePeriod }}</div>
+                    {% endif %}
+                    {{ form_widget(cancelForm.substitutedByInvoice, {attr: {class: 'form-control'}}) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(cancelForm.cancellationReason, null, {label_attr: {class: 'control-label'}}) }}
+                    {{ form_widget(cancelForm.cancellationReason, {attr: {class: 'form-control'}}) }}
+                </div>
+
+                <div class="form-group">
+                    <button type="button" id="cancelInvoiceBtn" class="btn btn-danger">Cancel Invoice
+                    </button>
+                </div>
+
+                {{ form_end(cancelForm) }}
+            {% endif %}
+        {% else %}
+            <div class="field-group">
+                <div class="caption">Cancellation Date</div>
+                <div class="value">{{ invoice.cancellationDate|date }}</div>
+            </div>
+            <div class="field-group">
+                <div class="caption">Cancellation Reason</div>
+                <div class="value">{{ invoice.cancellationReason }}</div>
+            </div>
+            <div class="field-group">
+                <div class="caption">Substituted by Invoice</div>
+                <div class="value">
+                    {% if invoice.substitutedByInvoice is not null %}
+                        <a href="{{ ea_url()
+                            .setController('App\\Controller\\Admin\\InvoiceCrudController')
+                            .setAction('detail')
+                            .setEntityId(invoice.substitutedByInvoice.id) }}">{{ invoice.substitutedByInvoice }}</a>
+                    {% else %}
+                        -none-
+                    {% endif %}
+                </div>
+            </div>
+            <div class="field-group">
+                <div class="caption">Cancellation Data</div>
+                <div data-level="0" class="value render-json">{{ invoice.cancellationData|json_encode|raw }}</div>
+            </div>
+        {% endif %}
+
+    {% endblock %}
+{% endembed %}

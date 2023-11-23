@@ -1,0 +1,19 @@
+<div class="card mt-3">
+    <div class="card-header"><i class="fa fa-warning"></i> Content Mismatches</div>
+    <div class="card-body">
+        <div class="alert alert-light pt-2 pb-2 mb-3" style="background-color: #fff9db;">
+            The following files exist in both source and target folder but have a different content.
+        </div>
+        <table class="table table-hover mt-1">
+            <tbody>
+            {% for checksum, filename in byNameChecksum %}
+                <tr>
+                    <td><span class="text-danger">{{ filename }}</span></td>
+                    <td><a href="{{ path('admin_accountingFiles_download', {financialMonth:financialMonth.id, location:'source', filename:filename}) }}"><i class="fa fa-file"></i> source</a></td>
+                    <td><a href="{{ path('admin_accountingFiles_download', {financialMonth:financialMonth.id, location:'target', filename:filename}) }}"><i class="fa fa-file"></i> target</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,57 @@
+App\Entity\Property:
+  property_tu6:
+    tenant: '@tenant_1'
+    slug: 'TU6'
+    matchString: 'Renta de la oficina #6'
+    caption: 'Oficina #6'
+    address: 'Av. Tulum #269'
+    cadastralNumber: '601201501800203006'
+    is_active: true
+  property_tu8:
+    tenant: '@tenant_1'
+    slug: 'TU8'
+    matchString: 'Renta de la oficina #8'
+    caption: 'Oficina #8'
+    address: 'Av. Tulum #269'
+    cadastralNumber: '601201501800203008'
+    is_active: true
+  property_cra:
+    tenant: '@tenant_1'
+    slug: 'CRA'
+    matchString: 'Renta mensual de departamento situado en Circ. Copan #23'
+    caption: 'Depto 302'
+    address: 'Circuito Copan #23'
+    cadastralNumber: '601201501202300006'
+    is_active: false
+  property_oya2:
+    tenant: '@tenant_1'
+    slug: 'OYA'
+    matchString: 'Renta mensual de departamento situado en Calle Oyamel #14'
+    caption: 'Depto #2'
+    address: 'Calle Oyamel #14'
+    cadastralNumber: '601204301300800002'
+    is_active: true
+  property_oya4:
+    tenant: '@tenant_1'
+    slug: 'OYA4'
+    matchString: 'Renta mensual de departamento situado en Calle Oyamel #14'
+    caption: 'Depto #4'
+    address: 'Calle Oyamel #14'
+    cadastralNumber: '601204301300800004'
+    is_active: false
+  property_pab:
+    tenant: '@tenant_1'
+    slug: 'PAB'
+    matchString: 'Renta de la oficina #216'
+    caption: 'Oficina #216'
+    address: 'Ac. Nichupte'
+    cadastralNumber: '601201900202200041'
+    is_active: true
+  property_alb:
+    tenant: '@tenant_1'
+    slug: 'ALB'
+    matchString: 'Renta mensual de departamento situado en Depto E'
+    caption: 'Alba E'
+    address: 'Playa del Carmen'
+    cadastralNumber: 'Catastral 801003000061010-4'
+    is_active: false

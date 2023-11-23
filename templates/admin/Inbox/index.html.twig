@@ -1,0 +1,15 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}
+    Inbox
+    <div style="width: 100%">
+        <div style="float: right">
+            <a href="{{ path('admin', {routeName: 'admin_inbox_process'}) }}"
+               class="btn btn-primary">Process Files</a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_content %}
+    {{ include('admin/Inbox/_inbox.html.twig', { files: files }) }}
+{% endblock %}

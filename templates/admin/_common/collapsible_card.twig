@@ -1,0 +1,10 @@
+<div class="card collapsible mt-2 col-md-{{ width|default(12) }} px-0">
+    {% block card_header %}
+        <div class="card-header">
+            <i class="{{ icon }}"></i> {{ title }}
+        </div>
+    {% endblock %}
+    <div class="card-body {{ bodyClass|default('') }}">
+        {% block card_body %}{% endblock %}
+    </div>
+</div>

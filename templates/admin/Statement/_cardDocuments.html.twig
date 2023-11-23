@@ -1,0 +1,82 @@
+<style>
+    div.edit-form.hidden {
+        display: none !important;
+    }
+</style>
+
+{% embed 'admin/_common/collapsible_card.twig' with {
+    icon:'fa fa-file',
+    title: 'Documents',
+} %}
+    {% block card_body %}
+        <div class="text-right mt-1">
+            <a class="file-rename-button" href="javascript: void(0)"><i
+                        class="fa fa-plus"></i> add annotation document</a>
+        </div>
+        <div class="edit-form hidden mt-3 mb-3">
+            <form class="mt-1" method="POST"
+                  action="{{ path('admin_statement_addAnnotationDocument', {statement: statement.id}) }}"
+                  style="display: grid; grid-gap: 10px;">
+                <input type="hidden" name="_csrf_token"
+                       value="{{ csrf_token('add-annotation-document-' ~ statement.id) }}">
+
+                <div style="display: flex; align-items: center;">
+                    <label for="filename" style="flex-shrink: 0; width: 80px;">Filename:</label>
+                    <input type="text" id="filename" name="filename" style="flex-grow: 1;">
+                </div>
+
+                <div style="display: flex; align-items: center;">
+                    <label for="amount" style="flex-shrink: 0; width: 80px;">Cent amount:</label>
+                    <input type="text" id="amount" name="amount" style="flex-grow: 1;">
+                </div>
+
+                <div style="display: flex; justify-content: space-between;">
+                    <div style="width: 80px;"></div> <!-- Spacer with the same width as the label -->
+                    <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-save"></i> create
+                        document
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {% if documents|length %}
+            <table class="table table-hover">
+                {% for document in documents %}
+                    {% set isStatement = document.type.value == 'account-statement' %}
+                    {% if not isStatement %}
+                        <tr data-droppable-id="{{ document.id }}" data-droppable-type="document"
+                            class="document draggable">
+                            {% if isStatement %}
+                                <td><i class="fa fa-map-pin"></i></td>
+                            {% else %}
+                                <td class="drag-handle" title="Drag to move"><i class="fa fa-arrows-alt"></i>
+                                </td>
+                            {% endif %}
+                            <td>{{ document.sequenceNo }}</td>
+                            <td>{{ document.type.value }}</td>
+                            <td>{{ document.filename }}</td>
+                            <td class="text-right">{% if not isStatement %}{{ document.amount|cent_amount }}{% endif %}</td>
+                            <td class="text-right">
+                                <div>
+                                    {% if document.type.value == 'annotation' %}
+                                        <a href="{{ document|ea_url('edit') }}"><i class="fa fa-pencil"></i></a>
+                                    {% endif %}
+                                    <a target="download" class="text-muted"
+                                       href="{{ path('admin_document_download', {document:document.id}) }}"><i
+                                                class="text-muted {{ file_icon(document.filename) }}"></i> </a>
+                                    <a target="download"
+                                       href="{{ path('admin_document_download', {document:document.id}) }}"><i
+                                                class="fa fa-trash text-danger"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </table>
+        {% else %}
+            <div class="alert alert-info">No documents found.</div>
+        {% endif %}
+
+    {% endblock %}
+{% endembed %}
+

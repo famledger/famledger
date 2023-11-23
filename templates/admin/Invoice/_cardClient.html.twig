@@ -1,0 +1,30 @@
+{% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-user', title: 'Customer Information' } %}
+    {% block card_body %}
+
+        <div class="field-group">
+            <div class="caption">Name</div>
+            <div class="value">
+                <a href="{{ ea_url()
+                    .setController('App\\Controller\\Admin\\CustomerCrudController')
+                    .setAction('detail')
+                    .setEntityId(invoice.customer.id) }}">{{ invoice.recipientName }}</a>
+            </div>
+        </div>
+        <div class="field-group">
+            <div class="caption">RFC</div>
+            <div class="value">{{ invoice.recipientRFC }}</div>
+        </div>
+        <div class="field-group">
+            <div class="caption">Property</div>
+            <div class="value">
+                {% if invoice.property is not null %}
+                    <a href="{{ ea_url()
+                        .setController('App\\Controller\\Admin\\PropertyCrudController')
+                        .setAction('detail')
+                        .setEntityId(invoice.property.id) }}">{{ invoice.property }}</a>
+                {% endif %}
+            </div>
+        </div>
+
+    {% endblock %}
+{% endembed %}

@@ -1,0 +1,42 @@
+{% extends '@!EasyAdmin/layout.html.twig' %}
+
+{% block head_stylesheets %}
+    {{ parent() }}
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
+    {#    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet"> #}
+    {#    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300&display=swap" rel="stylesheet"> #}
+    {#    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300&display=swap" rel="stylesheet"> #}
+    {#    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300&display=swap" rel="stylesheet"> #}
+    {#    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300&display=swap" rel="stylesheet"> #}
+    {{ encore_entry_link_tags('app') }}
+    {{ encore_entry_link_tags('dropzone') }}
+{% endblock %}
+
+{% block head_javascript %}
+
+    {{ parent() }}
+    {{ encore_entry_script_tags('app') }}
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+    <script src="/js/renderjson.js"></script>
+    <script>
+      $(document).ready(function() {
+        $('table.datagrid td.actions span.action-label').each(function() {
+          var labelText = $(this).text(); // Get the text of the span
+          $(this).prev('i').attr('title', labelText); // Set the text as the title of the <i> element
+          $(this).hide(); // Hide the span
+        });
+      });
+    </script>
+
+{% endblock %}
+
+{% block content_header_wrapper %}
+    {{ parent() }}
+    <div id="clipboard-popup">
+        The text has been copied to your clipboard !
+    </div>
+{% endblock %}
+
+

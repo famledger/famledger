@@ -1,0 +1,32 @@
+{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
+{# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
+{# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
+{% if ea.crud.currentAction == 'detail' %}
+    <table class="inline table table-hover">
+        <tbody>
+        <tr>
+            <th>#</th>
+            <th>Type</th>
+            <th>Booking date</th>
+            <th>Description</th>
+            <th>Documents</th>
+            <th>Amount</th>
+        </tr>
+        {% for item in field.value %}
+            {% set type = (item.type is not null) ? item.type.value : null %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{% if type is not null %}{{ type }}{% endif %}</td>
+                <td>{{ item.bookingDate|date }}</td>
+                <td><span title="{{ item.description }}">{{ item.description|truncate }}</span></td>
+                <td>
+                    {% for document in item.documents %}
+                        <div><a href="">{{ document.filename }}</a></div>
+                    {% endfor %}
+                </td>
+                <td class="text-right {% if 'annotation' == type %}text-muted{% elseif item.amount > 0 %}text-success{% else %}text-danger{% endif %}">{{ item.amount|cent_amount(true) }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endif %}

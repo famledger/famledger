@@ -1,0 +1,16 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}
+    Invoice Task Preview
+{% endblock %}
+
+{% block page_content %}
+    <div style="float: right">
+        <a class="btn btn-default" href="{{ ea_url()
+            .setController('App\\Controller\\Admin\\InvoiceTaskCrudController')
+            .setAction('detail')
+            .setEntityId(invoiceTask.id) }}">Back to details</a>
+    </div>
+
+    <div data-level="10" class="render-json">{{ request|json_encode|raw }}</div>
+{% endblock %}

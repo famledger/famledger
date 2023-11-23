@@ -1,0 +1,7 @@
+{% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-code', title: 'Data', width:12 } %}
+    {% block card_body %}
+
+        <div data-level="0" class="render-json">{{ invoice.data|json_encode|raw }}</div>
+
+    {% endblock %}
+{% endembed %}

@@ -1,0 +1,47 @@
+{% embed 'admin/_common/collapsible_card.twig' with {
+    icon:'fa fa-file-invoice',
+    title: 'Invoices',
+} %}
+    {% block card_body %}
+
+        {% if customerInvoices|length %}
+            <table class="table table-hover">
+                {% for customer, invoices in customerInvoices %}
+                    <tr class="table-active customer-row">
+                        <th colspan="9"><i class="fas fa-caret-right"></i> {{ customer }}</th>
+                    </tr>
+                    {% for invoice in invoices %}
+                        <tr data-droppable-id="{{ invoice.id }}" data-droppable-type="invoice"
+                            class="detail-row invoice draggable" title="{{ loop.index }}">
+                            <td class="drag-handle" title="Drag to move"><i class="fa fa-arrows-alt"></i></td>
+                            <td class="nowrap">
+                                {% if invoice.year is not null %}
+                                    {{ invoice.year }}-{{ "%02d"|format(invoice.month) }}
+                                {% else %}
+                                    {{ invoice.issueDate|date('Y-m-d') }}
+                                {% endif %}
+                            </td>
+                            <td class="nowrap">{{ invoice.series }}-{{ invoice.number }}</td>
+                            <td>{{ invoice.recipientRfc }}</td>
+                            <td>{{ invoice.recipientName }}</td>
+                            <td>{{ invoice.description }}</td>
+                            <td class="text-right">{{ invoice.amount|cent_amount }}</td>
+                            <td class="text-right">{{ invoice.status|invoice_status }}</td>
+                            <td class="text-right"><a target="download" class="text-danger"
+                                                      href="{{ path('admin_invoice_download', {invoice:invoice.id}) }}"><i
+                                            class="fa fa-file-pdf"></i></a>
+                                <a href="{{ ea_url()
+                                    .setController('App\\Controller\\Admin\\InvoiceCrudController')
+                                    .setAction('detail')
+                                    .setEntityId(invoice.id) }}"><i class="fa fa-eye"></i></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+            </table>
+        {% else %}
+            <div class="alert alert-info">No invoices found.</div>
+        {% endif %}
+
+    {% endblock %}
+{% endembed %}

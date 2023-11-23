@@ -1,0 +1,34 @@
+{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
+{# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
+{# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
+{% if ea.crud.currentAction == 'detail' %}
+    <table class="inline table table-hover">
+        <tbody>
+        <tr>
+            <th>#</th>
+            <th class="text-right">sequence</th>
+            <th>type</th>
+            <th>File name</th>
+            <th>is consolidated</th>
+            <th>&nbsp;</th>
+        </tr>
+        {% for item in field.value %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td class="text-right">
+                    {% if item.sequenceNo is not null %}
+                        {{ '%02d'|format(item.sequenceNo) }}
+                    {% endif %}
+                </td>
+                <td>{{ item.type.value }}</td>
+                <td>{{ item.filename }}</td>
+                <td>{{ item.isConsolidated }}</td>
+                <td class="text-right"><a class="btn btn-xs btn-default" href="{{ ea_url()
+                        .setController('App\\Controller\\Admin\\DocumentCrudController')
+                        .setAction('edit')
+                        .setEntityId(item.id) }}"><i class="fa fa-pencil"></i></a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endif %}

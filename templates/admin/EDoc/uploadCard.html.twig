@@ -1,0 +1,11 @@
+    <!-- First Dropzone -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-light bg-success">Contracts {{ type }}</div>
+            <div class="card-body">
+                <form action="{{ path('admin_eDoc_upload', { ownerId:1, ownerName:'Property', type:'contract' }) }}"
+                      class="e-doc dropzone">
+                </form>
+            </div>
+        </div>
+    </div>

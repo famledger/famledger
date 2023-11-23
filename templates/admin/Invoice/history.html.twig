@@ -1,0 +1,215 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}
+    Invoice History
+{% endblock %}
+
+{% block page_content %}
+    <style>
+        table tr.header-row {
+            font-size: .9em;
+            color: #666;
+            font-weight: normal;
+        }
+
+        table tr.header-row th {
+            padding: 2px 8px;
+        }
+
+        div.year-header {
+            background-color: #c5d6df;
+        }
+
+        tr.month-caption td {
+            background-color: #e6f7ff;
+            border-top: 2px solid #ccc;
+        }
+
+        tr.invoice-row.cancelado td {
+            text-decoration: line-through;
+            background-color: #EEE;
+            opacity: .6;
+        }
+
+        .nowrap {
+            white-space: nowrap;
+        }
+
+        /*.select-container {*/
+        /*    position: relative;*/
+        /*    display: inline-block;*/
+        /*}*/
+
+        .clear-icon {
+            cursor: pointer;
+            padding-left: 4px;
+            font-size: 1.2em;
+        }
+    </style>
+
+    <div class="text-right"><a target="enlace-fiscal" href="https://portal.enlacefiscal.com/comprobantes/factura">
+            EnlaceFiscal <i class="fa fa-external-link"></i></a></div>
+
+    <div style="margin-bottom: 4px;" class="select-container">
+        Restrict to customer:
+        <select id="customer-selector">
+            <option value="">- not restricted -</option>
+            {% for rfc, value in customers %}
+                <option value="{{ rfc }}">{{ value }}</option>
+            {% endfor %}
+        </select>
+        <a href="javascript:void(0)" class=""><i class="fas fa-times clear-icon" id="clear-customer-selector"></i></a>
+    </div>
+    {% for year, months in invoicesByYear %}
+        <div class="card card-primary mb-3">
+            <div class="card-header year-header">{{ year }}</div>
+            <div class="card-body">
+                <table class="table table-hover invoice-history">
+                    <tbody>
+                    {% for month, invoices in months %}
+                        <tr class="month-caption">
+                            <td colspan="9">
+                                {% set nextMonthDate = (year ~ '-' ~ month ~ '-01')|date_modify('first day of next month')|date_modify('+2 days') %}
+                                {% if  'now'|date('U') > nextMonthDate|date('U') %}
+                                    <a href="{{ statement_url(year, month) }}" style="float:right"><i
+                                                class="fa fa-balance-scale"></i> Statement</a>
+                                {% else %}
+                                    <a href="https://bbva.mx" target="bbva" style="float:right">BBVA <i
+                                                class="fa fa-external-link"></i></a>
+                                {% endif %}
+                                <strong>{{ date('2023-' ~ month ~ '-01')|date('F') }}</strong>
+                            </td>
+                        </tr>
+                        <tr class="header-row bg-light">
+                            <th>Number</th>
+                            <th>Issued</th>
+                            <th>Paid</th>
+                            <th class="text-right">Amount</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Live</th>
+                            <th>Customer</th>
+                            <th>Description</th>
+                            <th></th>
+                        </tr>
+                        {% for invoiceNumber, invoice in invoices %}
+                            {% if null == invoice %}
+                                <tr class="invoice-row" style="background-color: #ffe6e6">
+                                    <td>{{ invoiceNumber }}</td>
+                                    <td colspan="8"></td>
+                                </tr>
+                            {% else %}
+                                <tr class="invoice-row {{ invoice.status|lower }}"
+                                    data-customer="{{ invoice.customer.rfc }}">
+                                    <td class="nowrap">
+                                        {% if invoice.substitutedByInvoice is not null %}
+                                            {% set substituteInvoice = invoice.substitutedByInvoice %}
+                                            <a href="javascript:void(0)"
+                                               title="substituted by {{ substituteInvoice.__toString() }}"
+                                               class="text-danger"><i class="fa fa-exchange-alt"></i></a>
+                                        {% endif %}
+                                        {% if invoice.substitutesInvoice is not null %}
+                                            {% set substitutedInvoice = invoice.substitutesInvoice %}
+                                            <a href="javascript:void(0)"
+                                               title="substitutes {{ substitutedInvoice.__toString() }}"
+                                               class="text-success"><i class="fa fa-exchange-alt"></i></a>
+                                        {% endif %}
+                                        {{ invoiceNumber }}
+                                    </td>
+                                    <td class="nowrap">{{ invoice.issueDate|date('d-M-y') }}</td>
+                                    <td class="nowrap">
+                                        {% if invoice.document is not null and invoice.document.transaction is not null %}
+                                            {% set transaction = invoice.document.transaction %}
+                                            {% set paymentMonth = transaction.valueDate|date('m') %}
+                                            {% if paymentMonth == month %}
+                                                {{ transaction.valueDate|date('d-M-y') }}
+                                            {% else %}
+                                                {% set diffClass = transaction.valueDate < invoice.issueDate ? 'text-success' : 'text-warning' %}
+                                                <span class="{{ diffClass }}">{{ transaction.valueDate|date('d-M-y') }}</span>
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-right">{{ invoice.amount|cent_amount }}</td>
+                                    <td class="text-center">{{ invoice.status|invoice_status }}</td>
+                                    <td class="text-center">{{ invoice.liveMode|livemode_status }}</td>
+                                    <td>{{ invoice.customer }}</td>
+                                    <td>{{ invoice.description }}</td>
+                                    <td class="text-right nowrap">
+                                        {% if invoice.document is not null %}
+                                            <a target="download" title="view document" class="text-success"
+                                               href="{{ path('admin_document_download', {document:invoice.document.id}) }}"><i
+                                                        class="fa fa-file-pdf"></i></a>
+                                        {% else %}
+                                            <a title="no document has been associated" class="text-muted"
+                                               href="javascript:void(0)"><i style="opacity: .5"
+                                                        class="fa fa-file-pdf"></i></a>
+                                        {% endif %}
+                                        <a href="{{ ea_url()
+                                            .setController('App\\Controller\\Admin\\InvoiceCrudController')
+                                            .setAction('detail')
+                                            .setEntityId(invoice.id) }}"><i class="fa fa-eye"></i></a>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div> <!-- End of card -->
+    {% endfor %}
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        const customerSelector = document.getElementById("customer-selector")
+
+        // Load the selected customer from local storage on page load
+        const savedCustomer = localStorage.getItem('selectedCustomer')
+        if (savedCustomer) {
+          customerSelector.value = savedCustomer
+          filterRows(savedCustomer)
+        }
+
+        customerSelector.addEventListener("change", function() {
+          const selectedCustomer = this.value
+
+          // Save the selected customer to local storage
+          localStorage.setItem('selectedCustomer', selectedCustomer)
+
+          filterRows(selectedCustomer)
+        })
+
+        // Get the clear button element by its id
+        const clearButton = document.getElementById("clear-customer-selector")
+
+        // Add click event listener to clear button
+        clearButton.addEventListener("click", function() {
+          // Check if the customer selector has a selected customer
+          if (customerSelector.selectedIndex !== 0) {
+            // Remove the selected customer from local storage
+            localStorage.removeItem('selectedCustomer')
+
+            // Clear the select element
+            customerSelector.selectedIndex = 0
+
+            // Reload the page
+            location.reload()
+          }
+        })
+
+        function filterRows(selectedCustomer) {
+          const invoiceRows = document.querySelectorAll(".invoice-row")
+
+          invoiceRows.forEach(function(row) {
+            const rowCustomer = row.getAttribute("data-customer")
+
+            if (selectedCustomer === "" || rowCustomer === selectedCustomer) {
+              row.style.display = "" // Show the row
+            } else {
+              row.style.display = "none" // Hide the row
+            }
+          })
+        }
+      })
+
+    </script>
+{% endblock %}

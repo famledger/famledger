@@ -1,0 +1,28 @@
+App\Entity\Vehicle:
+  seat_2007:
+    uid: 'Seat-2007'
+    owner: 'Emilio Miridis Monroy'
+    license_plate: 'UVP-618-K'
+    make: 'Seat'
+    model: 'Ibiza'
+    year: '2007'
+    color: 'plata'
+    vin: ~
+  honda_hrv:
+    uid: 'Honda-HRV'
+    owner: 'Mayela Monroy Pacheco'
+    license_plate: 'UVP-616-K'
+    make: 'Honda'
+    model: 'HRV'
+    year: '2016'
+    color: 'plata'
+    vin: ~
+  kia_rio:
+    uid: 'KIA-Rio'
+    owner: 'Jorgo Miridis'
+    license_plate: 'UVP-614-K'
+    make: 'Kia'
+    model: 'Rio'
+    year: '2022'
+    color: 'azul'
+    vin: ~

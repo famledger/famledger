@@ -1,0 +1,3 @@
+{% if field.value %}
+    <span style="white-space: nowrap">{{ field.value.series }}-{{ field.value.number }} {{ field.value|invoice_substitution_link }}</span>
+{% endif %}

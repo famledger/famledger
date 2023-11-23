@@ -1,0 +1,16 @@
+{# Parameters: #}
+{# - width: width of the card (1,2,3,4,6,12) #}
+{# - eDocs: array of eDocs #}
+{# - owner: owner of the eDocs (e.g. 'property', 'customer', ...) #}
+{# - type: type of the eDocs (e.g. 'contract', 'deed', 'ife', ...) #}
+{% embed 'admin/_common/collapsible_card.twig' with { icon:icon|default('fa fa-at'), title: caption|default('e-Docs'), width:width|default(4) } %}
+    {% block card_body %}
+
+        {{ include('admin/EDoc/eDocsCardBody.html.twig', {
+            eDocs: eDocs,
+            owner: owner,
+            type: type
+        }) }}
+
+    {% endblock %}
+{% endembed %}

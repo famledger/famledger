@@ -1,0 +1,47 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+
+services:
+  # default configuration for services in *this* file
+  _defaults:
+    autowire: true      # Automatically injects dependencies in your services.
+    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+    bind:
+      $accountantFolder: '%env(ACCOUNTANT_FOLDER)%'
+      $accountingFolder: '%env(ACCOUNTING_FOLDER)%'
+      $attachmentsRootFolder: '%env(ATTACHMENTS_FOLDER)%'
+      $eDocsRootFolder: '%env(EDOCS_ROOT_FOLDER)%'
+      $inboxFolder: '%env(INBOX_FOLDER)%'
+      $invoicesFolder: '%env(INVOICES_FOLDER)%'
+
+      $efApiVersion: '%env(ENLACE_FISCAL_API_VERSION)%'
+      $efCfdiVersion: '%env(ENLACE_FISCAL_CFDI_VERSION)%'
+      $keepInboxFiles: '%env(KEEP_INBOX_FILES)%'
+      $invoiceMode: '%env(INVOICE_MODE)%'
+      $defaultLiveMode: '%env(DEFAULT_LIVE_MODE)%'
+
+  _instanceof:
+    App\Service\DocumentDetector\DocumentDetectorInterface:
+      tags: [ 'document_detector' ]
+
+  # makes classes in src/ available to be used as services
+  # this creates a service per class whose id is the fully-qualified class name
+  App\:
+    resource: '../src/'
+    exclude:
+      - '../src/DependencyInjection/'
+      - '../src/Entity/'
+      - '../src/Kernel.php'
+
+  App\EventListener\:
+    resource: ../src/EventListener/*
+
+  App\Filter\:
+    resource: ../src/Filter/*
+
+  App\Twig\:
+    resource: ../src/Twig/*

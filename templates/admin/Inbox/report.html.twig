@@ -1,0 +1,45 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}
+    Inbox Report
+    <div style="width: 100%">
+        <div style="float: right">
+            <a href="{{ path('admin', { routeName:'admin_inbox' }) }}" class="btn btn-default">Inbox</a>
+            <a href="{{ path('admin', { routeName: 'admin_inbox_process' }) }}"
+               class="btn btn-primary">Process Files</a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_content %}
+
+    {% set hasFiles = files|length %}
+    {{ include('admin/Inbox/_inbox.html.twig', { files: files }) }}
+
+    <table class="table table-hover">
+        {% for file, response in report %}
+            {% if response.type == constant('App\\Service\\ProcessingResponse::TYPE_ERROR') %}
+                <tr>
+                    <th class="text-danger">{{ file }}</th>
+                    <td>{{ response.response }}</td>
+                    <td class="text-right"><a target="download"
+                           href="{{ path('admin_inbox_download', { filename:file }) }}"><i
+                                    class="fa fa-file-pdf"></i> </a></td>
+                </tr>
+            {% else %}
+                <tr>
+                    <th class="text-success">{{ file }}</th>
+                    <td>
+                        {% set document = response.response %}
+                        <a href="{{ ea_url()
+                            .setController('App\\Controller\\Admin\\DocumentCrudController')
+                            .setAction('detail')
+                            .setEntityId(document.id) }}">Document #{{ document.id }}</a></td>
+                    <td class="text-right"><a target="download"
+                           href="{{ path('admin_inbox_download', { filename:file }) }}"><i
+                                    class="fa fa-file-pdf"></i> </a></td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+    </table>
+{% endblock %}

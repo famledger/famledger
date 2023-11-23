@@ -1,0 +1,158 @@
+<style>
+    div.edit-form.hidden {
+        display: none !important;
+    }
+
+    div#folder-comparator a,
+    div#folder-comparator a i {
+        cursor: pointer;
+    }
+
+    div#folder-comparator pre {
+        color: #666;
+    }
+</style>
+
+<div id="folder-comparator" class="card mt-3">
+    <div class="card-header"><i class="fa fa-exchange-alt"></i> Folder:
+        <pre style="display: inline">/{{ subFolder }}</pre>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <!-- Left column of cards -->
+            <div class="col-md-12">
+
+                <table class="table table-hover">
+
+                    <thead>
+                    <tr>
+                        <th>Local Files</th>
+
+                        <th>
+                            <a class="accounting-file-operation"
+                               title="copy all files to accountant folder"
+                               data-location="source"
+                               data-operation="sync"
+                               data-subfolder="{{ subFolder }}"
+                               data-filename="*"
+                               data-csrf-token="{{ csrf_token('upd-accounting-file-' ~ financialMonth.id) }}"
+                            ><i class="fa fa-arrow-right"></i></a>
+                        </th>
+
+                        <th>Accountant Files</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr>
+                        <td class="d-flex"><a class="copy-to-clipboard"
+                                              data-target="#accounting-folder-path-{{ subFolder }}">
+                                <i class="fa fa-clipboard"></i>
+                            </a>&nbsp;
+                            <pre id="accounting-folder-path-{{ subFolder }}"
+                                 style="font-size: .8em;white-space: pre-wrap">{{ accountingFolder }}{% if subFolder %}/{{ subFolder }}{% endif %}</pre>
+                        </td>
+
+                        <td></td>
+
+                        <td class="d-flex"><a class="copy-to-clipboard"
+                                              data-target="#accountant-folder-path-{{ subFolder }}">
+                                <i class="fa fa-clipboard"></i>
+                            </a>&nbsp;
+                            <pre id="accountant-folder-path-{{ subFolder }}"
+                                 style="font-size: .8em;white-space: pre-wrap">{{ accountantFolder }}{% if subFolder %}/{{ subFolder }}{% endif %}</pre>
+                        </td>
+                    </tr>
+
+                    {% for checksum, data in byContentChecksum %}
+                        <tr>
+                            {% set is_identical = data['source']|length == 1 and data['target']|length == 1 and data['source'][0].name == data['target'][0].name %}
+                            {% set bg_source = data['source']|length > 1 ? 'bg-light-red' : (is_identical ? 'bg-light-green' : '') %}
+                            {% set bg_target = data['target']|length > 1 ? 'bg-light-red' : (is_identical ? 'bg-light-green' : '') %}
+
+                            <td class="{{ bg_source }}">
+                                {% set sourceContainerId = 'source-container-' ~ checksum %}
+                                {% set textColor = data['source']|length > 1 ? 'text-danger' : (data['target'] is empty ? 'text-warning' : (is_identical ? 'text-muted' : 'text-default')) %}
+                                {% for file in data['source'] %}
+                                    <div id="{{ sourceContainerId }}" class="{{ textColor }}">
+                                        <a href="{{ path('admin_accountingFiles_download', {financialMonth:financialMonth.id, location:'source', filename:file.name}) }}"><i
+                                                    class="fa fa-file"></i></a>
+                                        {{ file.name }}
+                                        {% if data['source']|length > 1 %}
+                                            <a class="accounting-file-operation"
+                                               data-location="source"
+                                               data-operation="delete"
+                                               data-subfolder="{{ subFolder }}"
+                                               data-checksum="{{ checksum }}"
+                                               data-filename="{{ file.name }}"
+                                               data-csrf-token="{{ csrf_token('upd-accounting-file-' ~ financialMonth.id) }}"
+                                            ><i class="fa fa-trash"></i></a>
+                                        {% else %}
+                                            <a class="file-rename-button" href="javascript: void(0)"><i
+                                                        class="fa fa-pencil"></i></a>
+                                        {% endif %}
+                                    </div>
+                                    <div class="edit-form hidden"
+                                         style="margin-left: 15px; display: flex; align-items: center;">
+                                        <input type="text" value="{{ file.name }}"
+                                               style="flex-grow: 1; margin-right: 10px;">
+                                        <a class="accounting-file-operation" title="update"
+                                           data-location="source"
+                                           data-operation="rename"
+                                           data-subfolder="{{ subFolder }}"
+                                           data-checksum="{{ checksum }}"
+                                           data-filename="{{ data['source'][0].name }}"
+                                           data-csrf-token="{{ csrf_token('upd-accounting-file-' ~ financialMonth.id) }}"
+                                        ><i class="fa fa-save fa-xl"></i></a>
+                                    </div>
+                                {% endfor %}
+                            </td>
+
+                            <td class="{{ bg_source }}">
+                                {% if data['source']|length == 1 and not is_identical %}
+                                    <a class="accounting-file-operation"
+                                       title="copy file to accountant folder"
+                                       data-location="source"
+                                       data-operation="sync"
+                                       data-subfolder="{{ subFolder }}"
+                                       data-filename="{{ data['source'][0].name }}"
+                                       data-csrf-token="{{ csrf_token('upd-accounting-file-' ~ financialMonth.id) }}"
+                                    ><i class="fa fa-arrow-right"></i></a>
+                                {% else %}
+                                    &nbsp;
+                                {% endif %}
+                            </td>
+
+                            <td class="{{ bg_target }}">
+                                {% for file in data['target'] %}
+                                    {% set textColor = data['target']|length > 1 ? 'text-danger' : (data['source'] is empty ? 'text-danger' : (is_identical ? 'text-muted' : 'text-warning')) %}
+                                    <div class="{{ textColor }}">
+                                        <a href="{{ path('admin_accountingFiles_download', {financialMonth:financialMonth.id, location:'target', filename:file.name}) }}"><i
+                                                    class="fa fa-file"></i></a>
+                                        {{ file.name }}
+                                        {% if not is_identical %}
+                                            <a class="accounting-file-operation"
+                                               data-location="target"
+                                               data-operation="delete"
+                                               data-subfolder="{{ subFolder }}"
+                                               data-filename="{{ file.name }}"
+                                               data-csrf-token="{{ csrf_token('upd-accounting-file-' ~ financialMonth.id) }}"
+                                            ><i class="fa fa-trash"></i></a>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+
+                {% if byNameChecksum|length %}
+                    {{ include('admin/Accounting/_cardContentMismatches.html.twig') }}
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>

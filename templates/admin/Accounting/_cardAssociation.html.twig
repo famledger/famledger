@@ -1,0 +1,19 @@
+<div class="card">
+    <div class="card-header"><i class="fa fa-link"></i> Associations</div>
+    <div class="card-body">
+        {% if financialMonth.statement is not null %}
+            {% set statement = financialMonth.statement %}
+            <div class="field-group">
+                <div class="caption"><i class="fa fa-balance-scale"></i> Statement</div>
+                <div class="value">
+                    <a href="{{ ea_url()
+                        .setController('App\\Controller\\Admin\\StatementCrudController')
+                        .setAction('detail')
+                        .setEntityId(statement.id) }}">{{ statement }}</a>
+                </div>
+            </div>
+        {% else %}
+            - not assigned -
+        {% endif %}
+    </div>
+</div>

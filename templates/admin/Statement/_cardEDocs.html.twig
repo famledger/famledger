@@ -1,0 +1,7 @@
+{{ include('admin/EDoc/eDocsCard.html.twig', {
+    eDocs: eDocsByType[constant('App\\Constant\\StatementEDocType::GENERIC')]|default([]),
+    type:constant('App\\Constant\\StatementEDocType::GENERIC'),
+    caption:'e-Docs',
+    owner: entity.instance,
+    width: 12
+}) }}

@@ -1,0 +1,13 @@
+App\Entity\Tenant:
+  tenant_1:
+    rfc: 'MOPM670510J8A'
+    name: 'Arrendamiento'
+    api_key: 'e9aT1ajrRh1NyRkzOtDoN1ZEGmIsEKuJ6f3FYyLh'
+    token: '2aec1599e0a26fb7b00afd447edd7fdb'
+    icon: 'building'
+  tenant_2:
+    rfc: 'MIJO620503Q60'
+    name: 'Bodas'
+    api_key: 'e9aT1ajrRh1NyRkzOtDoN1ZEGmIsEKuJ6f3FYyLh'
+    token: 'a35d175b51916ad3cc93f51c6e528733'
+    icon: 'church'

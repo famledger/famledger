@@ -1,0 +1,82 @@
+{% set isConsolidated = statement.status == constant('App\\Entity\\Statement::STATUS_CONSOLIDATED') %}
+{% if transaction.type in [ constant('App\\Constant\\DocumentType::ANNOTATION'), constant('App\\Constant\\DocumentType::ATTACHMENT') ] %}
+    {% set droppableClasses = 'droppable-positive droppable-negative' %}
+{% else %}
+    {% if transaction.amount > 0 %}
+        {% set droppableClasses = 'droppable-positive' %}
+    {% else %}
+        {% set droppableClasses = 'droppable-negative' %}
+    {% endif %}
+{% endif %}
+
+<tr
+        {% set consolidatedClass = transaction.isConsolidated ? 'consolidated ' : '' %}
+        {% if isConsolidated %}
+            {% if transaction.isConsolidated %}
+                class="{{ consolidatedClass }}"
+            {% endif %}
+        {% else %}
+            class="{{ consolidatedClass }}droppable {{ droppableClasses }}" data-dropzone-id="{{ transaction.id }}"
+        {% endif %}
+        data-transaction-id="{{ transaction.id }}"
+>
+    <td>{{ transaction.sequenceNo }}</td>
+    <td title="{{ transaction.bookingDate|format_date('long') }}">{{ transaction.bookingDate|date('d M') }}</td>
+    <td>
+        {{ include('admin/Statement/_descriptionContainer.html.twig') }}
+        {% if transaction.documents|length %}
+            <div style="margin-top:4px; padding:4px 12px; border-top:1px solid #999;">
+                <table>
+                    {% set total = 0 %}
+                    {% for document in transaction.documents %}
+                        {% if document.type.value != 'attachment' or (document.type.value == 'invoice' and invoice.status == constant('App\\Constant\\InvoiceStatus::VIGENTE')) %}
+                            {% set total = total + document.amount %}
+                        {% endif %}
+                        <tr>
+                            <td>{% if document.type.value == 'attachment' %}
+                                    <i class="fa fa-paperclip text-super-muted"></i>
+                                {% else %}
+                                    <i class="fa fa-file text-super-muted"></i>
+                                {% endif %}
+                                {{ document.filename }}
+                                {% if document.invoice is not null %}
+                                    {{ document.invoice|invoice_substitution_link }}
+                                {% endif %}
+                            </td>
+                            <td style="white-space: nowrap; text-align: right">
+                                {% if not isConsolidated %}
+                                    <a href="javascript:void(0)" title="unlink document" class="tx-delete-btn"
+                                       data-document-id="{{ document.id }}"
+                                       data-document-type="{{ document.type.value }}"
+                                       data-transaction-id="{{ transaction.id }}"
+                                    ><i class="fa fa-unlink"></i></a>
+                                {% endif %}
+                                <a target="download" title="view document" class="text-muted"
+                                   href="{{ path('admin_document_download', {document:document.id}) }}"><i
+                                            class="{{ file_icon(document.filename) }}"></i> </a>
+                                <a href="{{ document|ea_url('detail') }}"><i class="fa fa-eye"></i></a>
+                            </td>
+                            <td colspan="2" class="text-right">
+                                <span{% if document.type.value == 'attachment' %} style="opacity:.5"{% endif %}>{{ document.amount|cent_amount }}</span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    {% if transaction.documents|length > 1 %}
+                        <tr style="border-top: 1px dotted #999;">
+                            <td>Total</td>
+                            {% if total != transaction.amount %}
+                                <td class="text-right text-danger" colspan="2">
+                                    ({{ (total - transaction.amount)|cent_amount }}
+                                    ) {{ total|cent_amount }}</td>
+                            {% else %}
+                                <td class="text-right" colspan="2">{{ total|cent_amount }}</td>
+                            {% endif %}
+                        </tr>
+                    {% endif %}
+                </table>
+            </div>
+        {% endif %}
+    </td>
+    <td class="text-right">{{ transaction.amount|cent_amount(true) }}</td>
+    <td>{{ transaction.status|transaction_status }}</td>
+</tr>

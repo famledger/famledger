@@ -1,0 +1,9 @@
+App\Entity\VehicleInsurance:
+  seat_2007_2023:
+    vehicle: '@seat_2007'
+    provider: 'AXA'
+    policy_number: '140280725801'
+    start_date: '<dateTime("2023-08-26")>'
+    expiry_date: '<dateTime("2024-08-26")>'
+    agent: 'AGT00068351 RAQUEL YOLANDA FLORES HERRERA'
+    amount: 618702

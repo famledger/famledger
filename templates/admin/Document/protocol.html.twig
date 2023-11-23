@@ -1,0 +1,62 @@
+<div class="card mt-3">
+    <div class="card-header">Detection Result</div>
+    <div class="card-body">
+        <div class="mb-3"><h4>{{ filename }}</h4></div>
+        {% if error is not empty %}
+            <div class="mb-3 alert alert-danger">{{ error }}</div>
+        {% endif %}
+        <div class="mt-2">
+            {% if protocol.detectors is defined %}
+                <div class="alert alert-success mb-1 py-2">Detectors</div>
+                <ul class="detector-list">
+                    {% for detector in protocol.detectors %}
+                        <li>
+                            {{ detector.name }}
+                            {% if detector.strategies is defined %}
+                                <ul class="strategy-list">
+                                    {% for strategy in detector.strategies %}
+                                        <li>{{ strategy.name }}: <span
+                                                    class="text-{{ strategy.matches ? 'success' : 'danger' }}">{{ strategy.matches ? 'true' : 'false' }}</span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        <div class="mt-2 ">
+            <div class="alert alert-info py-2">Document specs</div>
+            {% if documentSpecs is defined and documentSpecs is not empty %}
+                <pre style="margin-left: 8px;">{{ documentSpecs|json }}</pre>
+            {% else %}
+                <div class="mt-2">- not detected -</div>
+            {% endif %}
+        </div>
+        <div class="mt-2 ">
+            <div class="alert alert-info py-2">Existing Document</div>
+            {% if document is defined and document is not empty %}
+                <table class="table table-hover">
+                    <tr>
+                        <td>Document</td>
+                        <td><a href="{{ document|ea_url('detail') }}">{{ document.filename }}</a></td>
+                    </tr>
+                    {% if document.financialMonth is not empty %}
+                        {% set financialMonth = document.financialMonth %}
+                        <tr>
+                            <td>Financial month</td>
+                            <td><a href="{{ financialMonth|ea_url('detail') }}">{{ financialMonth }}</a></td>
+                        </tr>
+                        <tr>
+                            <td>Statement</td>
+                            <td><a href="{{ financialMonth.statement|ea_url('detail') }}">{{ financialMonth.statement }}</a></td>
+                        </tr>
+                    {% endif %}
+                </table>
+            {% else %}
+                <div class="mt-2">- none found -</div>
+            {% endif %}
+        </div>
+    </div>
+</div>

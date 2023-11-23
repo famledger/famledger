@@ -1,0 +1,312 @@
+{% extends '@EasyAdmin/crud/detail.html.twig' %}
+
+{% set statement = entity.instance %}
+
+{% block content_header %}
+    <div class="content-header-title">
+        <div class="d-flex align-items-center">
+            <h1 class="title">
+                {{ statement }}
+            </h1>
+            <span class="text-white badge ms-3 {{ statement.status|lower == 'consolidated' ? 'bg-success' : 'bg-warning' }}">
+                {{ statement.status | capitalize }}
+            </span>
+        </div>
+    </div>
+
+    {% block page_actions_wrapper %}
+        {{ parent() }}
+    {% endblock %}
+{% endblock %}
+
+{% block main %}
+    <div class="row">
+        <!-- Left column of cards -->
+        <div class="col-md-6">
+            {{ include('admin/Statement/_cardStatement.html.twig') }}
+        </div>
+        <!-- Right column of cards -->
+        <div class="col-md-6">
+            {{ include('admin/Statement/_cardAssociations.html.twig') }}
+        </div>
+    </div>
+
+    {% embed 'admin/_common/collapsible_card.twig' with {
+        icon:'fa fa-paperclip',
+        title: 'Attachments',
+        bodyClass: 'px-0',
+        width: 12
+    } %}
+
+        {% block card_header %}
+            <div class="card-header">
+                <div style="float:right">
+                    <span style="font-family: monospace"
+                          id="financial-month-path">{{ entity.instance.financialMonth|financial_month_path }}</span>&nbsp;<a
+                            class="copy-to-clipboard" data-target="#financial-month-path">
+                        <i class="fa fa-clipboard"></i>
+                    </a>
+                </div>
+                Transactions
+            </div>
+        {% endblock %}
+
+        {% block card_body %}
+            <div id="custom-transaction-section">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <td>#</td>
+                        <td>Date</td>
+                        <td>Description</td>
+                        <td>Amount</td>
+                        <td>Status</td>
+                    </tr>
+                    </thead>
+                    {% for transaction in transactions %}
+                        {{ include('admin/Statement/detail_transaction.html.twig', {transaction:transaction}) }}
+                    {% endfor %}
+                </table>
+            </div>
+        {% endblock %}
+    {% endembed %}
+
+    {{ include('admin/Statement/_cardInvoices.html.twig') }}
+    {{ include('admin/Statement/_cardAttachments.html.twig') }}
+    {{ include('admin/Statement/_cardDocuments.html.twig') }}
+
+    {{ include('admin/Statement/_cardEDocs.html.twig') }}
+
+    <script>
+      function submitComment(button) {
+        var inputElement = $(button).siblings('.comment-input')
+        var comment = inputElement.val()
+        var transactionId = $(button).closest('tr').data('transaction-id')
+
+        $.post('{{ path('admin_transaction_comment', {transaction:99999}) }}'.replace('99999', transactionId), {
+          comment: comment
+        }, function(data) {
+          // You can do something with the response data if needed
+          // For now, let's just log success and switch back to view mode
+          console.log('Comment updated successfully')
+          $(button).closest('.comment-container')
+            .toggleClass('edit-mode')
+            .find('span.transaction-comment').text(comment || '- no comment -') // Update the visible comment
+        }).fail(function() {
+          alert('Failed to update comment. Please try again.')
+        })
+      }
+
+      $(document).ready(function() {
+        $('.customer-row').click(function() {
+          // Toggle the details
+          $(this).nextUntil('.customer-row').toggle()
+          // Switch the icon
+          $(this).find('i').toggleClass('fa-caret-right fa-caret-down')
+        })
+      })
+    </script>
+{% endblock %}
+
+{% block head_stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
+    <style>
+        tr.customer-row {
+            cursor: pointer;
+        }
+
+        tr.customer-row > th {
+            border-bottom: 1px solid #666;
+        }
+
+        .detail-row {
+            display: none;
+        }
+
+        .btn-group-xs > .btn, .btn-xs {
+            padding: .25rem .4rem;
+            font-size: .875rem;
+            line-height: .5;
+            border-radius: .2rem;
+        }
+
+        tr.consolidated {
+            opacity: .9;
+            background-color: #eee;
+        }
+
+        .droppable-hover {
+            background-color: hsl(60, 100%, 93%) !important;
+        }
+
+        .drag-handle {
+            cursor: move;
+            opacity: 0.4;
+        }
+
+        .drag-handle:hover {
+            opacity: 1;
+        }
+
+        .description-container i.fa.fa-sticky-note {
+            cursor: pointer;
+        }
+
+        .description-container {
+            position: relative;
+        }
+
+        .comment-container {
+            display: none;
+            /* additional styles */
+        }
+
+        .comment-container.expanded {
+            display: block;
+            /* transition for smooth expanding effect */
+        }
+
+        .comment-container .edit-container {
+            display: none;
+        }
+
+        .comment-container.edit-mode .view-container {
+            display: none;
+        }
+
+        .comment-container.edit-mode .edit-container {
+            display: block;
+        }
+
+        .comment-input, .comment-submit {
+            /* styles for input and submit button */
+        }
+
+    </style>
+{% endblock %}
+
+{% block body_javascript %}
+    {{ parent() }}
+
+    <script type="text/javascript">
+      // toggle visibility of form to add an annotation document
+      document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('.file-rename-button').forEach(button => {
+          button.addEventListener('click', function() {
+            console.log(this.parentElement.nextElementSibling)
+            const editForm = this.parentElement.nextElementSibling
+            editForm.classList.toggle('hidden')
+          })
+        })
+      })
+
+      function initializeDragAndDrop() {
+        $(".draggable").draggable({
+          helper: "clone",
+          cursor: "move",
+          revert: true
+        })
+
+        function submit(el, ui) {
+          const droppableId = el.data("dropzone-id")
+          const draggableId = ui.helper.data("droppable-id")
+          const draggableType = ui.helper.data("droppable-type")
+
+          let dataKey = draggableType + 'Id'
+          let payload = {
+            transactionId: droppableId,
+            type: draggableType,
+          }
+          payload[ dataKey ] = draggableId
+          $.ajax({
+            url: '{{ path('admin_statement_link', {statement: entity.instance.id}) }}',
+            type: 'POST',
+            data: payload,
+            success: function(response) {
+              // Replace the current droppable row with the updated one from the server.
+              $(`tr[data-dropzone-id="${droppableId}"]`).replaceWith(response)
+              ui.helper.remove()
+              // Hide the original element that was dragged.
+              $(`tr[data-droppable-id="${draggableId}"][data-droppable-type="${draggableType}"]`).hide()
+              initializeDragAndDrop()
+            },
+            error: function(xhr) {
+              var errorMsg = "An unexpected error occurred"
+              if (xhr.responseJSON && xhr.responseJSON.error) {
+                errorMsg = xhr.responseJSON.error
+              } else if (xhr.responseText) {
+                errorMsg = xhr.responseText
+              }
+              alert(errorMsg)
+            }
+          })
+        }
+
+        $(".droppable-positive").droppable({
+          accept: ".invoice, .attachment, .document",
+          hoverClass: "droppable-hover",
+          drop: function(event, ui) {
+            submit($(this), ui)
+          }
+        })
+
+        $(".droppable-negative").droppable({
+          accept: ".document, .attachment",
+          hoverClass: "droppable-hover",
+          drop: function(event, ui) {
+            submit($(this), ui)
+          }
+        })
+      }
+
+      $('body').on('click', 'a.tx-delete-btn', function(evt) {
+        evt.preventDefault()
+        let transactionId = $(this).data('transaction-id')
+        let documentId = $(this).data('document-id')
+        let documentType = $(this).data('document-type')
+
+        $.ajax({
+          url: '{{ path('admin_statement_unlink', {statement: entity.instance.id}) }}',
+          type: 'POST',
+          data: {
+            documentId
+          },
+          success: function(response) {
+            // Replace the current droppable row with the updated one from the server.
+            $(`tr[data-transaction-id="${transactionId}"]`).replaceWith(response)
+            $(`tr[data-droppable-id="${transactionId}"]`).show()
+
+            // refresh the card containing the un-linked document
+            console.log('refreshing ' + documentType)
+            let reloadUrl
+            let cardSelector
+
+            if (documentType === 'attachment') {
+              reloadUrl = '{{ path('admin_statement_attachments', {statement: entity.instance.id}) }}'
+              cardSelector = '#attachments-card'
+            } else {
+              reloadUrl = '{{ path('admin_statement_documents', {statement: entity.instance.id}) }}'
+              cardSelector = '#documents-card'
+            }
+
+            $.get(reloadUrl, function(cardContent) {
+              $(cardSelector).replaceWith(cardContent)
+              initializeDragAndDrop()
+            })
+          },
+          error: function(xhr) {
+            var errorMsg = "An error occurred"
+            if (xhr && xhr.responseJSON && xhr.responseJSON.error) {
+              errorMsg = xhr.responseJSON.error
+            }
+            alert(errorMsg)
+          }
+        })
+      })
+
+      $(document).ready(function() {
+        initializeDragAndDrop()
+      })
+    </script>
+{% endblock %}

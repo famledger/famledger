@@ -1,0 +1,22 @@
+<div class="description-container">
+    <i class="fa fa-sticky-note {{ transaction.comment is not empty ? 'text-warning' : '' }}"
+       onclick="$(this).closest('.description-container').find('.comment-container').toggleClass('expanded');"></i>
+    <span class="transaction-description">{{ transaction.description }}</span>
+
+    <div class="comment-container">
+        <div class="view-container">
+            <a href="javascript:void(0)"
+               onclick="$(this).closest('.comment-container').toggleClass('edit-mode');"><i
+                        class="fa fa-pencil"></i></a>
+            <span class="transaction-comment{% if transaction.comment is not empty %} text-warning{% endif %}">{{ transaction.comment|default('- no comment -') }}</span>
+        </div>
+
+        <div class="edit-container">
+            <input type="text" class="comment-input mb-1" value="{{ transaction.comment }}"
+                   style="width: 100%"/>
+            <button class="comment-submit btn btn-primary btn-sm" onclick="submitComment(this)">update</button>
+            <a href="javascript:void(0)" class="btn btn-default btn-sm"
+               onclick="$(this).closest('.comment-container').toggleClass('edit-mode');">cancel</a>
+        </div>
+    </div>
+</div>

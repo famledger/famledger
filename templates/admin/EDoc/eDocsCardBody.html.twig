@@ -1,0 +1,39 @@
+{% set containerId = 'edoc-container-' ~ type %}
+{% set formId = 'form-' ~ type %}
+
+<div id="{{ containerId }}">
+
+    {% set isClosed = closed|default(false) %}
+    {% if isClosed %}
+    <div style="text-align:right"><a href="javascript:void(0)" onclick="$('#{{ formId }}').toggle()"><i class="fa fa-plus"></i> add files ...</a></div>
+    {% endif %}
+    <form data-container-id="{{ containerId }}" id="{{ formId }}"{% if isClosed %} style="display:none"{% endif %}
+          action="{{ owner|upload_url(type) }}" class="e-doc dropzone"
+    >
+    </form>
+
+    <table class="table table-hover">
+        {% if eDocs is defined %}
+            {% for eDoc in eDocs %}
+                <tr>
+                    <td>{{ eDoc.filename }}</td>
+                    <td class="text-right" style="white-space: nowrap">
+                        <a href="{{ ea_url()
+                            .setController('App\\Controller\\Admin\\EDocCrudController')
+                            .setAction('edit')
+                            .setEntityId(eDoc.id) }}"><i class="fa fa-pencil"></i></a>
+                        <a href="{{ path('admin_eDoc_download', {eDoc:eDoc.id}) }}"><i
+                                    class="fa fa-download"></i></a>
+                        <button class="delete-eDoc"
+                                data-edoc-id="{{ eDoc.id }}"
+                                data-csrf-token="{{ csrf_token('del-eDoc-' ~ eDoc.id) }}"
+                                data-container-id="{{ containerId }}"
+                        ><i class="fa fa-trash text-danger"></i>
+                        </button>
+                    </td>
+                </tr>
+            {% endfor %}
+        {% endif %}
+    </table>
+</div>
+

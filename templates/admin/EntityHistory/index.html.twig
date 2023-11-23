@@ -1,0 +1,32 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}
+    Entity History
+{% endblock %}
+
+{% block page_content %}
+    <h4>{{ class }} #{{ id }} &middot; <a href="{{ entityDetailsUrl }}">{{ slug }}</a></h4>
+
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Action</th>
+            <th scope="col">Logged By</th>
+            <th scope="col">Logged At</th>
+            <th scope="col">Data</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for logEntry in logEntries %}
+            <tr>
+                <th scope="row">{{ logEntry.id }}</th>
+                <td>{{ logEntry.action }}</td>
+                <td>{{ logEntry.username }}</td>
+                <td>{{ logEntry.loggedAt|date('Y-m-d H:i:s') }}</td>
+                <td class="render-json">{{ logEntry.data|json_encode|raw }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

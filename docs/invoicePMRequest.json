@@ -1,0 +1,109 @@
+{
+  "CFDi": {
+    "versionEF": "6.5",
+    "versionCFDi": "4.0",
+    "modo": "produccion",
+    "serie": "A",
+    "folioInterno": 817,
+    "fechaEmision": "2023-09-20 12:10:47",
+    "subTotal": "15734.28",
+    "total": "15000.00",
+    "tipoMoneda": "MXN",
+    "nombreDisenio": "Dise\u00f1o predeterminado",
+    "rfc": "MOPM670510J8A",
+    "Receptor": {
+      "rfc": "COM220907IS5",
+      "nombre": "COMTEGOLF",
+      "usoCfdi": "G01",
+      "regimenFiscal": "626",
+      "DomicilioFiscal": {
+        "calle": "TULUM",
+        "noExterior": "269",
+        "noInterior": "M3 L2 3 LOC8",
+        "colonia": "Supermanzana 15a",
+        "localidad": "Canc\u00fan",
+        "municipio": "Benito Ju\u00e1rez",
+        "estado": "Quintana Roo",
+        "pais": "M\u00e9xico",
+        "cp": "77505"
+      }
+    },
+    "Partidas": [
+      {
+        "agrupador": "Arrendamiento PM",
+        "cantidad": "1",
+        "claveUnidad": "E48",
+        "unidad": "Unidad de servicio",
+        "claveProdServ": "80131500",
+        "noIdentificacion": "Of 8",
+        "descripcion": "Renta de la oficina #8, Av. Tulum 269, Cancun, Q.Roo Periodo: 15 de septiembre 2023 al 14 de octubre 2023",
+        "valorUnitario": "15734.28",
+        "importe": "15734.28",
+        "objetoDeImpuesto": "02",
+        "Impuestos": [
+          {
+            "tipo": "retencion",
+            "claveImpuesto": "ISR",
+            "tipoFactor": "tasa",
+            "baseImpuesto": "15734.28",
+            "tasaOCuota": "0.100000",
+            "importe": "1573.43"
+          },
+          {
+            "tipo": "traslado",
+            "claveImpuesto": "IVA",
+            "tipoFactor": "tasa",
+            "baseImpuesto": "15734.28",
+            "tasaOCuota": "0.160000",
+            "importe": "2517.48"
+          },
+          {
+            "tipo": "retencion",
+            "claveImpuesto": "IVA",
+            "tipoFactor": "tasa",
+            "baseImpuesto": "15734.28",
+            "tasaOCuota": "0.106667",
+            "importe": "1678.33"
+          }
+        ]
+      }
+    ],
+    "Impuestos": {
+      "Totales": {
+        "retenciones": "3251.76",
+        "traslados": "2517.48"
+      },
+      "Impuestos": [
+        {
+          "tipo": "retencion",
+          "claveImpuesto": "ISR",
+          "tipoFactor": "tasa",
+          "tasaOCuota": "0.100000",
+          "importe": "1573.43",
+          "baseImpuesto": "15734.28"
+        },
+        {
+          "tipo": "traslado",
+          "claveImpuesto": "IVA",
+          "tipoFactor": "tasa",
+          "tasaOCuota": "0.160000",
+          "importe": "2517.48",
+          "baseImpuesto": "15734.28"
+        },
+        {
+          "tipo": "retencion",
+          "claveImpuesto": "IVA",
+          "tipoFactor": "tasa",
+          "tasaOCuota": "0.106667",
+          "importe": "1678.33",
+          "baseImpuesto": "15734.28"
+        }
+      ]
+    },
+    "exportacion": "01",
+    "DatosDePago": {
+      "metodoDePago": "PUE",
+      "formaDePago": "03"
+    }
+  }
+}

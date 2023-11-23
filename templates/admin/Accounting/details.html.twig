@@ -1,0 +1,131 @@
+{% extends '@EasyAdmin/crud/detail.html.twig' %}
+
+{% set financialMonth = entity.instance %}
+
+{% block content_header %}
+    <div class="content-header-title">
+        <div class="d-flex align-items-center">
+            <h1 class="title">
+                {{ financialMonth }}
+            </h1>
+        </div>
+    </div>
+
+    {% block page_actions_wrapper %}
+        {{ parent() }}
+    {% endblock %}
+{% endblock %}
+
+{% block main %}
+    <style>
+        td.bg-light-red {
+            background-color: #eedddd;
+        }
+
+        td.bg-light-green {
+            background-color: #dcecdf;
+        }
+    </style>
+
+    {{ include('admin/Accounting/_cardAssociation.html.twig') }}
+
+    {{ render(controller('App\\Controller\\Admin\\AccountingFilesController::comparison', { financialMonth:financialMonth.id, header:'' })) }}
+    {{ render(controller('App\\Controller\\Admin\\AccountingFilesController::comparison', { financialMonth:financialMonth.id, subFolder:'Anexos' })) }}
+
+    <script>
+
+      function getClosestElementWithAttribute(el, attr) {
+        while (el && !el.hasAttribute(attr)) {
+          el = el.parentElement
+        }
+        return el
+      }
+
+      document.addEventListener("DOMContentLoaded", function() {
+
+        document.querySelectorAll('.file-rename-button').forEach(button => {
+          button.addEventListener('click', function() {
+            const editForm = this.parentElement.nextElementSibling
+            editForm.classList.toggle('hidden')
+          })
+        })
+
+        document.querySelectorAll('div.edit-form input[type="text"]').forEach(inputField => {
+          inputField.addEventListener('keydown', function(e) {
+            // Check if the pressed key is Enter
+            if (e.key === 'Enter' || e.keyCode === 13) {
+              e.preventDefault()  // Prevent the default behavior
+
+              // Find the corresponding save button and trigger its click event
+              const saveButton = e.target.closest('div.edit-form').querySelector('a.accounting-file-operation')
+              if (saveButton) {
+                saveButton.click()
+              }
+            }
+          })
+        })
+
+        const operations = document.querySelectorAll('.accounting-file-operation')
+        operations.forEach(op => {
+          op.addEventListener('click', async function(e) {
+            e.preventDefault()
+
+            const targetElement = getClosestElementWithAttribute(e.target, 'data-location')
+
+            if (!targetElement) {
+              return
+            }
+
+            const fileLocation = targetElement.getAttribute('data-location')
+            const operation = targetElement.getAttribute('data-operation')
+            const subfolder = targetElement.getAttribute('data-subfolder')
+            const checksum = targetElement.getAttribute('data-checksum')
+            const filename = targetElement.getAttribute('data-filename')
+            const csrfToken = targetElement.getAttribute('data-csrf-token')
+
+            const data = {
+              location: fileLocation,
+              operation: operation,
+              subfolder: subfolder,
+              checksum: checksum,
+              filename: filename,
+              _token: csrfToken
+            }
+
+            if (operation === 'rename') {
+              const parentDiv = op.closest('div')
+              const inputField = parentDiv.querySelector('input[type="text"]')
+              if (inputField) {
+                data.newFilename = inputField.value
+              } else {
+                console.error('Input field not found!')
+              }
+            }
+
+            console.log(data)
+
+            try {
+              const response = await fetch('{{ path('admin_accountingFiles_update', { financialMonth:financialMonth.id }) }}', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+              })
+
+              if (!response.ok) {
+                throw new Error('Network response was not ok')
+              }
+
+              window.location.reload()
+
+            } catch (error) {
+              console.error('There was a problem with the fetch operation:', error)
+            }
+          })
+        })
+      })
+
+    </script>
+{% endblock %}
+

@@ -1,0 +1,32 @@
+{% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-link', title: 'Associations' } %}
+    {% block card_body %}
+
+        {% if invoice.document is not null %}
+            {% set document = invoice.document %}
+            <div class="field-group">
+                <div class="caption"><i class="fa fa-file"></i> Document</div>
+                <div class="value">
+                    <a href="{{ ea_url()
+                        .setController('App\\Controller\\Admin\\DocumentCrudController')
+                        .setAction('detail')
+                        .setEntityId(document.id) }}">{{ document }}</a>
+                </div>
+            </div>
+            {% if document.transaction is not null %}
+                {% set statement = document.transaction.statement %}
+                <div class="field-group">
+                    <div class="caption"><i class="fa fa-balance-scale"></i> Statement</div>
+                    <div class="value">
+                        <a href="{{ ea_url()
+                            .setController('App\\Controller\\Admin\\StatementCrudController')
+                            .setAction('detail')
+                            .setEntityId(statement.id) }}">{{ statement }}</a>
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            - not assigned -
+        {% endif %}
+
+    {% endblock %}
+{% endembed %}

@@ -1,0 +1,9 @@
+body {
+    background-color: lightgray;
+}
+
+.dropzone .dz-message {
+    text-align: center;
+    margin: 0 !important; /* No margin */
+}
+

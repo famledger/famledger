@@ -1,0 +1,22 @@
+App\Entity\Customer:
+  publico_general:
+    tenant: '@tenant_1'
+    rfc: 'XAXX010101000'
+    name: 'Público en general'
+  hector_guzman:
+    tenant: '@tenant_1'
+    rfc: 'GUMH851129PV4'
+    name: 'HECTOR ALBERTO GUZMAN MARTINEZ'
+  comtegolf:
+    tenant: '@tenant_1'
+    rfc: 'COM220907IS5'
+    name: 'COMTEGOLF'
+  bustamante:
+    tenant: '@tenant_1'
+    rfc: 'BUDA620727T38'
+    name: 'Aurelio Bustamante Dominguez'
+  servicios_empresariales:
+    tenant: '@tenant_1'
+    rfc: 'SEA040112AU6'
+    name: 'Servicios Empresariales de Alta Calidad'
+

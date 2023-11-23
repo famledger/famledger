@@ -1,0 +1,36 @@
+{% embed 'admin/_common/collapsible_card.twig' with {
+    icon:'fa fa-paperclip',
+    title: 'Attachments',
+} %}
+    {% block card_body %}
+
+        {% if attachments|length %}
+            <table class="table table-hover">
+                {% for document in attachments %}
+                    <tr data-droppable-id="{{ document.id }}" data-droppable-type="attachment"
+                        class="attachment draggable">
+                        <td class="drag-handle" title="Drag to move"><i class="fa fa-arrows-alt"></i></td>
+                        <td>{{ document.sequenceNo }}</td>
+                        <td>{{ document.type.value }}</td>
+                        <td>
+                            {{ document.filename }}
+                            {% if document.displayFilename is not empty %}
+                                <br/>{{ document.displayFilename }}
+                            {% endif %}
+                        </td>
+                        <td class="text-right">{{ document.amount|cent_amount(true) }}</td>
+                        <td class="text-right">
+                            <a target="download" href="{{ path('admin_document_download', {document:document.id}) }}"><i
+                                        class="text-muted {{ file_icon(document.filename) }}"></i></a>
+                            <a target="download" href="{{ path('admin_document_download', {document:document.id}) }}"><i
+                                        class="fa fa-trash text-danger"></i></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <div class="alert alert-info">No attachments found.</div>
+        {% endif %}
+
+    {% endblock %}
+{% endembed %}

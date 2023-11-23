@@ -1,0 +1,37 @@
+App\Entity\Account:
+  account_1:
+    tenant: '@tenant_1'
+    caption: 'Maye Personal'
+    number: '1447253494'
+    clabe: '012691014472534940'
+    username: '4152313896514143'
+  account_2:
+    tenant: '@tenant_1'
+    caption: 'Arrendamiento'
+    number: '1447391412'
+    clabe: '012691014473914129'
+    username: '4152313121409028'
+  account_3:
+    tenant: '@tenant_1'
+    caption: 'Familia'
+    number: '1447271220'
+    clabe: '012691014472712209'
+    username: '4152313439359865'
+  account_4:
+    tenant: '@tenant_2'
+    caption: 'Bodas'
+    number: '1447302029'
+    clabe: '012691014473020291'
+    username: '4152313121408996'
+  account_5:
+    tenant: '@tenant_2'
+    caption: 'Jorgo Nomina'
+    number: '2885949823'
+    clabe: '012691028859498239'
+    username: '4152313987507097'
+  account_6:
+    tenant: '@tenant_1'
+    caption: 'Maye Nomina'
+    number: '1584120496'
+    clabe: '012691015841204965'
+    username: '4152313574049149'

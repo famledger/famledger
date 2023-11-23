@@ -1,0 +1,207 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}
+    Payment History
+{% endblock %}
+
+{% block page_content %}
+    <style>
+        table tr.header-row {
+            font-size: .9em;
+            color: #666;
+            font-weight: normal;
+        }
+
+        table tr.header-row th {
+            padding: 2px 8px;
+        }
+
+        div.year-header {
+            background-color: #c5d6df;
+        }
+
+        tr.month-caption td {
+            background-color: #e6f7ff;
+            border-top: 2px solid #ccc;
+        }
+
+        tr.transaction-row.cancelado td {
+            text-decoration: line-through;
+            background-color: #EEE;
+            opacity: .6;
+        }
+
+        .nowrap {
+            white-space: nowrap;
+        }
+
+        /*.select-container {*/
+        /*    position: relative;*/
+        /*    display: inline-block;*/
+        /*}*/
+
+        .clear-icon {
+            cursor: pointer;
+            padding-left: 4px;
+            font-size: 1.2em;
+        }
+    </style>
+
+    <div style="margin-bottom: 4px;" class="select-container">
+        Restrict to customer:
+        <select id="customer-selector">
+            <option value="">- not restricted -</option>
+            {% for rfc, value in customers %}
+                <option value="{{ rfc }}">{{ value }}</option>
+            {% endfor %}
+        </select>
+        <a href="javascript:void(0)" class=""><i class="fas fa-times clear-icon" id="clear-customer-selector"></i></a>
+    </div>
+
+    {% for year, months in transactionsByYear %}
+        <div class="card card-primary mb-3">
+            <div class="card-header year-header">{{ year }}</div>
+            <div class="card-body">
+                <table class="table table-hover transaction-history">
+                    <tbody>
+                    {% for month, transactions in months %}
+                        <tr class="month-caption">
+                            <td colspan="9">
+                                {% set nextMonthDate = (year ~ '-' ~ month ~ '-01')|date_modify('first day of next month')|date_modify('+2 days') %}
+                                {% if  'now'|date('U') > nextMonthDate|date('U') %}
+                                    <a href="{{ statement_url(year, month) }}" style="float:right"><i
+                                                class="fa fa-balance-scale"></i> Statement</a>
+                                {% else %}
+                                    <a href="https://bbva.mx" target="bbva" style="float:right">BBVA <i
+                                                class="fa fa-external-link"></i></a>
+                                {% endif %}
+                                <strong>{{ date('2023-' ~ month ~ '-01')|date('F') }}</strong>
+                            </td>
+                        </tr>
+                        <tr class="header-row bg-light">
+                            <th>Issued</th>
+                            <th>Customer</th>
+                            <th>Description</th>
+                            <th class="text-right">Amount</th>
+                            <th class="text-center">Status</th>
+                        </tr>
+                        {% for transaction in transactions %}
+                            <tr class="transaction-row {{ transaction.status|lower }}"
+                                data-customer="{{ transaction.customer.rfc }}">
+                                <td class="nowrap text-center">
+                                    <strong>{{ transaction.bookingDate|date('d') }}</strong><br/>
+                                    {{ transaction.bookingDate|date('M') }}
+                                </td>
+                                <td>{{ transaction.customer }}</td>
+                                <td><span class="transaction-description">{{ transaction.description }}</span>
+                                    {% if transaction.documents|length %}
+                                        <div style="margin-top:4px; padding:4px 12px; border-top:1px solid #999;">
+                                            <table>
+                                                {% set total = 0 %}
+                                                {% for document in transaction.documents %}
+                                                    {% set invoice = document.invoice %}
+                                                    <tr>
+                                                        <td><i class="fa fa-file text-super-muted"></i>
+                                                            {{ document.filename }} {{ document.invoice|invoice_substitution_link }}
+                                                        </td>
+                                                        <td style="white-space: nowrap; text-align: right">
+                                                            <a target="download" title="view document"
+                                                               class="text-muted"
+                                                               href="{{ path('admin_document_download', {document:document.id}) }}"><i
+                                                                        class="{{ file_icon(document.filename) }}"></i>
+                                                            </a>
+                                                            <a href="{{ document|ea_url('detail') }}"><i
+                                                                        class="fa fa-eye"></i></a>
+                                                        </td>
+                                                        <td class="text-right">
+                                                            {% if invoice.status == constant('App\\Constant\\InvoiceStatus::VIGENTE') %}
+                                                                {% set total = total + invoice.amount %}
+                                                                {{ invoice.amount|cent_amount }}
+                                                            {% else %}
+                                                                {{ invoice.status|invoice_status }}
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                                {% if transaction.documents|length > 1 %}
+                                                    <tr style="border-top: 1px dotted #999;">
+                                                        <td>Total</td>
+                                                        {% if total != transaction.amount %}
+                                                            <td class="text-right text-danger" colspan="2">
+                                                                ({{ (total - transaction.amount)|cent_amount }}
+                                                                ) {{ total|cent_amount }}</td>
+                                                        {% else %}
+                                                            <td class="text-right" colspan="2">{{ total|cent_amount }}</td>
+                                                        {% endif %}
+                                                    </tr>
+                                                {% endif %}
+                                            </table>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td class="text-right">{{ transaction.amount|cent_amount }}</td>
+                                <td class="text-center">{{ transaction.status|transaction_status }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div> <!-- End of card -->
+    {% endfor %}
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        const customerSelector = document.getElementById("customer-selector")
+
+        // Load the selected customer from local storage on page load
+        const savedCustomer = localStorage.getItem('selectedCustomer')
+        if (savedCustomer) {
+          customerSelector.value = savedCustomer
+          filterRows(savedCustomer)
+        }
+
+        customerSelector.addEventListener("change", function() {
+          const selectedCustomer = this.value
+
+          // Save the selected customer to local storage
+          localStorage.setItem('selectedCustomer', selectedCustomer)
+
+          filterRows(selectedCustomer)
+        })
+
+        // Get the clear button element by its id
+        const clearButton = document.getElementById("clear-customer-selector")
+
+        // Add click event listener to clear button
+        clearButton.addEventListener("click", function() {
+          // Check if the customer selector has a selected customer
+          if (customerSelector.selectedIndex !== 0) {
+            // Remove the selected customer from local storage
+            localStorage.removeItem('selectedCustomer')
+
+            // Clear the select element
+            customerSelector.selectedIndex = 0
+
+            // Reload the page
+            location.reload()
+          }
+        })
+
+        function filterRows(selectedCustomer) {
+          const transactionRows = document.querySelectorAll(".transaction-row")
+
+          transactionRows.forEach(function(row) {
+            const rowCustomer = row.getAttribute("data-customer")
+
+            if (selectedCustomer === "" || rowCustomer === selectedCustomer) {
+              row.style.display = "" // Show the row
+            } else {
+              row.style.display = "none" // Hide the row
+            }
+          })
+        }
+      })
+
+    </script>
+{% endblock %}

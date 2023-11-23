@@ -1,0 +1,76 @@
+{
+  "CFDi": {
+    "versionEF": "6.5",
+    "versionCFDi": "4.0",
+    "modo": "produccion",
+    "serie": "A",
+    "folioInterno": 816,
+    "fechaEmision": "2023-09-20 11:37:28",
+    "subTotal": "15000.00",
+    "total": "17400.00",
+    "tipoMoneda": "MXN",
+    "nombreDisenio": "Dise\u00f1o predeterminado",
+    "rfc": "MOPM670510J8A",
+    "Receptor": {
+      "rfc": "GUMH851129PV4",
+      "nombre": "HECTOR ALBERTO GUZMAN MARTINEZ",
+      "usoCfdi": "S01",
+      "regimenFiscal": "611",
+      "DomicilioFiscal": {
+        "calle": "Araucarias",
+        "noExterior": "501",
+        "noInterior": "Local 8A",
+        "colonia": "Indeco Animas",
+        "localidad": "Xalapa-Enr\u00edquez",
+        "municipio": "Xalapa",
+        "estado": "Veracruz",
+        "pais": "M\u00e9xico",
+        "cp": "91190"
+      }
+    },
+    "Partidas": [
+      {
+        "agrupador": "Arrendamiento AE",
+        "cantidad": "1",
+        "claveUnidad": "E48",
+        "unidad": "Unidad de servicio",
+        "claveProdServ": "80131500",
+        "noIdentificacion": "Of 6 Hector Guzman",
+        "descripcion": "Renta de la oficina #6, Av. Tulum 269, Cancun, Q.Roo Periodo: 15 de septiembre 2023 al 14 de octubre 2023",
+        "valorUnitario": "15000.00",
+        "importe": "15000.00",
+        "objetoDeImpuesto": "02",
+        "Impuestos": [
+          {
+            "tipo": "traslado",
+            "claveImpuesto": "IVA",
+            "tipoFactor": "tasa",
+            "baseImpuesto": "15000.00",
+            "tasaOCuota": "0.160000",
+            "importe": "2400.00"
+          }
+        ]
+      }
+    ],
+    "Impuestos": {
+      "Totales": {
+        "traslados": "2400.00"
+      },
+      "Impuestos": [
+        {
+          "tipo": "traslado",
+          "claveImpuesto": "IVA",
+          "tipoFactor": "tasa",
+          "tasaOCuota": "0.160000",
+          "importe": "2400.00",
+          "baseImpuesto": "15000.00"
+        }
+      ]
+    },
+    "exportacion": "01",
+    "DatosDePago": {
+      "metodoDePago": "PUE",
+      "formaDePago": "03"
+    }
+  }
+}

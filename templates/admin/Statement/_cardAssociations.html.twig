@@ -1,0 +1,45 @@
+{% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-link', title: 'Associations' } %}
+    {% block card_body %}
+
+        <div class="field-group">
+            <div class="caption"><i class="fa fa-bank"></i> Account</div>
+            <div class="value">
+                {% set account = statement.account %}
+                <a href="{{ ea_url()
+                    .setController('App\\Controller\\Admin\\AccountCrudController')
+                    .setAction('detail')
+                    .setEntityId(account.id) }}">{{ account }}</a>
+            </div>
+        </div>
+
+        <div class="field-group">
+            <div class="caption"><i class="fa fa-calendar"></i> Financial File</div>
+            <div class="value">
+                {% set financialMonth = statement.financialMonth %}
+                <a href="{{ ea_url()
+                    .setController('App\\Controller\\Admin\\FinancialMonthCrudController')
+                    .setAction('detail')
+                    .setEntityId(financialMonth.id) }}">{{ financialMonth }}</a>
+            </div>
+        </div>
+
+        <div class="field-group">
+            <div class="caption"><i class="fa fa-file"></i> Document</div>
+            <div class="value">
+                {% set document = statement.document %}
+                {% if document is not null %}
+                    <a title="view document" class="text-info"
+                       href="{{ path('admin_document_download', {document:document.id}) }}"><i
+                                class="fa fa-file-pdf"></i></a>
+                    <a href="{{ ea_url()
+                        .setController('App\\Controller\\Admin\\DocumentCrudController')
+                        .setAction('detail')
+                        .setEntityId(document.id) }}">{{ document }}</a>
+                {% else %}
+                    <span class="text-danger">- missing -</span>
+                {% endif %}
+            </div>
+        </div>
+
+    {% endblock %}
+{% endembed %}

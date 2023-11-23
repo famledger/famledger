@@ -1,0 +1,20 @@
+{% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-info', title: 'Details' } %}
+    {% block card_body %}
+
+        <div class="field-group">
+            <div class="caption">Month</div>
+            <div class="value"> {{ ("1-" ~ statement.month ~ "-" ~ statement.year)|date("F Y") }}</div>
+        </div>
+        <div class="field-group">
+            <div class="caption">Balance</div>
+            <div class="value">{{ statement.startingBalance|cent_amount }} - {{ statement.endingBalance|cent_amount }}
+                = {{ (statement.startingBalance - statement.endingBalance)|cent_amount }}</div>
+        </div>
+        <div class="field-group">
+            <div class="caption">Transactions</div>
+            <div class="value">+{{ statement.noDeposits }} deposits<br/> -{{ statement.noWithdrawals }} withdrawals
+            </div>
+        </div>
+
+    {% endblock %}
+{% endembed %}
