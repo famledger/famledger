@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Service\MonthConverter;
 use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -14,6 +13,7 @@ use App\Annotation\TenantDependent;
 use App\Annotation\TenantFilterable;
 use App\Constant\InvoiceStatus;
 use App\Repository\InvoiceRepository;
+use App\Service\MonthConverter;
 use App\Service\Strategies\StrategyHelper;
 
 #[ORM\Entity(repositoryClass: InvoiceRepository::class)]
