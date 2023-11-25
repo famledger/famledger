@@ -40,13 +40,9 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface
     #[Gedmo\Versioned]
     private ?Customer $customer = null;
 
-    #[ORM\OneToOne(mappedBy: 'invoice')]
+    #[ORM\OneToOne(inversedBy: 'invoice')]
     #[Gedmo\Versioned]
     private ?Document $document = null;
-
-    #[ORM\OneToOne(mappedBy: 'invoice')]
-    #[Gedmo\Versioned]
-    private ?Attachment $attachment = null;
 
     #[ORM\Column(length: 16)]
     #[Gedmo\Versioned]
@@ -145,6 +141,9 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?DateTime $paymentDate = null;
+
+    #[ORM\OneToOne(inversedBy: 'invoice')]
+    private ?Attachment $attachment = null;
 
     public function getId(): ?int
     {
@@ -277,6 +276,11 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface
         return $this->status;
     }
 
+    public function getDisplayStatus(): ?string
+    {
+        return $this->getCancellationStatus() ?? $this->status;
+    }
+
     public function setStatus(string $status): static
     {
         $this->status = $status;
@@ -350,7 +354,9 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface
     public function getCancellationStatus(): ?string
     {
         if (null !== $cancellationData = $this->getData('infoCancelacion')) {
-            return $cancellationData['estatus'] ?? null;
+            $lastEntry = end($cancellationData);
+
+            return $lastEntry['estatus'] ?? null;
         }
 
         return null;
@@ -436,50 +442,6 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface
     public function setLiveMode(?bool $liveMode): static
     {
         $this->liveMode = $liveMode;
-
-        return $this;
-    }
-
-    public function getDocument(): ?Document
-    {
-        return $this->document;
-    }
-
-    public function setDocument(?Document $document): static
-    {
-        // unset the owning side of the relation if necessary
-        if ($document === null && $this->document !== null) {
-            $this->document->setInvoice(null);
-        }
-
-        // set the owning side of the relation if necessary
-        if ($document !== null && $document->getInvoice() !== $this) {
-            $document->setInvoice($this);
-        }
-
-        $this->document = $document;
-
-        return $this;
-    }
-
-    public function getAttachment(): ?Attachment
-    {
-        return $this->attachment;
-    }
-
-    public function setAttachment(?Attachment $attachment): static
-    {
-        // unset the owning side of the relation if necessary
-        if ($attachment === null && $this->attachment !== null) {
-            $this->attachment->setInvoice(null);
-        }
-
-        // set the owning side of the relation if necessary
-        if ($attachment !== null && $attachment->getInvoice() !== $this) {
-            $attachment->setInvoice($this);
-        }
-
-        $this->attachment = $attachment;
 
         return $this;
     }
@@ -632,6 +594,30 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface
     public function setPaymentDate(?DateTime $paymentDate): static
     {
         $this->paymentDate = $paymentDate;
+
+        return $this;
+    }
+
+    public function getDocument(): ?Document
+    {
+        return $this->document;
+    }
+
+    public function setDocument(?Document $document): static
+    {
+        $this->document = $document;
+
+        return $this;
+    }
+
+    public function getAttachment(): ?Attachment
+    {
+        return $this->attachment;
+    }
+
+    public function setAttachment(?Attachment $attachment): static
+    {
+        $this->attachment = $attachment;
 
         return $this;
     }

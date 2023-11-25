@@ -63,28 +63,28 @@ class InvoiceRepository extends ServiceEntityRepository
         }
 
         $invoices           = [];
-        $lastInvoiceNumbers = [];
+//        $lastInvoiceNumbers = [];
         foreach ($qb->getQuery()->getResult() as $invoice) {
             /** @var Invoice $invoice */
             $series            = $invoice->getSeries();
             $year              = $invoice->getYear();
             $month             = $invoice->getMonth();
-            $lastInvoiceNumber = ($lastInvoiceNumbers[$series] ?? null);
-
-            // Detect and add missing invoices if needed
-            if (null !== $lastInvoiceNumber and in_array($series, $activeSeries)) {
-                for ($missingInvoice = $lastInvoiceNumber - 1; $missingInvoice > $invoice->getNumber(); $missingInvoice--) {
-                    $invoiceKey                           = $invoice->getSeries() . '-' . $missingInvoice;
-                    $invoices[$year][$month][$invoiceKey] = null;
-                }
-            }
+//            $lastInvoiceNumber = ($lastInvoiceNumbers[$series] ?? null);
+//
+//            // Detect and add missing invoices if needed
+//            if (null !== $lastInvoiceNumber and in_array($series, $activeSeries)) {
+//                for ($missingInvoice = $lastInvoiceNumber - 1; $missingInvoice > $invoice->getNumber(); $missingInvoice--) {
+//                    $invoiceKey                           = $invoice->getSeries() . '-' . $missingInvoice;
+//                    $invoices[$year][$month][$invoiceKey] = null;
+//                }
+//            }
 
             // Add the current invoice to the array
             $invoiceKey                           = $invoice->getSeries() . '-' . $invoice->getNumber();
             $invoices[$year][$month][$invoiceKey] = $invoice;
 
             // Update the lastInvoiceNumber for each series
-            $lastInvoiceNumbers[$series] = $invoice->getNumber();
+//            $lastInvoiceNumbers[$series] = $invoice->getNumber();
         }
 
         // Sort the array by keys (invoice numbers)
@@ -102,12 +102,12 @@ class InvoiceRepository extends ServiceEntityRepository
             ->where($qb->expr()->andX()
                 // invoices for customer 'Servicios Empresariales de Alta Calidad' (5) were not created
                 // consistently and could not be associated with corresponding transactions, so they are excluded
-                ->add($qb->expr()->notIn('i.customer', [5, 7]))
+                //->add($qb->expr()->notIn('i.customer', [5, 7]))
                 ->add($qb->expr()->isNull('d.id'))
                 ->add($qb->expr()->in('i.series', $series))
                 ->add($qb->expr()->orX()
-                    ->add($qb->expr()->eq('i.status', $qb->expr()->literal(InvoiceStatus::VIGENTE)))
-                    ->add($qb->expr()->gte('i.issueDate', $qb->expr()->literal('2023-09-01')))
+                    //->add($qb->expr()->eq('i.status', $qb->expr()->literal(InvoiceStatus::VIGENTE)))
+                    ->add($qb->expr()->gte('i.issueDate', $qb->expr()->literal('2022-09-01')))
                 )
             )
             ->orderBy('i.customer', 'ASC')

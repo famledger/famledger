@@ -95,12 +95,12 @@ class InvoiceFileManager
 
     public function getPdfFilename(Invoice $invoice): string
     {
-        return InvoiceFileNamer::buildFilenameStem($invoice) . '.pdf';
+        return InvoiceFileNamer::buildFileName($invoice, 'pdf');
     }
 
     public function getXmlFilename(Invoice $invoice): string
     {
-        return InvoiceFileNamer::buildFilenameStem($invoice) . '.xml';
+        return InvoiceFileNamer::buildFileName($invoice, 'xml');
     }
 
 

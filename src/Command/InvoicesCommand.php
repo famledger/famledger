@@ -33,7 +33,7 @@ class InvoicesCommand extends Command
         private readonly EntityManagerInterface $em,
         private readonly InvoiceSynchronizer    $invoiceSynchronizer,
         private readonly InvoiceRepository      $invoiceRepo,
-        private readonly SeriesRepository       $seriesRepository,
+//        private readonly SeriesRepository       $seriesRepository,
     ) {
         parent::__construct();
     }
@@ -86,7 +86,7 @@ EOT
                         $tenant = $this->em->getRepository(Tenant::class)->findOneBy(['rfc' => $tenantRfc]);
                     }
                     $io->info('Fetching new invoices for active series');
-                    $report = $this->fetchActiveSeries($tenant);
+                    $report = $this->invoiceSynchronizer->fetchActiveSeries($tenant);
                     foreach ($report as $key => $countProcessed) {
                         $io->writeln(sprintf('%s: %d', $key, $countProcessed));
                     }
@@ -114,13 +114,12 @@ EOT
                     $invoices = $qb->getQuery()->getResult();
                     foreach($invoices as $invoice) {
                         /** @var Invoice $invoice */
-                        $invoice->getDocument()->setFilename(InvoiceFileNamer::getInvoiceDocumentName($invoice));
+                        $invoice->getDocument()->setFilename(InvoiceFileNamer::buildDocumentName($invoice));
                     }
                     $this->em->flush();
 
                     $io->info('Fetching details for new invoices');
                     $incompleteInvoices = $this->invoiceRepo->findIncompleteInvoices($tenant);
-
 
                     foreach ($incompleteInvoices as $invoice) {
                         try {
@@ -164,34 +163,34 @@ EOT
             return Command::FAILURE;
         }
     }
-
-    /**
-     * @throws EfClientException
-     */
-    private function fetchActiveSeries(?Tenant $tenant = null): array
-    {
-        // The LivemodeFilter and TenantFilter are only enabled in the web context,
-        // so we can expect to get series un-filtered here.
-        $seriesByTenant = $this->seriesRepository->getActiveSeriesByTenant($tenant);
-
-        // we have grouped the series by tenant, because the series code is unique per tenant but could be duplicated
-        // across tenants, this allows us to display the tenant RFC in combination with the series code in the report
-        $report = [];
-        foreach ($seriesByTenant as $rfc => $tenantSeries) {
-            foreach ($tenantSeries as $series) {
-                $modes = 'api' === strtolower($series->getSource()) ? [true, false] : [true];
-                foreach ($modes as $liveMode) {
-                    $reportKey = sprintf('%s-%s-%s',
-                        $rfc,
-                        $series->getCode(),
-                        $liveMode ? 'live' : 'test'
-                    );
-                    // update all invoices for series->code / series->tenant / liveMode
-                    $report[$reportKey] = $this->invoiceSynchronizer->synchronizeSeries($series, $liveMode);
-                }
-            }
-        }
-
-        return $report;
-    }
+//
+//    /**
+//     * @throws EfClientException
+//     */
+//    private function fetchActiveSeries(?Tenant $tenant = null): array
+//    {
+//        // The LivemodeFilter and TenantFilter are only enabled in the web context,
+//        // so we can expect to get series un-filtered here.
+//        $seriesByTenant = $this->seriesRepository->getActiveSeriesByTenant($tenant);
+//
+//        // we have grouped the series by tenant, because the series code is unique per tenant but could be duplicated
+//        // across tenants, this allows us to display the tenant RFC in combination with the series code in the report
+//        $report = [];
+//        foreach ($seriesByTenant as $rfc => $tenantSeries) {
+//            foreach ($tenantSeries as $series) {
+//                $modes = 'api' === strtolower($series->getSource()) ? [true, false] : [true];
+//                foreach ($modes as $liveMode) {
+//                    $reportKey = sprintf('%s-%s-%s',
+//                        $rfc,
+//                        $series->getCode(),
+//                        $liveMode ? 'live' : 'test'
+//                    );
+//                    // update all invoices for series->code / series->tenant / liveMode
+//                    $report[$reportKey] = $this->invoiceSynchronizer->synchronizeSeries($series, $liveMode);
+//                }
+//            }
+//        }
+//
+//        return $report;
+//    }
 }

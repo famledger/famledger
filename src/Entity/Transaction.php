@@ -186,8 +186,9 @@ class Transaction
         if ($document->getInvoice() !== null) {
             $invoiceCustomer = $document->getInvoice()->getCustomer();
 
-            if ($this->customer !== null && $invoiceCustomer !== $this->customer) {
-                throw new \LogicException('Cannot add invoices from different customers to the same transaction.');
+            if ($this->customer !== null and $invoiceCustomer !== $this->customer) {
+                // TODO: re-enamble after cleanup
+                //throw new \LogicException('Cannot add invoices from different customers to the same transaction.');
             }
 
             $this->customer = $invoiceCustomer;
@@ -207,7 +208,7 @@ class Transaction
         if ($this->documents->removeElement($document)) {
             // Check if it's the last document with an invoice from the current customer
             $hasMoreInvoicesFromCustomer = $this->documents->exists(function ($key, Document $doc) {
-                return null !== $doc->getInvoice() && $doc->getInvoice()->getCustomer() === $this->customer;
+                return null !== $doc->getInvoice() and $doc->getInvoice()->getCustomer() === $this->customer;
             });
 
             if (!$hasMoreInvoicesFromCustomer) {
@@ -238,14 +239,27 @@ class Transaction
 
     public function updateConsolidationStatus(): void
     {
-        // Filter out Attachment entities
         $supportingDocuments = $this->documents->filter(function ($document) {
-            return !($document instanceof Attachment)
-                   or ($this->amount < 0 and $document->getType() == DocumentType::EXPENSE)
-                   or ($this->amount > 0
-                       and $document->getType() == DocumentType::INCOME
-                           and $document->getInvoice() !== null
-                               and $document->getInvoice()->getStatus() === InvoiceStatus::VIGENTE);
+            // Exclude if it's an Attachment
+            if ($document instanceof Attachment) {
+                return false;
+            }
+
+            // Exclude if it's an Expense
+            if ($this->amount < 0 and $document->getType() == DocumentType::EXPENSE) {
+                return true;
+            }
+
+            // Exclude if it points to a non-valid Invoice
+            if ($this->amount > 0 and $document->getType() == DocumentType::INCOME) {
+                $invoice = $document->getInvoice();
+                if (null !== $invoice and $invoice->getStatus() !== InvoiceStatus::VIGENTE) {
+                    return false;
+                }
+            }
+
+            // Include the document if none of the above conditions are met
+            return true;
         });
 
         $hasDocuments = $supportingDocuments->count() > 0;
@@ -254,7 +268,10 @@ class Transaction
         $firstDocument = $supportingDocuments->first();
 
         if (!$hasDocuments) {
-            $this->setStatus(self::STATUS_PENDING);
+            $this->setStatus(0 === count($this->documents)
+                ? self::STATUS_PENDING
+                : self::STATUS_AMOUNT_MISMATCH
+            );
         } else {
             // income can be backed up by multiple documents
             if ($this->getAmount() > 0) {
@@ -281,7 +298,6 @@ class Transaction
                 }
             }
         }
-
         // Compare sum to transaction amount and set the isConsolidate flag accordingly
         $this->setIsConsolidated(self::STATUS_CONSOLIDATED === $this->getStatus());
     }

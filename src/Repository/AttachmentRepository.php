@@ -40,15 +40,4 @@ class AttachmentRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
-
-    public function findInvoiceAttachment(Invoice $invoice): ?Attachment
-    {
-        $qb = $this->createQueryBuilder('d');
-        $qb->where($qb->expr()->andX()
-            ->add($qb->expr()->eq('d.invoice', $qb->expr()->literal($invoice->getId())))
-        );
-
-        return $qb->getQuery()->getOneOrNullResult();
-
-    }
 }

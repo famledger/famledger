@@ -38,8 +38,8 @@ class AccountingFolderManager
      */
     public function createAccountingFile(
         FinancialMonth $financialMonth,
-        string         $sourcePath,
         string         $filename,
+        string         $sourcePath,
         ?bool          $isAttachment = false,
         ?bool          $overwriteExisting = false
     ): string {
@@ -48,7 +48,7 @@ class AccountingFolderManager
             throw new Exception("The path $destinationPath is a directory");
         }
         if (is_file($destinationPath) and false === $overwriteExisting) {
-            throw new Exception("The file $destinationPath already exists");
+            //throw new Exception("The file $destinationPath already exists");
         }
         $this->filesystem->copy($sourcePath, $destinationPath);
         $this->logger->info("Created accounting file: $destinationPath");
@@ -59,7 +59,7 @@ class AccountingFolderManager
     /**
      * @throws Exception
      */
-    public function createAnnotationFile(FinancialMonth $financialMonth, string $filename): string
+        public function createAnnotationFile(FinancialMonth $financialMonth, string $filename): string
     {
         $destinationPath = $this->getAccountingFolderPath($financialMonth, false) . '/' . $filename;
         if (is_dir($destinationPath)) {
@@ -83,7 +83,8 @@ class AccountingFolderManager
     {
         $filePath = $this->getAccountingFolderPath($financialMonth, $isAttachment) . '/' . $filename;
         if (!is_file($filePath)) {
-            throw new Exception("The file $filePath does not exist");
+            return;
+            //throw new Exception("The file $filePath does not exist");
         }
         $this->filesystem->remove($filePath);
         $this->logger->info("Deleted accounting file: $filePath");

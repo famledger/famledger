@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Service\Invoice\InvoiceSynchronizer;
+use App\Service\TenantContext;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
@@ -96,7 +97,7 @@ class InvoiceCrudController extends AbstractCrudController
         AdminContext           $adminContext,
         InvoiceSynchronizer    $invoiceSynchronizer,
         Request                $request,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
     ): Response {
 
         try {
@@ -113,6 +114,33 @@ class InvoiceCrudController extends AbstractCrudController
             ->setController(InvoiceCrudController::class)
             ->setAction(Action::DETAIL)
             ->setEntityId($invoice->getId())
+            ->generateUrl()
+        );
+    }
+
+    public function fetch(
+        AdminUrlGenerator      $adminUrlGenerator,
+        EntityManagerInterface $em,
+        InvoiceSynchronizer    $invoiceSynchronizer,
+        Request                $request,
+        TenantContext          $tenantContext,
+    ): Response {
+        try {
+            $report  = $invoiceSynchronizer->fetchActiveSeries($tenantContext->getTenant());
+            $message = '';
+            foreach ($report as $key => $countProcessed) {
+                $message .= sprintf('%s: %d<br/>', $key, $countProcessed);
+            }
+            $em->flush();
+
+            $request->getSession()->getFlashBag()->add('success', $message);
+        } catch (EfClientException $e) {
+            $request->getSession()->getFlashBag()->add('error', $e->getMessage());
+        }
+
+        return $this->redirect($adminUrlGenerator
+            ->setController(InvoiceCrudController::class)
+            ->setAction(Action::INDEX)
             ->generateUrl()
         );
     }
@@ -179,8 +207,12 @@ class InvoiceCrudController extends AbstractCrudController
             });
         $syncInvoice     = Action::new('sync', 'sync from EF', 'fa fa-refresh')
             ->linkToCrudAction('sync');
+        $fetchLatest     = Action::new('fetch', 'fetch latest from EF', 'fa fa-download')
+            ->linkToCrudAction('fetch')
+            ->createAsGlobalAction();
 
         return $actions
+            ->add(Crud::PAGE_INDEX, $fetchLatest)
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
             ->update(Crud::PAGE_INDEX, Action::DETAIL, function (Action $action) {
                 return $action->setIcon('fa fa-eye')->setLabel('');
@@ -244,11 +276,12 @@ class InvoiceCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
+            ->setSearchFields(['series', 'customer.name', 'property.slug'])
             ->overrideTemplate('crud/detail', 'admin/Invoice/details.html.twig')
             ->showEntityActionsInlined()
             ->setEntityLabelInSingular('Invoice')
             ->setEntityLabelInPlural('Invoices')
-            ->setDefaultSort(['number' => 'DESC']);
+            ->setDefaultSort(['issueDate' => 'DESC']);
     }
 
     private function createInvoiceCancelFrom(Invoice $invoice): FormInterface

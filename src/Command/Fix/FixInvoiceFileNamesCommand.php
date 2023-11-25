@@ -51,17 +51,15 @@ class FixInvoiceFileNamesCommand extends Command
     private array $invoices = [];
 
     public function __construct(
-        private readonly AccountingFolderManager   $accountingFolderManager,
         private readonly AccountingDocumentService $accountingDocumentService,
-        private readonly AttachmentFolderManager   $attachmentFolderManager,
         private readonly AttachmentRepository      $attachmentRepository,
         private readonly DocumentService           $documentService,
         private readonly EFClient                  $efClient,
         private readonly EntityManagerInterface    $em,
         private readonly InvoiceFileManager        $invoiceFileManager,
         private readonly InvoiceRepository         $invoiceRepository,
-        private readonly InvoiceSynchronizer       $invoiceSynchronizer,
         private readonly InvoiceSyncService        $invoiceSyncService,
+        private readonly InvoiceSynchronizer       $invoiceSynchronizer,
         private readonly LiveModeContext           $liveModeContext,
         private readonly SeriesRepository          $seriesRepository,
         private readonly TenantContext             $tenantContext,
@@ -77,12 +75,18 @@ class FixInvoiceFileNamesCommand extends Command
 
         try {
             $this->disableDocumentListener();
+
+            // for all documents that are associated with an invoice
+            // - set the Document filename in accordance with the InvoiceFileNamer
+            // - rename the accounting file to match the new filename
+            // - re-fetch the invoice details and PDF/XML files
             foreach ($this->tenantRepository->findAll() as $tenant) {
                 $invoiceDocuments = $this->getInvoiceDocuments($tenant);
                 $this->updateInvoiceDocuments($invoiceDocuments);
             }
 
-            // get all invoice entities
+            // some invoices might not be associated with a document, but we want to have the PDF/XML files
+            // we check for the existence of the PDF/XML files and fetch them if they are missing
             $invoices = $this->em->getRepository(Invoice::class)->findAll();
             foreach ($invoices as $invoice) {
                 $path = $this->invoiceFileManager->getPdfPath($invoice);
@@ -101,7 +105,7 @@ class FixInvoiceFileNamesCommand extends Command
             }
 
             // remove duplicate attachments
-            $query      = "select group_concat(id) from document where type='attachment' group by checksum having count(*) > 1";
+            $query      = "SELECT group_concat(id) FROM document WHERE type='attachment' GROUP BY checksum HAVING count(*) > 1";
             $ids        = explode(',', join(',', $this->em->getConnection()
                 ->executeQuery($query)
                 ->fetchFirstColumn()
@@ -122,12 +126,18 @@ class FixInvoiceFileNamesCommand extends Command
                 }
             }
 
+            // modify all invoice attachments (XML)
+            // - set the display filename in accordance with the InvoiceFileNamer
+            // - rename the accounting file to match the new filename
+            // - set the invoice number and series in the specs
             $attachments = $this->em->getRepository(Attachment::class)->findAll();
             $n           = 0;
             foreach ($attachments as $attachment) {
                 $suggestedFilename = $attachment->getFilename();
-                if (preg_match('/^(MIJO620503Q60|MOPM670510J8A)-([0-9]{8})-([A-Z])([0-9]+).xml/', $suggestedFilename,
-                    $matches)) {
+                if (preg_match('/^(MIJO620503Q60|MOPM670510J8A)-([0-9]{8})-([A-Z])([0-9]+).xml/',
+                    $suggestedFilename,
+                    $matches
+                )) {
                     $n++;
                     $output->writeln(sprintf("%3d: %s", $n, $suggestedFilename));
 
@@ -142,8 +152,11 @@ class FixInvoiceFileNamesCommand extends Command
                     $attachment->setSpecs($specs->serialize());
                     // find the corresponding invoice document, set the display filename and attach the attachment
                     if (null != $invoice = $this->getInvoiceForAttachment($invoiceNumber, $invoiceSeries, $rfc)) {
-                        $attachment->setDisplayFilename(InvoiceFileNamer::getInvoiceDocumentName($invoice, 'xml'));
-                        $attachment->setInvoice($invoice);
+                        $filename = InvoiceFileNamer::buildDocumentName($invoice, 'xml');
+                        $attachment
+                            ->setFilename($filename)
+                            ->setDisplayFilename($filename)
+                            ->setInvoice($invoice);
                         if (null !== $document = $invoice->getDocument()) {
                             $document->setAttachment($attachment);
                             if (null !== $transaction = $document->getTransaction()) {
@@ -171,15 +184,17 @@ class FixInvoiceFileNamesCommand extends Command
     private function updateInvoiceDocuments(array $invoiceDocuments)
     {
         foreach ($invoiceDocuments as $invoice) {
-            // determine the expected file name for each invoice
-            $filename = InvoiceFileNamer::getInvoiceDocumentName($invoice);
+            // update the filename of each document using the InvoiceFileNamer
+            // when the document is persisted, the accounting file will be renamed
+            // to match the new filename if it has changed
+            $filename = InvoiceFileNamer::buildDocumentName($invoice);
+            $document = $invoice->getDocument();
+            $document->setFilename($filename);
 
             $this->output->writeln(sprintf("  - %s", $filename));
 
-            $document = $invoice->getDocument();
-            $document->setFilename($filename);
             // fetch the details and PDF/XML files for the invoice
-            // the filenames will match the one set on the document here
+            // the filenames in the invoices folder will match the ones in the accounting folder
             $this->invoiceSynchronizer->syncInvoiceDetails($invoice);
             $this->em->flush();
         }
@@ -373,7 +388,7 @@ class FixInvoiceFileNamesCommand extends Command
             // the actual file name displayed in the statement
             $documentFilename = $document->getFilename();
             // the expected file name
-            $documentDisplayName = InvoiceFileNamer::getInvoiceDocumentName($invoice);
+            $documentDisplayName = InvoiceFileNamer::buildDocumentName($invoice);
             // the full path the accounting file is expected to be found at
             try {
                 $accountingFilePath = $this->documentService->getDocumentPath($document);

@@ -4,7 +4,8 @@ namespace App\Service;
 
 class MonthConverter
 {
-    static public function fromNumericMonth(int $month): string
+
+    static public function fromNumericMonth(?int $month): string
     {
         return match ($month) {
             1       => 'January',

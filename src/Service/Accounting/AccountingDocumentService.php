@@ -2,6 +2,7 @@
 
 namespace App\Service\Accounting;
 
+use App\Entity\Attachment;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Throwable;
@@ -46,7 +47,14 @@ class AccountingDocumentService
             $document->setSequenceNo(0);
         }
 
-        return ($document->isAttachment() or null === $document->getSequenceNo())
+        // handle the case where the filename has already been prefixed with the sequence number
+        // remove once all documents have been named correctly
+
+        if (preg_match('/^[0-9]{2} /', $document->getFilename())) {
+            $document->setFilename(substr($document->getFilename(), 3));
+        }
+
+        return ($document->isAttachment())
             ? $document->getFilename()
             : sprintf('%02d %s', $document->getSequenceNo(), $document->getFilename());
     }
@@ -60,10 +68,10 @@ class AccountingDocumentService
 
     /**
      * Receives
+     * - a Document object
      * - a FinancialMonth object
-     * - a DocumentSpecs object
-     * - a sourceFilepath where the file described by the document specs is
-     * located and performs the following operations:
+     * - a sourceFilepath where the file described by the document specs is located
+     * and performs the following operations:
      *
      * - creates and persists a Document entity from the DocumentSpecs object
      * - associates the Document entity with the FinancialMonth entity
@@ -90,8 +98,8 @@ class AccountingDocumentService
                 $isAttachment   = $document->isAttachment();
                 $copiedFilePath = $this->accountingFolderManager->createAccountingFile(
                     $financialMonth,
-                    $sourceFilepath,
                     self::composeFilename($document),
+                    $sourceFilepath,
                     $isAttachment,
                 );
             }
@@ -108,9 +116,10 @@ class AccountingDocumentService
     public function deleteDocument(Document $document): void
     {
         try {
-            if (null !== $document->getTransaction()) {
-                throw new Exception('Cannot delete a document that is associated with a transaction');
-            }
+            // TODO: review why this has been conceived initially and whether it is still necessary
+//            if (null !== $document->getTransaction()) {
+//                throw new Exception('Cannot delete a document that is associated with a transaction');
+//            }
 
             $financialMonth = $document->getFinancialMonth();
             $this->accountingFolderManager->deleteAccountingFile(
@@ -119,6 +128,9 @@ class AccountingDocumentService
                 $document->isAttachment()
             );
             $financialMonth->removeDocument($document);
+
+            $document->setInvoice(null);
+
             $this->em->remove($document);
         } catch (Exception) {
         }
@@ -129,7 +141,7 @@ class AccountingDocumentService
         try {
             $document->setFilename($filename);
             $this->em->flush();
-        } catch (Exception ) {
+        } catch (Exception) {
         }
     }
 

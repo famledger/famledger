@@ -21,7 +21,7 @@ use App\Service\TenantContext;
 
 #[AsCommand(
     name: 'app:ef-client',
-    description: 'Test the EFClient connection',
+    description: 'Performs different operations related to EFClient and tenants',
 )]
 class EfClientCommand extends Command
 {
@@ -37,7 +37,8 @@ class EfClientCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addArgument('operation', InputArgument::OPTIONAL, 'Operation to perform: "test" or "tenants"', 'test')
+            ->addArgument('operation', InputArgument::OPTIONAL,
+                'Operation to perform: "test", "tenants", "list-invoices", or "show-invoice"')
             ->addOption('tenant', null, InputOption::VALUE_REQUIRED, 'The RFC of the tenant')
             ->addOption('livemode', null, InputOption::VALUE_REQUIRED, 'execute request in either live or test mode')
             ->addOption('series', null, InputOption::VALUE_REQUIRED, '')
@@ -49,6 +50,8 @@ The <info>%command.name%</info> command performs different operations related to
 <comment>Operations:</comment>
 - <info>test</info>: Tests the EFClient connection for a specific tenant. Requires the --tenant option.
 - <info>tenants</info>: Returns a list of all tenants.
+- <info>list-invoices</info>: Lists all invoices for a given series. Requires the --series option.
+- <info>show-invoice</info>: Shows details of a specific invoice. Requires both --series and --number options.
 
 <comment>Usage Examples:</comment>
 
@@ -58,11 +61,19 @@ To test a tenant with a specific RFC:
 To list all tenants:
   <info>php %command.full_name% tenants</info>
 
+To list invoices for a specific series:
+  <info>php %command.full_name% list-invoices --series=S123</info>
+
+To show a specific invoice:
+  <info>php %command.full_name% show-invoice --series=S123 --number=456</info>
+
 <comment>Arguments:</comment>
-  <info>operation</info>: The operation to perform. Allowed values are 'test' and 'tenants'. Default is 'test'.
+  <info>operation</info>: The operation to perform. Allowed values are <info>'test'</info>, <info>'tenants'</info>, <info>'list-invoices'</info>, and <info>'show-invoice'</info>.
 
 <comment>Options:</comment>
-  <info>--tenant</info>: The RFC of the tenant for which you want to test the connection. Required for 'test' operation.
+  <info>--tenant</info>: The RFC of the tenant for which you want to test the connection. Required for all operations except <info>'tenants'</info>.
+  <info>--series</info>: The series of the invoices. Required for <info>'list-invoices'</info> and <info>'show-invoice'</info> operations.
+  <info>--number</info>: The number of the specific invoice. Required for <info>'show-invoice'</info> operation.
 EOT
             );
     }
@@ -83,82 +94,83 @@ EOT
                 }
 
                 $this->tenantContext->setTenant($tenant);
-                $this->liveModeContext->setLiveMode($input->getOption('livemode'));
+            }
+            $this->liveModeContext->setLiveMode($input->getOption('livemode'));
 
-                switch($operation) {
+            switch($operation) {
 
-                    case 'list-invoices':
-                        if (null === $series = $input->getOption('series')) {
-                            throw new Exception('Series is required');
-                        }
-                        $response = $this->efClient->listInvoices($series);
-                        $io->success('List of invoices for series ' . $series);
+                case 'list-invoices':
+                    if (null === $series = $input->getOption('series')) {
+                        throw new Exception('Series is required');
+                    }
+                    $response = $this->efClient->listInvoices($series);
+                    $io->success('List of invoices for series ' . $series);
+                    $io->note(json_encode($response, JSON_PRETTY_PRINT));
+
+                    return Command::SUCCESS;
+
+                case 'show-invoice':
+                    if (null === $series = $input->getOption('series')) {
+                        throw new Exception('Series is required');
+                    }
+                    if (null === $number = $input->getOption('number')) {
+                        throw new Exception('Number is required');
+                    }
+                    $invoice  = $this->em->getRepository(Invoice::class)->findOneBy([
+                        'series' => $series,
+                        'number' => $number,
+                    ]);
+                    $response = $this->efClient->getInvoice($invoice);
+                    $io->success('Invoice details');
+                    $io->note(json_encode($response, JSON_PRETTY_PRINT));
+
+                    return Command::SUCCESS;
+
+                case 'test':
+                    $tenant = $this->em->getRepository(Tenant::class)->findOneBy(['rfc' => $tenantRfc]);
+                    if (null === $tenant) {
+                        throw new Exception(sprintf('Tenant with RFC %s not found', $tenantRfc));
+                    }
+
+                    $this->tenantContext->setTenant($tenant);
+
+                    if ($response = $this->efClient->testConnection()) {
+                        $io->success('Your connection was successful.');
                         $io->note(json_encode($response, JSON_PRETTY_PRINT));
 
                         return Command::SUCCESS;
+                    } else {
+                        $io->error('Your connection was not unsuccessful.');
 
-                    case 'show-invoice':
-                        if (null === $series = $input->getOption('series')) {
-                            throw new Exception('Series is required');
-                        }
-                        if (null === $number = $input->getOption('number')) {
-                            throw new Exception('Number is required');
-                        }
-                        $invoice  = $this->em->getRepository(Invoice::class)->findOneBy([
-                            'series' => $series,
-                            'number' => $number,
-                        ]);
-                        $response = $this->efClient->getInvoice($invoice);
-                        $io->success('Invoice details');
-                        $io->note(json_encode($response, JSON_PRETTY_PRINT));
+                        return Command::FAILURE;
+                    }
+
+                case 'tenants':
+                    $tenants = $this->em->getRepository(Tenant::class)->findAll();
+
+                    if (empty($tenants)) {
+                        $io->warning('No tenants found.');
 
                         return Command::SUCCESS;
+                    }
 
-                    case 'test':
-                        $tenant = $this->em->getRepository(Tenant::class)->findOneBy(['rfc' => $tenantRfc]);
-                        if (null === $tenant) {
-                            throw new Exception(sprintf('Tenant with RFC %s not found', $tenantRfc));
-                        }
+                    $tenantList = [];
+                    foreach ($tenants as $tenant) {
+                        $tenantList[] = [$tenant->getRfc(), $tenant->getName()];
+                    }
 
-                        $this->tenantContext->setTenant($tenant);
+                    $io->table(['RFC', 'Name'], $tenantList);
 
-                        if ($response = $this->efClient->testConnection()) {
-                            $io->success('Your connection was successful.');
-                            $io->note(json_encode($response, JSON_PRETTY_PRINT));
+                    return Command::SUCCESS;
 
-                            return Command::SUCCESS;
-                        } else {
-                            $io->error('Your connection was not unsuccessful.');
-
-                            return Command::FAILURE;
-                        }
-
-                    case 'tenants':
-                        $tenants = $this->em->getRepository(Tenant::class)->findAll();
-
-                        if (empty($tenants)) {
-                            $io->warning('No tenants found.');
-
-                            return Command::SUCCESS;
-                        }
-
-                        $tenantList = [];
-                        foreach ($tenants as $tenant) {
-                            $tenantList[] = [$tenant->getRfc(), $tenant->getName()];
-                        }
-
-                        $io->table(['RFC', 'Name'], $tenantList);
-
-                        return Command::SUCCESS;
-
-                    default:
-                        throw new Exception(sprintf('Operation "%s" not supported', $operation));
-                }
+                default:
+                    throw new Exception(sprintf('Operation "%s" not supported', $operation));
             }
         } catch (Throwable $e) {
             $io->error($e->getMessage());
 
         }
+
         return Command::FAILURE;
     }
 }

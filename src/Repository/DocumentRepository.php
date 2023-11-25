@@ -2,13 +2,15 @@
 
 namespace App\Repository;
 
-use App\Entity\FinancialMonth;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 use App\Constant\DocumentType;
+use App\Entity\Attachment;
 use App\Entity\Document;
+use App\Entity\FinancialMonth;
+use App\Entity\Invoice;
 use App\Entity\Statement;
 
 /**
@@ -56,6 +58,7 @@ class DocumentRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getOneOrNullResult();
     }
+
     public function findByChecksumForFinancialMonth(FinancialMonth $financialMonth, string $checksum): ?Document
     {
         $qb = $this->createQueryBuilder('d');

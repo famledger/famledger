@@ -93,4 +93,12 @@ class DocumentController extends AbstractController
         return $response;
     }
 
+    /**
+     * @throws Exception
+     */
+    #[Route('/delete/{document}', name: 'admin_document_delete')]
+    public function delete(Document $document, DocumentService $documentService): Response
+    {
+        $documentService->removeDocument($document);
+    }
 }

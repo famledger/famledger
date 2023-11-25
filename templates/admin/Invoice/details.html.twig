@@ -11,7 +11,7 @@
                 {{ invoice.status | capitalize }}
             </span>
             {% if invoice.cancellationStatus is not empty %}
-                <span class="text-white badge ms-3 bg-warning }}">
+                <span class="ms-3">Cancellation</span> <span class="text-white badge ms-1 bg-warning }}">
                 {{ invoice.cancellationStatus }}
             </span>
             {% endif %}

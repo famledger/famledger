@@ -29,7 +29,8 @@
                 <table>
                     {% set total = 0 %}
                     {% for document in transaction.documents %}
-                        {% if document.type.value != 'attachment' or (document.type.value == 'invoice' and invoice.status == constant('App\\Constant\\InvoiceStatus::VIGENTE')) %}
+                        {% set isInvoiceAttachment = (document.isAttachment and document.invoice is not null) %}
+                        {% if document.affectsTransactionSum %}
                             {% set total = total + document.amount %}
                         {% endif %}
                         <tr>
@@ -44,7 +45,7 @@
                                 {% endif %}
                             </td>
                             <td style="white-space: nowrap; text-align: right">
-                                {% if not isConsolidated %}
+                                {% if not isConsolidated and not isInvoiceAttachment %}
                                     <a href="javascript:void(0)" title="unlink document" class="tx-delete-btn"
                                        data-document-id="{{ document.id }}"
                                        data-document-type="{{ document.type.value }}"
@@ -57,7 +58,7 @@
                                 <a href="{{ document|ea_url('detail') }}"><i class="fa fa-eye"></i></a>
                             </td>
                             <td colspan="2" class="text-right">
-                                <span{% if document.type.value == 'attachment' %} style="opacity:.5"{% endif %}>{{ document.amount|cent_amount }}</span>
+                                <span{% if not document.affectsTransactionSum %} style="opacity:.5"{% endif %}>{{ document.amount|cent_amount }}</span>
                             </td>
                         </tr>
                     {% endfor %}

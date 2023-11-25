@@ -47,7 +47,7 @@ class AttachmentSpecs extends BaseDocumentSpecs
         return $this;
     }
 
-    private function getInvoiceSeries(): ?string
+    public function getInvoiceSeries(): ?string
     {
         return $this->invoiceSeries;
     }
@@ -59,7 +59,7 @@ class AttachmentSpecs extends BaseDocumentSpecs
         return $this;
     }
 
-    private function getInvoiceNumber(): ?int
+    public function getInvoiceNumber(): ?int
     {
         return $this->invoiceNumber;
     }

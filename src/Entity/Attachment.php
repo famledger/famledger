@@ -137,4 +137,22 @@ class Attachment extends Document
 
         return $this;
     }
+
+
+    public function setInvoice(?Invoice $invoice): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($invoice === null && $this->getInvoice() !== null) {
+            $this->getInvoice()->setAttachment(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($invoice !== null && $invoice->getAttachment() !== $this) {
+            $invoice->setAttachment($this);
+        }
+
+        parent::setInvoice($invoice);
+
+        return $this;
+    }
 }

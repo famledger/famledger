@@ -10,13 +10,16 @@ use App\Entity\Document;
 use App\Entity\Invoice;
 use App\Entity\Statement;
 use App\Entity\Transaction;
+use App\Exception\DocumentCreationException;
 use App\Exception\StatementValidationFailedException;
 use App\Repository\AttachmentRepository;
+use App\Repository\DocumentRepository;
 
 class StatementService
 {
     public function __construct(
         private readonly AttachmentRepository   $attachmentRepository,
+        private readonly DocumentRepository     $documentRepository,
         private readonly DocumentService        $documentService,
         private readonly EntityManagerInterface $em
     ) {
@@ -66,7 +69,6 @@ class StatementService
             ->setFinancialMonth($transaction->getStatement()->getFinancialMonth());
     }
 
-
     /**
      * Linking an invoice to a transaction means:
      * - setting the payment date of the invoice to the booking date of the transaction
@@ -80,47 +82,48 @@ class StatementService
      */
     public function linkInvoice(Transaction $transaction, Invoice $invoice): void
     {
-        if (null === $attachment = $this->attachmentRepository->findInvoiceAttachment($invoice)) {
-            throw new Exception(sprintf('No attachment found for invoice %s', $invoice->getNumber()));
+        if (null !== $invoice->getAttachment()) {
+            throw new DocumentCreationException(sprintf('Invoice %s already has an attachment.', $invoice));
+        }
+        if (null !== $invoice->getDocument()) {
+            throw new DocumentCreationException(sprintf('Invoice %s already has a document.', $invoice));
         }
 
         $financialMonth = $transaction->getStatement()->getFinancialMonth();
 
-        $attachment
+        // create an attachment for the invoice and link it to the transaction and financial month
+        $invoiceAttachment = $this->documentService->createAttachmentFromInvoice($transaction, $invoice)
             ->setAccount($financialMonth->getAccount())
             ->setFinancialMonth($financialMonth);
 
         // create a document for the invoice and link it to the transaction and financial month
-        $document = $this->documentService->createFromInvoice($invoice)
+        $invoiceDocument = $this->documentService->createDocumentFromInvoice($transaction, $invoice)
             ->setFinancialMonth($financialMonth)
-            ->setAttachment($attachment);
-        $this->em->persist($document);
+            ->setAttachment($invoiceAttachment);
 
-        $transaction
-            ->addDocument($document)
-            ->addDocument($attachment);
+        // mark the invoice document as paid
+        $invoice->setPaymentDate($transaction->getBookingDate());// copy invoice files from the invoices folder to the accounting folder
 
-        $invoice->setPaymentDate($transaction->getBookingDate());
-
-        // copy invoice files from the invoices folder to the accounting folder
-        $this->documentService->copyInvoiceFilesToAccountingFolder($invoice);
+        // only persist if no exception has been thrown so far
+        $this->em->persist($invoiceAttachment);
+        $this->em->persist($invoiceDocument);
     }
 
     public function unLinkDocument(?Transaction $transaction, Document $document): void
     {
-        $transaction->removeDocument($document);
-
+        // invoice documents require that the corresponding accounting files are removed
+        // non-invoice documents are just un-linked by removing the association to the transaction
         if (null !== $invoice = $document->getInvoice()) {
-            $invoice->setPaymentDate(null);
-            $this->em->remove($document);
 
-            if (null !== $attachment = $document->getAttachment()) {
-                $transaction->removeDocument($attachment);
-                $this->em->remove($attachment);
+            // remove invoice files from the accounting folder
+            $this->documentService->removeDocument($document);
+            if (null !== $attachment = $invoice->getAttachment()) {
+                $this->documentService->removeDocument($attachment);
             }
-        }
 
-        // remove invoice files from the accounting folder
-        $this->documentService->removeInvoiceAccountingFiles($invoice);
+            $invoice->setPaymentDate(null);
+        } else {
+            $transaction->removeDocument($document);
+        }
     }
 }

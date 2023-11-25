@@ -2,9 +2,11 @@
 
 namespace App\Entity;
 
+use App\Constant\InvoiceStatus;
 use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 use App\Annotation\TenantDependent;
@@ -66,7 +68,7 @@ class Document implements TenantAwareInterface
     #[Gedmo\Versioned]
     private ?int $amount = null;
 
-    #[ORM\OneToOne(inversedBy: 'document')]
+    #[ORM\OneToOne(mappedBy: 'document')]
     #[Gedmo\Versioned]
     private ?Invoice $invoice = null;
 
@@ -168,6 +170,23 @@ class Document implements TenantAwareInterface
         return $this;
     }
 
+    public function affectsTransactionSum(): bool
+    {
+        // documents that affect the transaction they are associated with are:
+        // - expenses
+        // - invoices that have not been canceled
+        $isAnnotation   = $this->getType() === DocumentType::ANNOTATION;
+        $isExpense      = $this->getType() === DocumentType::EXPENSE;
+        $isTax          = $this->getType() === DocumentType::TAX;
+        $isValidInvoice = (
+            $this->getType() === DocumentType::INCOME
+            and null !== $this->getInvoice()
+                and $this->getInvoice()->getStatus() === InvoiceStatus::VIGENTE
+        );
+
+        return $isExpense or $isTax or $isAnnotation or $isValidInvoice;
+    }
+
     public function getIsConsolidated(): bool
     {
         return $this->isConsolidated;
@@ -211,12 +230,25 @@ class Document implements TenantAwareInterface
 
     public function setInvoice(?Invoice $invoice): self
     {
-        $this->invoice = $invoice;
-        if ($this instanceof Attachment) {
-            $invoice?->setAttachment($this);
-        } else {
-            $invoice?->setDocument($this);
+        // unset the owning side of the relation if necessary
+        if ($invoice === null && $this->invoice !== null) {
+            if ($this instanceof Attachment) {
+                $this->invoice->setAttachment(null);
+            } else {
+                $this->invoice->setDocument(null);
+            }
         }
+
+        // set the owning side of the relation if necessary
+        if ($invoice !== null && $invoice->getDocument() !== $this) {
+            if ($this instanceof Attachment) {
+                $invoice->setAttachment($this);
+            } else {
+                $invoice->setDocument($this);
+            }
+        }
+
+        $this->invoice = $invoice;
 
         return $this;
     }

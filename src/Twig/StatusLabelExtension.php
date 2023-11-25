@@ -30,10 +30,18 @@ class StatusLabelExtension extends AbstractExtension
     public function invoiceStatus(?string $status): string
     {
         $type = match (strtolower($status)) {
-            'vigente'   => 'success',
-            'cancelado' => 'danger',
-            default     => 'default',
+            'vigente'                  => 'success',
+            'cancelado',
+            'cancelado sin aceptación',
+            'cancelado plazo vencido', => 'danger',
+            'en proceso'               => 'warning',
+            default                    => 'default',
         };
+        if (str_starts_with(strtolower($status), 'cancelado ')) {
+            // replace only the first the space after the word 'cancelado' with a <br/>
+            // this is a hack to make the label fit in the column
+            $status = preg_replace('/^Cancelado /', 'Cancelado<br/>', $status);
+        }
 
         return $this->renderStatus($status, $type);
     }

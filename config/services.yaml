@@ -17,6 +17,7 @@ services:
       $eDocsRootFolder: '%env(EDOCS_ROOT_FOLDER)%'
       $inboxFolder: '%env(INBOX_FOLDER)%'
       $invoicesFolder: '%env(INVOICES_FOLDER)%'
+      $rootFolder: '%env(ROOT_FOLDER)%'
 
       $efApiVersion: '%env(ENLACE_FISCAL_API_VERSION)%'
       $efCfdiVersion: '%env(ENLACE_FISCAL_CFDI_VERSION)%'

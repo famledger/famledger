@@ -116,7 +116,7 @@ class StatementController extends AbstractController
                 'transaction' => $transaction,
                 'statement'   => $statement,
             ]);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return new JsonResponse(['error' => $e->getMessage()], 500);
         }
     }
@@ -175,15 +175,24 @@ class StatementController extends AbstractController
     ): Response {
 
         try {
+            $unconsolidatedSequenceNumbers = [];
             foreach ($statement->getTransactions() as $transaction) {
                 if ($transaction->getType() === DocumentType::ACCOUNT_STATEMENT) {
                     continue;
                 }
                 $transaction->updateConsolidationStatus();
                 if ($transaction->getStatus() !== Transaction::STATUS_CONSOLIDATED) {
-                    throw new Exception(sprintf('Transaction %d is not consolidated', $transaction->getSequenceNo()));
+                    $unconsolidatedSequenceNumbers[] = $transaction->getSequenceNo();
                 }
             }
+            if (count($unconsolidatedSequenceNumbers) > 0) {
+                // persist potential transaction status changes
+                $em->flush();
+                throw new Exception(sprintf('Transaction(s) %s are not consolidated',
+                    implode(', ', $unconsolidatedSequenceNumbers)
+                ));
+            }
+
             $statement->setStatus(Statement::STATUS_CONSOLIDATED);
             $em->flush();
             $request->getSession()->getFlashBag()->add('success', 'The statement has been consolidated');

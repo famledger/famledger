@@ -34,6 +34,16 @@ class AccountingFolderComparator
         return new self($path1, $path2);
     }
 
+    public function getByContentChecksum(): array
+    {
+        return $this->byContentChecksum;
+    }
+
+    public function getByNameChecksum(): array
+    {
+        return $this->byNameChecksum;
+    }
+
     public function reload(): self
     {
         $this->init();
@@ -107,16 +117,6 @@ class AccountingFolderComparator
                 $this->byNameChecksum[$nameChecksum] = $filename;
             }
         }
-    }
-
-    public function getByContentChecksum(): array
-    {
-        return $this->byContentChecksum;
-    }
-
-    public function getByNameChecksum(): array
-    {
-        return $this->byNameChecksum;
     }
 
     private function assertFolder(string $path1): void

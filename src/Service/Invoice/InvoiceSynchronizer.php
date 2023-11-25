@@ -15,6 +15,7 @@ use App\Event\Invoice\InvoiceUpdatedEvent;
 use App\Exception\EfClientException;
 use App\Exception\EfStatusException;
 use App\Repository\InvoiceRepository;
+use App\Repository\SeriesRepository;
 use App\Service\EFClient;
 use App\Service\LiveModeContext;
 use App\Service\TenantContext;
@@ -27,8 +28,39 @@ class InvoiceSynchronizer
         private readonly EventDispatcherInterface $dispatcher,
         private readonly InvoiceRepository        $invoiceRepo,
         private readonly LiveModeContext          $liveModeContext,
+        private readonly SeriesRepository         $seriesRepository,
         private readonly TenantContext            $tenantContext,
     ) {
+    }
+
+    /**
+     * @throws EfClientException
+     */
+    public function fetchActiveSeries(?Tenant $tenant = null): array
+    {
+        // The LivemodeFilter and TenantFilter are only enabled in the web context,
+        // so we can expect to get series un-filtered here.
+        $seriesByTenant = $this->seriesRepository->getActiveSeriesByTenant($tenant);
+
+        // we have grouped the series by tenant, because the series code is unique per tenant but could be duplicated
+        // across tenants, this allows us to display the tenant RFC in combination with the series code in the report
+        $report = [];
+        foreach ($seriesByTenant as $rfc => $tenantSeries) {
+            foreach ($tenantSeries as $series) {
+                $modes = 'api' === strtolower($series->getSource()) ? [true, false] : [true];
+                foreach ($modes as $liveMode) {
+                    $reportKey = sprintf('%s-%s-%s',
+                        $rfc,
+                        $series->getCode(),
+                        $liveMode ? 'live' : 'test'
+                    );
+                    // update all invoices for series->code / series->tenant / liveMode
+                    $report[$reportKey] = $this->synchronizeSeries($series, $liveMode);
+                }
+            }
+        }
+
+        return $report;
     }
 
     /**

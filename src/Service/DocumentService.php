@@ -2,21 +2,22 @@
 
 namespace App\Service;
 
-use App\Exception\StatementCreationException;
+use App\Entity\Transaction;
 use Exception;
+use Throwable;
 
 use App\Constant\DocumentType;
 use App\Entity\Attachment;
 use App\Entity\Document;
+use App\Entity\FinancialMonth;
 use App\Entity\Invoice;
 use App\Entity\Statement;
-use App\Exception\DocumentConversionException;
-use App\Exception\DocumentDetectionException;
+use App\Exception\DocumentCreationException;
+use App\Exception\StatementCreationException;
 use App\Service\Accounting\AccountingDocumentService;
 use App\Service\Accounting\AccountingFolderManager;
 use App\Service\Accounting\AttachmentFolderManager;
 use App\Service\DocumentDetector\DocumentLoader;
-use Throwable;
 
 /**
  * DocumentService is responsible for:
@@ -38,7 +39,7 @@ class DocumentService
      * Determines the path of the physical file associated with the given document/attachment.
      *
      * If the document is an attachment and is not linked to a transaction, it is not stored in the accounting folder.
-     * IN order to determine the path, we must use the AttachmentFolderManager instead of the AccountingFolderManager.
+     * In order to determine the path, we must use the AttachmentFolderManager instead of the AccountingFolderManager.
      */
     public function getAccountingFilepath(Document $document, ?bool $absolute = true): ?string
     {
@@ -47,7 +48,11 @@ class DocumentService
             return null;
         }
 
-        $folderPath = ($document instanceof Attachment and null === $document->getFinancialMonth())
+        // all documents are stored in the accounting folder
+        // all attachments are stored in the attachment folder
+        // attachments for invoices only exists when they have been associated with a transaction,
+        // so we don't have to consider them here
+        $folderPath = ($document instanceof Attachment and null == $document->getTransaction())
             ? $this->attachmentFolderManager->getAttachmentFolderPath(
                 $document->getAccount(),
                 $absolute
@@ -58,11 +63,85 @@ class DocumentService
                 $absolute
             );
 
-        return sprintf('%s/%s%s',
-            $folderPath,
-            (null === $sequenceNumber = $document->getSequenceNo()) ? '' : sprintf('%02d ', $sequenceNumber),
-            AccountingDocumentService::composeFilename($document)
-        );
+        return $folderPath . '/' . AccountingDocumentService::composeFilename($document);
+    }
+
+    /**
+     * Documents representing an invoice PDF file (income) are only created when the invoice is being associated
+     * with a transaction.
+     *
+     * @throws DocumentCreationException
+     */
+    public function createDocumentFromInvoice(Transaction $transaction, Invoice $invoice): Document
+    {
+        try {
+            // instantiate a document entity
+            $invoiceDocument = DocumentFactory::create(DocumentType::INCOME)
+                ->setInvoice($invoice)
+                ->setAmount($invoice->getAmount())
+                ->setFilename(InvoiceFileNamer::buildDocumentName($invoice));
+
+            // create a copy of the invoice PDF file in the accounting folder
+            $this->createDocumentFile($invoiceDocument, $transaction, $this->getSourceFilePath($invoice, 'pdf'));
+
+            return $invoiceDocument;
+        } catch (Throwable $e) {
+            throw new DocumentCreationException($e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function createAttachmentFromInvoice(Transaction $transaction, Invoice $invoice): ?Attachment
+    {
+        try {
+            // determine the path of the invoice XML file
+            $sourceFilePath = $this->getSourceFilePath($invoice, 'xml');
+
+            $attachmentSpecs = $this->documentLoader->load($sourceFilePath, 'xml', basename($sourceFilePath));
+            /** @var Attachment $attachmentDocument */
+            $attachmentDocument = DocumentFactory::createFromDocumentSpecs($attachmentSpecs);
+            $attachmentDocument
+                ->setInvoice($invoice)
+                ->setDescription($attachmentSpecs->getDescription());
+
+            // create a copy of the invoice XML file in the accounting folder
+            $this->createDocumentFile($attachmentDocument, $transaction, $this->getSourceFilePath($invoice, 'xml'));
+
+            return $attachmentDocument;
+        } catch (Throwable $e) {
+            throw new DocumentCreationException($e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Helper method for common code between for invoice PDF and XML file creation
+     *
+     * @throws StatementCreationException
+     * @throws Throwable
+     */
+    private function createDocumentFile(Document $document, Transaction $transaction, string $sourceFilePath): void
+    {
+        // this will set the sequence number of the document
+        $transaction->addDocument($document);
+        $financialMonth = $transaction->getStatement()->getFinancialMonth();
+        $this->accountingDocumentService->addDocument($document, $financialMonth, $sourceFilePath);
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function getSourceFilePath(Invoice $invoice, string $fileType): string
+    {
+        $filePathMethod = $fileType === 'pdf' ? 'getPdfPath' : 'getXMlPath';
+        $sourceFilePath = $this->invoiceFileManager->$filePathMethod($invoice);
+
+        if (!is_file($sourceFilePath)) {
+            throw new Exception(sprintf('Invoice %s file %s does not exist', strtoupper($fileType), $sourceFilePath));
+        }
+
+        return $sourceFilePath;
     }
 
     /**
@@ -70,7 +149,7 @@ class DocumentService
      * The source files being managed by the InvoiceFileManager, the destination files are managed by the
      * AccountingFolderManager.
      * The source filename is defined by the InvoiceFileNamer.
-     * The destination filename is the one define in the document.
+     * The destination filename is the one defined in the document.
      *
      * @throws StatementCreationException
      * @throws Throwable
@@ -88,14 +167,9 @@ class DocumentService
         $this->accountingDocumentService->addDocument($attachment, $financialMonth, $xmlPath);
     }
 
-    public function removeInvoiceAccountingFiles(Invoice $invoice): void
+    public function removeDocument(Document $document): void
     {
-        if (null !== $document = $invoice->getDocument()) {
-            $this->accountingDocumentService->deleteDocument($document);
-            if (null !== $attachment = $document->getAttachment()) {
-                $this->accountingDocumentService->deleteDocument($attachment);
-            }
-        }
+        $this->accountingDocumentService->deleteDocument($document);
     }
 
     /**
@@ -123,45 +197,6 @@ class DocumentService
     }
 
     /**
-     * Documents representing an invoice PDF file (income) are only created when the invoice is being associated
-     * with a transaction. Asserting that a corresponding file is copied to the accounting folder is the
-     * responsibility of the caller.
-     */
-    public function createFromInvoice(Invoice $invoice): Document
-    {
-        return DocumentFactory::create(DocumentType::INCOME)
-            ->setInvoice($invoice)
-            ->setAmount($invoice->getAmount())
-            ->setFilename(InvoiceFileNamer::getInvoiceDocumentName($invoice));
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function createAttachmentFromInvoice(Invoice $invoice): ?Attachment
-    {
-        $filePath = $this->invoiceFileManager->getXMlPath($invoice);
-        if (!is_file($filePath)) {
-            throw new Exception(sprintf('Invoice XML file %s does not exist', $filePath));
-        }
-        try {
-            $attachmentSpecs = $this->documentLoader->load($filePath, 'xml', basename($filePath));
-            /** @var Attachment $attachment */
-            $attachment = DocumentFactory::createFromDocumentSpecs($attachmentSpecs);
-            $attachment
-                ->setInvoice($invoice)
-                ->setDescription($attachmentSpecs->getDescription());
-
-            return $attachment;
-        } catch (DocumentConversionException) {
-            // TODO: finish implementation
-        } catch (DocumentDetectionException) {
-        }
-
-        return null;
-    }
-
-    /**
      * This method must be called after the invoice has been updated with the latest data from the EF API.
      * If the status has changed, the filename will change too and must be updated.
      * The renaming of the corresponding physical file is the responsibility of the caller.
@@ -176,6 +211,7 @@ class DocumentService
 
         return $document
             ->setAmount($invoice->getAmount())
-            ->setFilename(InvoiceFileNamer::getInvoiceDocumentName($invoice));
+            ->setFilename(InvoiceFileNamer::buildDocumentName($invoice));
     }
+
 }
