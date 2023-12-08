@@ -11,7 +11,7 @@ class PABExpenseStrategy extends BaseBBVAExpenseStrategy
 {
     protected function specificMatchLogic(array $properties, string $content): bool
     {
-        return $properties['Cuenta destino'] ?? '' == '0116541267'
+        return ($properties['Cuenta destino'] ?? '') == '0116541267'
                or ($properties['Cuenta destino'] ?? '') == '0154489144';
     }
 

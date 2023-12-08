@@ -12,7 +12,7 @@ class TulumExpenseStrategy extends BaseBBVAExpenseStrategy
     protected function specificMatchLogic(array $properties, string $content): bool
     {
         return str_contains($content, 'MANT OF 6 Y 8')
-               or $properties['Cuenta destino'] ?? '' == '036691500222427302';
+               or ($properties['Cuenta destino'] ?? '') == '036691500222427302';
     }
 
     /**

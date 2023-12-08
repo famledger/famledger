@@ -64,7 +64,7 @@ class ExpenseXmlAttachmentStrategy extends BaseCfdiStrategy
                     $displayFilename = sprintf('Gasto MNTO OFIC 216 %d-%02d.pdf', $year, $month);
 
                 } catch (DocumentMatchException) {
-                    $displayFilename = 'Gasto MNTO OFIC 216 ' . $cfdiData['description'];
+                    $displayFilename = 'Gasto MNTO TULUM ' . $cfdiData['description'];
                 }
                 break;
 
