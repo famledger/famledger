@@ -116,6 +116,8 @@ class DocumentCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
+            ->setDefaultSort(['created' => 'DESC'])
+            ->setSearchFields(['type', 'filename'])
             ->showEntityActionsInlined();
     }
 }
