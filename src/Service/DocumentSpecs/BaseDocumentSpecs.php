@@ -28,7 +28,7 @@ abstract class BaseDocumentSpecs
         $this->type = basename(str_replace('\\', '/', get_class($this)));
         if ($params) {
             foreach ($params as $key => $value) {
-                if ($key === 'issueDate' && $value !== null) {
+                if ($key === 'issueDate' && $value !== null and !($value instanceof DateTime)) {
                     $value = DateTime::createFromFormat('Y-m-d', $value);
                 }
                 $this->$key = $value;
