@@ -13,7 +13,7 @@ time mysqldump --host=$DB_HOST --user=$DB_USER --password=$DB_PASSWORD --extende
 # Import database
 time mysql --host=$DB_HOST --user=$DB_USER --password=$DB_PASSWORD -e "source $DUMP_FILE;" fam-ledger-dev
 
-PRODUCTION_ROOT="/Users/jorgo/Library/CloudStorage/GoogleDrive-jmiridis@gmail.com/My Drive/Apps/FamLedger"
+PRODUCTION_ROOT="/Volumes/KC3000-2TB/DataStorage/FamLedger"
 DEVELOPMENT_ROOT="/Users/jorgo/FamLedger"
 
 # Remove existing files in DEVELOPMENT_ROOT
