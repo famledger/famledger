@@ -87,21 +87,34 @@ class AccountingDocumentService
     public function addDocument(
         Document       $document,
         FinancialMonth $financialMonth,
-        ?string        $sourceFilepath = null
+        ?string        $sourceFilepath = null,
+        bool           $createNumberedFiles = false
     ): void {
         $mustCopyFile   = null !== $sourceFilepath;
         $copiedFilePath = null;
+
         try {
             $document->setFinancialMonth($financialMonth);
 
             if ($mustCopyFile) {
-                $isAttachment   = $document->isAttachment();
-                $copiedFilePath = $this->accountingFolderManager->createAccountingFile(
-                    $financialMonth,
-                    self::composeFilename($document),
-                    $sourceFilepath,
-                    $isAttachment,
-                );
+                $isAttachment = $document->isAttachment();
+
+                if ($createNumberedFiles) {
+                    $copiedFilePath = $this->createNumberedAccountingFile(
+                        $financialMonth,
+                        self::composeFilename($document),
+                        $sourceFilepath,
+                        $isAttachment
+                    );
+                    $document->setFilename(pathinfo($copiedFilePath, PATHINFO_BASENAME));
+                } else {
+                    $copiedFilePath = $this->accountingFolderManager->createAccountingFile(
+                        $financialMonth,
+                        self::composeFilename($document),
+                        $sourceFilepath,
+                        $isAttachment
+                    );
+                }
             }
 
             $financialMonth->addDocument($document);
@@ -111,6 +124,37 @@ class AccountingDocumentService
             }
             throw $e;
         }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function createNumberedAccountingFile(
+        FinancialMonth $financialMonth,
+        string         $filename,
+        string         $sourceFilepath,
+        bool           $isAttachment
+    ): string {
+        $basePath     = $this->accountingFolderManager->getAccountingFolderPath($financialMonth, $isAttachment);
+        $extension    = pathinfo($filename, PATHINFO_EXTENSION);
+        $baseFilename = pathinfo($filename, PATHINFO_FILENAME);
+
+        $numberedFilename = $baseFilename;
+        $counter          = 1;
+
+        while(file_exists("$basePath/$numberedFilename.$extension")) {
+            $numberedFilename = $baseFilename . '-' . $counter;
+            $counter++;
+        }
+
+        $numberedFilename = "$numberedFilename.$extension";
+
+        return $this->accountingFolderManager->createAccountingFile(
+            $financialMonth,
+            $numberedFilename,
+            $sourceFilepath,
+            $isAttachment
+        );
     }
 
     public function deleteDocument(Document $document): void
@@ -138,11 +182,8 @@ class AccountingDocumentService
 
     public function renameDocument(Document $document, string $filename): void
     {
-        try {
-            $document->setFilename($filename);
-            $this->em->flush();
-        } catch (Exception) {
-        }
+        $document->setFilename($filename);
+        $this->em->flush();
     }
 
     public function getDocumentByChecksum(FinancialMonth $financialMonth, string $checksum): ?Document

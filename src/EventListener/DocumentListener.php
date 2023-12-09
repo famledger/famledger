@@ -168,7 +168,6 @@ class DocumentListener
 
     /**
      * @throws DuplicateFileException
-     * @throws MissingDocumentFileException
      */
     private function assertChecksumIsUnique(string $checksum, Document $document): void
     {

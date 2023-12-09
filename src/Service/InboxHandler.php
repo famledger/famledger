@@ -74,7 +74,7 @@ class InboxHandler
                     $documentSpecs->getMonth(),
                     $account
                 );
-                $this->accountingDocumentService->addDocument($document, $financialMonth, $filePath);
+                $this->accountingDocumentService->addDocument($document, $financialMonth, $filePath, true);
             }
 
             $this->dispatcher->dispatch(new DocumentCreatedEvent($document, $documentSpecs, $account));

@@ -116,7 +116,7 @@ class DocumentService
     }
 
     /**
-     * Helper method for common code between for invoice PDF and XML file creation
+     * Helper method for common code for invoice PDF and XML file creation
      *
      * @throws StatementCreationException
      * @throws Throwable

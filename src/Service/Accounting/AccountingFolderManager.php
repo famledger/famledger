@@ -2,13 +2,13 @@
 
 namespace App\Service\Accounting;
 
-use App\Exception\MissingAccountantFileException;
-use App\Exception\MissingDocumentFileException;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
 use App\Entity\FinancialMonth;
+use App\Exception\ExistingFileException;
+use App\Exception\MissingAccountantFileException;
 
 /**
  * AccountingFolderManager is responsible for managing the files related to FinancialMonth entities.
@@ -48,7 +48,7 @@ class AccountingFolderManager
             throw new Exception("The path $destinationPath is a directory");
         }
         if (is_file($destinationPath) and false === $overwriteExisting) {
-            //throw new Exception("The file $destinationPath already exists");
+            throw new ExistingFileException("The file $destinationPath already exists");
         }
         $this->filesystem->copy($sourcePath, $destinationPath);
         $this->logger->info("Created accounting file: $destinationPath");
