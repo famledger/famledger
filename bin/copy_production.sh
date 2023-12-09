@@ -5,13 +5,13 @@ DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=D3lph1
 
-DUMP_FILE=/Volumes/Backup/FamLedger/fam-ledger-prod.sql
+DUMP_FILE=/Volumes/KC3000-2TB/Backups/FamLedger/fam-ledger-prod.sql
 
 # Export database
-time mysqldump --host=$DB_HOST --user=$DB_USER --password=$DB_PASSWORD --extended-insert --set-gtid-purged=OFF --result-file=$DUMP_FILE fam-ledger-prod
+mysqldump --host=$DB_HOST --user=$DB_USER --password=$DB_PASSWORD --extended-insert --set-gtid-purged=OFF --result-file=$DUMP_FILE fam-ledger-prod
 
 # Import database
-time mysql --host=$DB_HOST --user=$DB_USER --password=$DB_PASSWORD -e "source $DUMP_FILE;" fam-ledger-dev
+mysql --host=$DB_HOST --user=$DB_USER --password=$DB_PASSWORD -e "source $DUMP_FILE;" fam-ledger-dev
 
 PRODUCTION_ROOT="/Volumes/KC3000-2TB/DataStorage/FamLedger"
 DEVELOPMENT_ROOT="/Users/jorgo/FamLedger"
