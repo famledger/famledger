@@ -45,7 +45,6 @@ class AddressCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
-            AssociationField::new('customer'), //->renderAsEmbeddedForm(),
             TextField::new('identifier'),
             TextField::new('calle'),
             TextField::new('noExterior'),

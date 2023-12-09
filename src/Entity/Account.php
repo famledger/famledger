@@ -51,15 +51,24 @@ class Account implements TenantAwareInterface
     #[Gedmo\Versioned]
     private ?string $username = null;
 
+    #[ORM\ManyToOne(inversedBy: 'accounts')]
+    private ?Customer $customer = null;
+
+    #[ORM\Column(length: 15)]
+    private ?string $bankRfc = null;
+
+    #[ORM\Column(length: 32)]
+    private ?string $bankName = null;
+
     public function __construct()
     {
-        $this->statements = new ArrayCollection();
+        $this->statements      = new ArrayCollection();
         $this->financialMonths = new ArrayCollection();
     }
 
     public function __toString(): string
     {
-     return $this->getCaption() . ' [' . $this->getNumber() . ']';
+        return $this->getCaption() . ' [' . $this->getNumber() . ']';
     }
 
     public function getId(): ?int
@@ -183,6 +192,42 @@ class Account implements TenantAwareInterface
     public function setUsername(?string $username): static
     {
         $this->username = $username;
+
+        return $this;
+    }
+
+    public function getCustomer(): ?Customer
+    {
+        return $this->customer;
+    }
+
+    public function setCustomer(?Customer $customer): static
+    {
+        $this->customer = $customer;
+
+        return $this;
+    }
+
+    public function getBankRfc(): ?string
+    {
+        return $this->bankRfc;
+    }
+
+    public function setBankRfc(string $bankRfc): static
+    {
+        $this->bankRfc = $bankRfc;
+
+        return $this;
+    }
+
+    public function getBankName(): ?string
+    {
+        return $this->bankName;
+    }
+
+    public function setBankName(string $bankName): static
+    {
+        $this->bankName = $bankName;
 
         return $this;
     }

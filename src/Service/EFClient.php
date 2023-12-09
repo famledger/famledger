@@ -50,6 +50,20 @@ class EFClient
         ]);
     }
 
+    public function sendEmail(Invoice $invoice, array $emails, ?string $message = null): array
+    {
+        return $this->executeRequest('enviarCorreo', [
+            'CFDi' => [
+                'serie'      => $invoice->getSeries(),
+                'folio'      => $invoice->getNumber(),
+                'EnviarCFDI' => array_filter([
+                    'Correos'       => $emails,
+                    'mensajeCorreo' => $message
+                ])
+            ]
+        ]);
+    }
+
     /**
      * @throws EfClientException
      */

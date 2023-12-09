@@ -15,13 +15,16 @@ use EasyCorp\Bundle\EasyAdminBundle\Exception\InsufficientEntityPermissionExcept
 use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ColorField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Security\Permission;
 
 use App\Entity\Customer;
 use App\Entity\EDoc;
-use App\Entity\Property;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 class CustomerCrudController extends AbstractCrudController
 {
@@ -46,8 +49,12 @@ class CustomerCrudController extends AbstractCrudController
             throw new InsufficientEntityPermissionException($context);
         }
 
-        $this->container->get(EntityFactory::class)->processFields($context->getEntity(),
-            FieldCollection::new($this->configureFields(Crud::PAGE_DETAIL)));
+        try {
+            $this->container->get(EntityFactory::class)->processFields($context->getEntity(),
+                FieldCollection::new($this->configureFields(Crud::PAGE_DETAIL)));
+        } catch (\Throwable $e) {
+            $a = 1;
+        }
         $context->getCrud()->setFieldAssets($this->getFieldAssets($context->getEntity()->getFields()));
         $this->container->get(EntityFactory::class)->processActions($context->getEntity(),
             $context->getCrud()->getActionsConfig());
@@ -93,14 +100,32 @@ class CustomerCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        return [
-            TextField::new('rfc'),
-            TextField::new('name'),
-            AssociationField::new('defaultAddress'),
-            CollectionField::new('addresses')
-                ->hideOnForm()
-                ->renderExpanded(),
-            TextareaField::new('comment'),
-        ];
+        yield TextField::new('rfc');
+        yield TextField::new('name');
+        yield ColorField::new('color');
+        yield AssociationField::new('defaultAddress');
+        yield TextareaField::new('comment');
+
+        yield FormField::addPanel('Accounts')->collapsible()->setIcon('fa fa-bank');
+        yield CollectionField::new('accounts')
+            ->setFormTypeOptions(['by_reference' => false, 'required' => true])
+            ->setEntryIsComplex()
+            ->useEntryCrudForm(AccountCrudController::class)
+            ->hideOnIndex()
+            ->renderExpanded();
+        yield FormField::addPanel('Addresses')->collapsible()->setIcon('fa fa-address-card');
+        yield CollectionField::new('addresses')
+            ->setFormTypeOptions(['by_reference' => false, 'required' => true])
+            ->setEntryIsComplex()
+            ->useEntryCrudForm(AddressCrudController::class)
+            ->hideOnIndex()
+            ->renderExpanded();
+
+        yield FormField::addPanel('Emails')->collapsible()->setIcon('fa fa-envelope');
+        yield CollectionField::new('emails')
+            ->setFormTypeOptions(['by_reference' => false, 'required' => true])
+            ->setEntryIsComplex()
+            ->useEntryCrudForm(EmailCrudController::class)
+            ->hideOnIndex();
     }
 }

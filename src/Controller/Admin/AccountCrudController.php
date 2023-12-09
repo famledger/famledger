@@ -24,6 +24,7 @@ class AccountCrudController extends AbstractCrudController
     public function configureActions(Actions $actions): Actions
     {
         $actions = $this->addEntityHistoryAction($actions);
+
         return $actions
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
             ->update(Crud::PAGE_INDEX, Action::DETAIL, function (Action $action) {
@@ -46,10 +47,14 @@ class AccountCrudController extends AbstractCrudController
     {
         return [
             IdField::new('id')->hideOnForm(),
-            AssociationField::new('tenant'),
+            AssociationField::new('customer'),
             TextField::new('caption'),
+            TextField::new('bankRfc'),
+            TextField::new('bankName'),
             TextField::new('number'),
             TextField::new('clabe'),
+            TextField::new('bankRfc'),
+            TextField::new('bankName'),
             TextField::new('username'),
         ];
     }
