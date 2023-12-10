@@ -107,7 +107,7 @@ class InvoiceRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('i');
 
         $qb
-            ->leftJoin('i.document', 'd', 'WITH', "d.type = '" . DocumentType::INCOME->value . "'")
+            ->leftJoin('i.document', 'd')
             ->where($qb->expr()->andX()
                 // invoices for customer 'Servicios Empresariales de Alta Calidad' (5) were not created
                 // consistently and could not be associated with corresponding transactions, so they are excluded
