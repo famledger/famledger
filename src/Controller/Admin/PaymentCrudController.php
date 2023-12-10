@@ -41,18 +41,17 @@ class PaymentCrudController extends AbstractCrudController
         $statementDetailAction = Action::new('statementDetail', 'View Statement')
             ->setIcon('fa fa-balance-scale')
             ->linkToUrl(function (Receipt $payment) {
-                // Assuming 'StatementCrudController' and the 'id' of the Statement entity is used
-                return (null === $statementId = $payment->getStatement()?->getId())
-                    ? ''
-                    : $this->adminUrlGenerator
-                        ->setController(StatementCrudController::class)
-                        ->setAction(Action::DETAIL)
-                        ->setEntityId($statementId)
-                        ->generateUrl();
+                return $this->adminUrlGenerator
+                    ->setController(StatementCrudController::class)
+                    ->setAction(Action::DETAIL)
+                    ->setEntityId($payment->getStatement()?->getId())
+                    ->generateUrl();
+            })
+            ->displayIf(function (Receipt $payment) {
+                return null !== $payment->getStatement()?->getId();
             });
 
         return $actions
-            ->add(Crud::PAGE_INDEX, $statementDetailAction)
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
             ->update(Crud::PAGE_INDEX, Action::DETAIL, function (Action $action) {
                 $adminUrlGenerator = $this->adminUrlGenerator;
@@ -67,7 +66,9 @@ class PaymentCrudController extends AbstractCrudController
                     })
                     ->setIcon('fa fa-eye')->setLabel('');
             })
-            ->remove(Crud::PAGE_INDEX, Action::NEW);
+            ->add(Crud::PAGE_INDEX, $statementDetailAction)
+            ->remove(Crud::PAGE_INDEX, Action::NEW)
+            ->disable(Action::BATCH_DELETE);
     }
 
     public function configureFields(string $pageName): iterable
