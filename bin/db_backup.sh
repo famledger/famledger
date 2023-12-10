@@ -7,7 +7,7 @@ DB_PASSWORD="D3lph1"
 DB_NAME="fam-ledger-prod"
 
 # Base backup directory
-BASE_DUMP_FOLDER="/Users/jorgo/Library/CloudStorage/GoogleDrive-jmiridis@gmail.com/My Drive/Apps/Backup"
+BASE_DUMP_FOLDER="/Volumes/KC3000-2TB/Backups/FamLedger"
 
 # Backup directories for daily, weekly, and monthly backups
 DAILY_DUMP_FOLDER="${BASE_DUMP_FOLDER}/daily"
