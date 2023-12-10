@@ -42,7 +42,7 @@ class StatementNavigationExtension extends AbstractExtension
         $endDate   = (clone $currentDate)->modify("+{$range} months");
 
         // Fetch statements within the range
-        $statements = $this->statementRepository->findByDateRange($startDate, $endDate);
+        $statements = $this->statementRepository->findByDateRange($statement->getAccount(), $startDate, $endDate);
 
         // Sort statements
         usort($statements, function ($a, $b) {

@@ -6,6 +6,7 @@ use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
+use App\Entity\Account;
 use App\Entity\Statement;
 
 /**
@@ -23,7 +24,7 @@ class StatementRepository extends ServiceEntityRepository
         parent::__construct($registry, Statement::class);
     }
 
-    public function findByDateRange(DateTime $startDate, DateTime $endDate): array
+    public function findByDateRange(Account $account, DateTime $startDate, DateTime $endDate): array
     {
         $qb = $this->createQueryBuilder('s');
 
@@ -31,6 +32,9 @@ class StatementRepository extends ServiceEntityRepository
         $startMonth = (int)$startDate->format('m');
         $endYear    = (int)$endDate->format('Y');
         $endMonth   = (int)$endDate->format('m');
+
+        // Add the account condition to the query
+        $qb->andWhere($qb->expr()->eq('s.account', $qb->expr()->literal($account->getId())));
 
         // Handling the year boundaries
         if ($startYear === $endYear) {
@@ -43,14 +47,14 @@ class StatementRepository extends ServiceEntityRepository
             // Spanning multiple years
             // (s.year = :startYear AND s.month >= :startMonth) OR
             // (s.year > :startYear AND s.year < :endYear) OR
-            // (s.year = :endYear AND s.month <= :endMonth)')
+            // (s.year = :endYear AND s.month <= :endMonth)
             $condition = $qb->expr()->orX()
                 ->add($qb->expr()->andX()
                     ->add($qb->expr()->eq('s.year', $qb->expr()->literal($startYear)))
                     ->add($qb->expr()->gte('s.month', $qb->expr()->literal($startMonth)))
                 )
                 ->add($qb->expr()->andX()
-                    ->add($qb->expr()->gt('s.year', $qb->expr()->literal($endYear)))
+                    ->add($qb->expr()->gt('s.year', $qb->expr()->literal($startYear)))
                     ->add($qb->expr()->lt('s.year', $qb->expr()->literal($endYear)))
                 )
                 ->add($qb->expr()->andX()
@@ -59,6 +63,6 @@ class StatementRepository extends ServiceEntityRepository
                 );
         }
 
-        return $qb->where($condition)->getQuery()->getResult();
+        return $qb->andWhere($condition)->getQuery()->getResult();
     }
 }
