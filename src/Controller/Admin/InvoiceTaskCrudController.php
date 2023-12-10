@@ -2,7 +2,6 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Series;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -30,12 +29,13 @@ use App\Constant\PaymentForm;
 use App\Constant\PaymentMethod;
 use App\Constant\UsoCFDi;
 use App\Entity\InvoiceTask;
+use App\Entity\Series;
 use App\Service\Invoice\InvoiceBuilder;
 use App\Service\Invoice\InvoiceSynchronizer;
+use App\Service\Invoice\ReceiptBuilder;
 
 class InvoiceTaskCrudController extends AbstractCrudController
 {
-
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly RequestStack           $requestStack
@@ -49,19 +49,19 @@ class InvoiceTaskCrudController extends AbstractCrudController
 
     public function preview(
         AdminContext   $adminContext,
-        InvoiceBuilder $invoiceBuilder,
+        ReceiptBuilder $receiptBuilder,
         Request        $request,
     ): Response {
 
         try {
-            $invoiceTask = $adminContext->getEntity()->getInstance();
+            $receiptTask = $adminContext->getEntity()->getInstance();
         } catch (Exception $e) {
             $request->getSession()->getFlashBag()->add('error', $e->getMessage());
         }
 
         return $this->render('admin/InvoiceTask/preview.html.twig', [
-            'invoiceTask' => $invoiceTask,
-            'request'     => $invoiceBuilder->buildRequestFromTask($invoiceTask, $totalAmount),
+            'invoiceTask' => $receiptTask,
+            'request'     => $receiptBuilder->buildRequestFromTask($receiptTask),
         ]);
     }
 

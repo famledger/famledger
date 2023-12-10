@@ -174,6 +174,9 @@ class AccountingDocumentService
             $financialMonth->removeDocument($document);
 
             $document->setInvoice(null);
+            if ($document instanceof Attachment) {
+                $document->setParent(null);
+            }
 
             $this->em->remove($document);
         } catch (Exception) {

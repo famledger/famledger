@@ -8,6 +8,7 @@ enum DocumentType: string
     case ATTACHMENT = 'attachment';
     case EXPENSE = 'expense';
     case INCOME = 'income';
+    case PAYMENT = 'payment';
     case ANNOTATION = 'annotation';
     case TAX = 'tax';
 

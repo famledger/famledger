@@ -57,34 +57,40 @@ class InvoiceRepository extends ServiceEntityRepository
             ->addOrderBy('i.number', 'desc');
 
         if (null === $year) {
-            $qb->where($qb->expr()->gte('i.year', $qb->expr()->literal($currentYear - 10)));
+            $startDate = (new \DateTime())->setDate($currentYear - 10, 1, 1);
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    $qb->expr()->isNotNull('i.year'),
+                    $qb->expr()->andX(
+                        $qb->expr()->isNull('i.year'),
+                        $qb->expr()->gte('i.issueDate', ':startDate')
+                    )
+                )
+            )->setParameter('startDate', $startDate);
         } else {
-            $qb->where($qb->expr()->eq('i.year', $qb->expr()->literal($year)));
+            $startOfYear = (new \DateTime())->setDate($year, 1, 1);
+            $endOfYear = (new \DateTime())->setDate($year, 12, 31);
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    $qb->expr()->eq('i.year', $qb->expr()->literal($year)),
+                    $qb->expr()->andX(
+                        $qb->expr()->isNull('i.year'),
+                        $qb->expr()->between('i.issueDate', ':startOfYear', ':endOfYear')
+                    )
+                )
+            )->setParameter('startOfYear', $startOfYear)
+                ->setParameter('endOfYear', $endOfYear);
         }
 
-        $invoices           = [];
-//        $lastInvoiceNumbers = [];
+        $invoices = [];
         foreach ($qb->getQuery()->getResult() as $invoice) {
             /** @var Invoice $invoice */
-            $series            = $invoice->getSeries();
-            $year              = $invoice->getYear();
-            $month             = $invoice->getMonth();
-//            $lastInvoiceNumber = ($lastInvoiceNumbers[$series] ?? null);
-//
-//            // Detect and add missing invoices if needed
-//            if (null !== $lastInvoiceNumber and in_array($series, $activeSeries)) {
-//                for ($missingInvoice = $lastInvoiceNumber - 1; $missingInvoice > $invoice->getNumber(); $missingInvoice--) {
-//                    $invoiceKey                           = $invoice->getSeries() . '-' . $missingInvoice;
-//                    $invoices[$year][$month][$invoiceKey] = null;
-//                }
-//            }
+            $invoiceYear = $invoice->getYear() ?? $invoice->getIssueDate()->format('Y');
+            $invoiceMonth = $invoice->getMonth() ?? $invoice->getIssueDate()->format('m');
 
             // Add the current invoice to the array
-            $invoiceKey                           = $invoice->getSeries() . '-' . $invoice->getNumber();
-            $invoices[$year][$month][$invoiceKey] = $invoice;
-
-            // Update the lastInvoiceNumber for each series
-//            $lastInvoiceNumbers[$series] = $invoice->getNumber();
+            $invoiceKey = $invoice->getSeries() . '-' . $invoice->getNumber();
+            $invoices[$invoiceYear][$invoiceMonth][$invoiceKey] = $invoice;
         }
 
         // Sort the array by keys (invoice numbers)

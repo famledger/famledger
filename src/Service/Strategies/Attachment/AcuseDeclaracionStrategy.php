@@ -2,6 +2,7 @@
 
 namespace App\Service\Strategies\Attachment;
 
+use App\Constant\DocumentSubType;
 use App\Exception\DocumentParseException;
 use App\Service\DocumentSpecs\AttachmentSpecs;
 use App\Service\DocumentSpecs\BaseDocumentSpecs;
@@ -57,6 +58,7 @@ class AcuseDeclaracionStrategy implements StrategyInterface
 
         return (new AttachmentSpecs())
             ->setAccountNumber(StrategyHelper::getAccountNumber($rfc))
+            ->setSubType(DocumentSubType::TAX_NOTICE)
             ->setAmount($amount)
             ->setYear($year)
             ->setMonth($month);

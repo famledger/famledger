@@ -53,7 +53,7 @@ class EDoc implements TenantAwareInterface, FileOwnerInterface
         return $this->getId();
     }
 
-    public function getSelf(): self
+    public function getSelf(): static
     {
         return $this;
     }

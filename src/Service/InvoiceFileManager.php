@@ -73,6 +73,7 @@ class InvoiceFileManager
         if ($xmlContent === false) {
             throw new InvoiceException($invoice, "Failed to fetch XML content from $urlXml");
         }
+        $invoice->setCfdi($xmlContent);
         $xmlChecksum = ChecksumHelper::get($xmlContent);
         if (false === $this->storeXML($invoice, $xmlContent)) {
             throw new InvoiceException($invoice, "Failed to store XML content for {$invoice->getNumber()}");

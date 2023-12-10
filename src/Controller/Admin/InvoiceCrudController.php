@@ -2,8 +2,6 @@
 
 namespace App\Controller\Admin;
 
-use App\Service\Invoice\InvoiceSynchronizer;
-use App\Service\TenantContext;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
@@ -40,10 +38,12 @@ use Symfony\Component\HttpFoundation\Response;
 use App\Admin\Field\CentAmountField;
 use App\Constant\InvoiceStatus;
 use App\Entity\Invoice;
+use App\Entity\Receipt;
 use App\Exception\EfClientException;
 use App\Form\InvoiceCancelType;
 use App\Service\EFClient;
-use App\Service\Invoice\InvoiceBuilder;
+use App\Service\Invoice\InvoiceSynchronizer;
+use App\Service\TenantContext;
 
 class InvoiceCrudController extends AbstractCrudController
 {
@@ -276,10 +276,12 @@ class InvoiceCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setSearchFields(['series', 'customer.name', 'property.slug'])
+            ->setSearchFields(['series', 'number', 'customer.name', 'property.slug'])
             ->overrideTemplate('crud/detail', 'admin/Invoice/details.html.twig')
             ->showEntityActionsInlined()
-            ->setEntityLabelInSingular('Invoice')
+            ->setEntityLabelInSingular(function ($entity) {
+                return $entity instanceof Receipt ? 'Receipt' : 'Invoice';
+            })
             ->setEntityLabelInPlural('Invoices')
             ->setDefaultSort(['issueDate' => 'DESC']);
     }

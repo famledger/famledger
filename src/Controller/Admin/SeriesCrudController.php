@@ -2,11 +2,17 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Series;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+
+use App\Constant\SeriesType;
+use App\Entity\Series;
 
 class SeriesCrudController extends AbstractCrudController
 {
@@ -36,14 +42,15 @@ class SeriesCrudController extends AbstractCrudController
     }
 
 
-    /*
     public function configureFields(string $pageName): iterable
     {
-        return [
-            IdField::new('id'),
-            TextField::new('title'),
-            TextEditorField::new('description'),
-        ];
+        yield TextField::new('code');
+        yield ChoiceField::new('source')->setChoices(['API' => 'API', 'WEB' => 'WEB', 'RECEIPT' => 'RECEIPT']);
+        yield ChoiceField::new('type')->setChoices([
+            SeriesType::INVOICE => SeriesType::INVOICE,
+            SeriesType::PAYMENT => SeriesType::PAYMENT
+        ]);
+        yield TextareaField::new('description');
+        yield BooleanField::new('isActive')->setLabel('active');
     }
-    */
 }

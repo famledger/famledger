@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Constant\SeriesType;
 use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -19,6 +20,12 @@ use App\Service\Strategies\StrategyHelper;
 #[ORM\Entity(repositoryClass: InvoiceRepository::class)]
 #[LiveModeFilterable(livemodeFieldName: 'live_mode')]
 #[LiveModeDependent (livemodeFieldName: 'live_mode')]
+#[ORM\InheritanceType('SINGLE_TABLE')]
+#[ORM\DiscriminatorColumn(name: 'discr', type: 'string', length: 20)]
+#[ORM\DiscriminatorMap([
+    SeriesType::INVOICE => Invoice::class,
+    SeriesType::PAYMENT => Receipt::class,
+])]
 #[TenantDependent(tenantFieldName: 'tenant_id')]
 #[TenantFilterable(tenantFieldName: 'tenant_id')]
 #[Gedmo\Loggable]
@@ -60,7 +67,7 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface
     #[Gedmo\Versioned]
     private ?string $recipientName = null;
 
-    #[ORM\Column(length: 3)]
+    #[ORM\Column(length: 3, nullable: true)]
     #[Gedmo\Versioned]
     private ?string $currency = null;
 
@@ -145,6 +152,15 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface
     #[ORM\OneToOne(inversedBy: 'invoice')]
     private ?Attachment $attachment = null;
 
+    #[ORM\ManyToOne(inversedBy: 'invoices')]
+    private ?Receipt $payment = null;
+
+    #[ORM\ManyToOne(inversedBy: 'invoices')]
+    private ?ReceiptTask $receiptTask = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $cfdi = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -155,7 +171,7 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface
         return sprintf('%s-%s', $this->series, $this->number);
     }
 
-    public function getInvoiceUid(): self
+    public function getInvoiceUid(): static
     {
         return $this;
     }
@@ -242,7 +258,7 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface
 
     public function setCurrency(string $currency): static
     {
-        $this->currency = $currency;
+        $this->currency = 'XXX' === $currency ? null : $currency;
 
         return $this;
     }
@@ -618,6 +634,49 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface
     public function setAttachment(?Attachment $attachment): static
     {
         $this->attachment = $attachment;
+
+        return $this;
+    }
+
+    public function getPayment(): ?Receipt
+    {
+        return $this->payment;
+    }
+
+    public function setPayment(?Receipt $payment): static
+    {
+        $this->payment = $payment;
+
+        return $this;
+    }
+
+    public function getPeticion(?string $key = null): ?array
+    {
+        if (null === $peticion = $this->getData('peticion')) {
+            return null;
+        }
+
+        return null === $key
+            ? $peticion
+            : ($peticion[$key] ?? null);
+    }
+
+
+    public function getPaymentMethod(): ?string
+    {
+        $peticion = $this->getPeticion();
+
+        return $peticion['CFDi']['DatosDePago']['metodoDePago'] ?? null;
+    }
+
+    public function getCfdi(): ?string
+    {
+        return $this->cfdi;
+    }
+
+    public function setCfdi(?string $cfdi): static
+    {
+        $this->cfdi = $cfdi;
 
         return $this;
     }

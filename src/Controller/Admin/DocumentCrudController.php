@@ -97,6 +97,8 @@ class DocumentCrudController extends AbstractCrudController
                 ->setChoices(DocumentType::getOptions())
                 ->renderAsNativeWidget()
                 ->allowMultipleChoices(false),
+            IntegerField::new('year'),
+            IntegerField::new('month')->setTemplatePath('admin/fields/monthAsString.html.twig'),
             AssociationField::new('financialMonth'),
             AssociationField::new('transaction')->hideOnForm(),
             AssociationField::new('invoice')->hideOnForm(),
@@ -107,7 +109,7 @@ class DocumentCrudController extends AbstractCrudController
             TextField::new('displayFilename')->hideOnForm(),
             DocumentPathField::new('id')->onlyOnDetail(),
             BooleanField::new('isConsolidated')->hideOnForm(),
-            DateField::new('created')->hideOnForm(),
+            DateField::new('created')->hideOnForm()->hideOnIndex(),
             ArrayField::new('specs')->hideOnIndex()->hideOnForm()
                 ->setTemplatePath('admin/fields/array.html.twig'),
         ];

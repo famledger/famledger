@@ -14,6 +14,7 @@ abstract class BaseDocumentSpecs
     protected ?string $accountNumber     = null;
     private ?string   $suggestedFilename = null;
     private string    $type;
+    private ?string   $subType           = null;
     private ?int      $amount            = null;
     private ?DateTime $issueDate         = null;
     private ?string   $description       = null;
@@ -115,6 +116,18 @@ abstract class BaseDocumentSpecs
     public function getType(): string
     {
         return $this->type;
+    }
+
+    public function getSubType(): ?string
+    {
+        return $this->subType;
+    }
+
+    public function setSubType(?string $subType): self
+    {
+        $this->subType = $subType;
+
+        return $this;
     }
 
     public function getDescription(): ?string

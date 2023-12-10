@@ -88,6 +88,15 @@ class Document implements TenantAwareInterface
     #[ORM\ManyToOne]
     private ?Property $property = null;
 
+    #[ORM\Column(type: Types::SMALLINT, nullable: true)]
+    private ?int $year = null;
+
+    #[ORM\Column(type: Types::SMALLINT, nullable: true)]
+    private ?int $month = null;
+
+    #[ORM\Column(length: 32, nullable: true)]
+    private ?string $subType = null;
+
     public function __toString(): string
     {
         return $this->filename;
@@ -103,7 +112,7 @@ class Document implements TenantAwareInterface
         return $this->tenant;
     }
 
-    public function setTenant(?Tenant $tenant): self
+    public function setTenant(?Tenant $tenant): static
     {
         $this->tenant = $tenant;
 
@@ -115,7 +124,7 @@ class Document implements TenantAwareInterface
         return $this->type;
     }
 
-    public function setType(DocumentType $type): self
+    public function setType(DocumentType $type): static
     {
         $this->type = $type;
 
@@ -127,7 +136,7 @@ class Document implements TenantAwareInterface
         return $this->type?->value;
     }
 
-    public function setTypeString(string $type): self
+    public function setTypeString(string $type): static
     {
         $this->type = DocumentType::from($type);
 
@@ -139,7 +148,7 @@ class Document implements TenantAwareInterface
         return $this->financialMonth;
     }
 
-    public function setFinancialMonth(?FinancialMonth $financialMonth): self
+    public function setFinancialMonth(?FinancialMonth $financialMonth): static
     {
         $this->financialMonth = $financialMonth;
 
@@ -151,7 +160,7 @@ class Document implements TenantAwareInterface
         return $this->sequenceNo;
     }
 
-    public function setSequenceNo(?int $sequenceNo): self
+    public function setSequenceNo(?int $sequenceNo): static
     {
         $this->sequenceNo = $sequenceNo;
 
@@ -163,7 +172,7 @@ class Document implements TenantAwareInterface
         return $this->filename;
     }
 
-    public function setFilename(string $filename): self
+    public function setFilename(string $filename): static
     {
         $this->filename = $filename;
 
@@ -192,7 +201,7 @@ class Document implements TenantAwareInterface
         return $this->isConsolidated;
     }
 
-    public function setIsConsolidated(bool $isConsolidated): self
+    public function setIsConsolidated(bool $isConsolidated): static
     {
         $this->isConsolidated = $isConsolidated;
 
@@ -204,7 +213,7 @@ class Document implements TenantAwareInterface
         return $this->transaction;
     }
 
-    public function setTransaction(?Transaction $transaction): self
+    public function setTransaction(?Transaction $transaction): static
     {
         $this->transaction = $transaction;
 
@@ -216,7 +225,7 @@ class Document implements TenantAwareInterface
         return $this->amount;
     }
 
-    public function setAmount(?int $amount): self
+    public function setAmount(?int $amount): static
     {
         $this->amount = $amount;
 
@@ -228,7 +237,7 @@ class Document implements TenantAwareInterface
         return $this->invoice;
     }
 
-    public function setInvoice(?Invoice $invoice): self
+    public function setInvoice(?Invoice $invoice): static
     {
         // unset the owning side of the relation if necessary
         if ($invoice === null && $this->invoice !== null) {
@@ -258,7 +267,7 @@ class Document implements TenantAwareInterface
         return $this->checksum;
     }
 
-    public function setChecksum(?string $checksum): self
+    public function setChecksum(?string $checksum): static
     {
         $this->checksum = $checksum;
 
@@ -275,7 +284,7 @@ class Document implements TenantAwareInterface
         return $this->attachment;
     }
 
-    public function setAttachment(?Attachment $attachment): self
+    public function setAttachment(?Attachment $attachment): static
     {
         // unset the owning side of the relation if necessary
         if ($attachment === null && $this->attachment !== null) {
@@ -297,9 +306,13 @@ class Document implements TenantAwareInterface
         return $this->specs;
     }
 
-    public function setSpecs(?array $specs): self
+    public function setSpecs(?array $specs): static
     {
         $this->specs = $specs;
+        if (null !== $specs) {
+            $this->setYear($specs['year'] ?? null);
+            $this->setMonth($specs['month'] ?? null);
+        }
 
         return $this;
     }
@@ -309,7 +322,7 @@ class Document implements TenantAwareInterface
         return $this->issueDate;
     }
 
-    public function setIssueDate(?DateTime $issueDate): self
+    public function setIssueDate(?DateTime $issueDate): static
     {
         $this->issueDate = $issueDate;
 
@@ -324,6 +337,42 @@ class Document implements TenantAwareInterface
     public function setProperty(?Property $property): static
     {
         $this->property = $property;
+
+        return $this;
+    }
+
+    public function getYear(): ?int
+    {
+        return $this->year;
+    }
+
+    public function setYear(?int $year): static
+    {
+        $this->year = $year;
+
+        return $this;
+    }
+
+    public function getMonth(): ?int
+    {
+        return $this->month;
+    }
+
+    public function setMonth(?int $month): static
+    {
+        $this->month = $month;
+
+        return $this;
+    }
+
+    public function getSubType(): ?string
+    {
+        return $this->subType;
+    }
+
+    public function setSubType(?string $subType): static
+    {
+        $this->subType = $subType;
 
         return $this;
     }

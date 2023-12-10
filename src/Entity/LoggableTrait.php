@@ -30,7 +30,7 @@ trait LoggableTrait
     #[Gedmo\Versioned]
     private ?User $updatedBy;
 
-    public function setCreated(DateTime $created): self
+    public function setCreated(DateTime $created): static
     {
         $this->created = $created;
 
@@ -42,7 +42,7 @@ trait LoggableTrait
         return $this->created;
     }
 
-    public function setUpdated(DateTime $updated): self
+    public function setUpdated(DateTime $updated): static
     {
         $this->updated = $updated;
 
@@ -54,7 +54,7 @@ trait LoggableTrait
         return $this->updated;
     }
 
-    public function setCreatedBy(User $createdBy = null): self
+    public function setCreatedBy(User $createdBy = null): static
     {
         $this->createdBy = $createdBy;
 
@@ -66,7 +66,7 @@ trait LoggableTrait
         return $this->createdBy;
     }
 
-    public function setUpdatedBy(?User $updatedBy = null): self
+    public function setUpdatedBy(?User $updatedBy = null): static
     {
         $this->updatedBy = $updatedBy;
 

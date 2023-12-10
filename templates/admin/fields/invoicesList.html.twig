@@ -1,0 +1,11 @@
+{% for series, numbers in field.value %}
+    <div>{{ series }}:
+        {% for invoiceId, number in numbers %}
+            {% if loop.index > 1 %}&middot; {% endif %}
+            <a href="{{ ea_url()
+                .setController('App\\Controller\\Admin\\InvoiceCrudController')
+                .setAction('detail')
+                .setEntityId(invoiceId) }}">{{ number }}</a>
+        {% endfor %}
+    </div>
+{% endfor %}

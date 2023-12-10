@@ -2,6 +2,7 @@
 
 namespace App\Service\Strategies\Attachment;
 
+use App\Constant\DocumentSubType;
 use App\Service\DocumentSpecs\AttachmentSpecs;
 use App\Service\DocumentSpecs\BaseDocumentSpecs;
 use App\Service\Strategies\StrategyHelper;
@@ -29,7 +30,7 @@ class DeclaracionProvisionalStrategy implements StrategyInterface
         $year = $matches[1];
 
         // match RFC: ..
-        $rfc  = StrategyHelper::extractValue(
+        $rfc = StrategyHelper::extractValue(
             '/RFC:?\s+([0-9A-Z]+)/',
             $content,
             $filePath,
@@ -38,6 +39,7 @@ class DeclaracionProvisionalStrategy implements StrategyInterface
 
         return (new AttachmentSpecs())
             ->setAccountNumber(StrategyHelper::getAccountNumber($rfc))
+            ->setSubType(DocumentSubType::TAX_CALCULUS)
             ->setYear($year)
             ->setMonth($month);
     }

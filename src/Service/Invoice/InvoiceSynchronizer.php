@@ -82,9 +82,16 @@ class InvoiceSynchronizer
         $countAdded = 0;
         foreach (($invoices['Comprobantes'] ?? []) as $invoiceData) {
             if (in_array($invoiceData['folio'], $existingInvoices)) {
-                continue;
+                if ($series->getCode() !== 'REP') {
+                    continue;
+                }
             }
-            $invoice = $this->initInvoiceFromData(new Invoice(), $invoiceData, $series->getTenant(), $liveMode);
+            $invoice = $this->initInvoiceFromData(
+                InvoiceFactory::create($series),
+                $invoiceData,
+                $series->getTenant(),
+                $liveMode
+            );
             $this->em->persist($invoice);
             $this->dispatcher->dispatch(new InvoiceCreatedEvent($invoice));
             $countAdded++;

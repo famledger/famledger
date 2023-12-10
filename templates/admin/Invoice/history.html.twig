@@ -92,6 +92,7 @@
                             <th></th>
                         </tr>
                         {% for invoiceNumber, invoice in invoices %}
+                            {% set customer = invoice.customer %}
                             {% if null == invoice %}
                                 <tr class="invoice-row" style="background-color: #ffe6e6">
                                     <td>{{ invoiceNumber }}</td>
@@ -99,7 +100,7 @@
                                 </tr>
                             {% else %}
                                 <tr class="invoice-row {{ invoice.status|lower }}"
-                                    data-customer="{{ invoice.customer.rfc }}">
+                                    data-customer="{{ customer.rfc }}">
                                     <td class="nowrap">
                                         {% if invoice.substitutedByInvoice is not null %}
                                             {% set substituteInvoice = invoice.substitutedByInvoice %}
@@ -118,20 +119,24 @@
                                     <td class="nowrap">{{ invoice.issueDate|date('d-M-y') }}</td>
                                     <td class="nowrap">
                                         {% if invoice.document is not null and invoice.document.transaction is not null %}
-                                            {% set transaction = invoice.document.transaction %}
-                                            {% set paymentMonth = transaction.valueDate|date('m') %}
-                                            {% if paymentMonth == month %}
-                                                {{ transaction.valueDate|date('d-M-y') }}
+                                            {% if invoice.payment is not null %}
+                                                {{ invoice.payment.series }}-{{ invoice.payment.number }}
                                             {% else %}
-                                                {% set diffClass = transaction.valueDate < invoice.issueDate ? 'text-success' : 'text-warning' %}
-                                                <span class="{{ diffClass }}">{{ transaction.valueDate|date('d-M-y') }}</span>
+                                                {% set transaction = invoice.document.transaction %}
+                                                {% set paymentMonth = transaction.valueDate|date('m') %}
+                                                {% if paymentMonth == month %}
+                                                    {{ transaction.valueDate|date('d-M-y') }}
+                                                {% else %}
+                                                    {% set diffClass = transaction.valueDate < invoice.issueDate ? 'text-success' : 'text-warning' %}
+                                                    <span class="{{ diffClass }}">{{ transaction.valueDate|date('d-M-y') }}</span>
+                                                {% endif %}
                                             {% endif %}
                                         {% endif %}
                                     </td>
                                     <td class="text-right">{{ invoice.amount|cent_amount }}</td>
                                     <td class="text-center">{{ invoice.status|invoice_status }}</td>
                                     <td class="text-center">{{ invoice.liveMode|livemode_status }}</td>
-                                    <td>{{ invoice.customer }}</td>
+                                    <td style="background-color: {{ customer.color }}">{{ invoice.customer }}</td>
                                     <td>{{ invoice.description }}</td>
                                     <td class="text-right nowrap">
                                         {% if invoice.document is not null %}
@@ -141,7 +146,7 @@
                                         {% else %}
                                             <a title="no document has been associated" class="text-muted"
                                                href="javascript:void(0)"><i style="opacity: .5"
-                                                        class="fa fa-file-pdf"></i></a>
+                                                                            class="fa fa-file-pdf"></i></a>
                                         {% endif %}
                                         <a href="{{ ea_url()
                                             .setController('App\\Controller\\Admin\\InvoiceCrudController')

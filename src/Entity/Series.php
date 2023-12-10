@@ -36,12 +36,15 @@ class Series implements TenantAwareInterface
     #[Gedmo\Versioned]
     private ?string $description = null;
 
-    #[ORM\Column(length: 3, nullable: true)]
+    #[ORM\Column(length: 16, nullable: true)]
     #[Gedmo\Versioned]
     private ?string $source = null;
 
     #[ORM\Column(options: ['default' => false])]
     private ?bool $isActive = null;
+
+    #[ORM\Column(length: 16, nullable: true)]
+    private ?string $type = null;
 
     public function __toString(): string
     {
@@ -109,6 +112,18 @@ class Series implements TenantAwareInterface
     public function setIsActive(bool $isActive): static
     {
         $this->isActive = $isActive;
+
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(?string $type): static
+    {
+        $this->type = $type;
 
         return $this;
     }

@@ -171,34 +171,20 @@ class StatementController extends AbstractController
         Statement              $statement,
         Request                $request,
         EntityManagerInterface $em,
-        AdminUrlGenerator      $adminUrlGenerator
+        AdminUrlGenerator      $adminUrlGenerator,
+        StatementService       $statementService
     ): Response {
 
         try {
-            $unconsolidatedSequenceNumbers = [];
-            foreach ($statement->getTransactions() as $transaction) {
-                if ($transaction->getType() === DocumentType::ACCOUNT_STATEMENT) {
-                    continue;
-                }
-                $transaction->updateConsolidationStatus();
-                if ($transaction->getStatus() !== Transaction::STATUS_CONSOLIDATED) {
-                    $unconsolidatedSequenceNumbers[] = $transaction->getSequenceNo();
-                }
-            }
-            if (count($unconsolidatedSequenceNumbers) > 0) {
-                // persist potential transaction status changes
-                $em->flush();
-                throw new Exception(sprintf('Transaction(s) %s are not consolidated',
-                    implode(', ', $unconsolidatedSequenceNumbers)
-                ));
-            }
+            // validate all transactions, an exception will be thrown if any of them is invalid
+            $statementService->validate($statement);
 
-            $statement->setStatus(Statement::STATUS_CONSOLIDATED);
-            $em->flush();
             $request->getSession()->getFlashBag()->add('success', 'The statement has been consolidated');
         } catch (Exception $e) {
             $request->getSession()->getFlashBag()->add('error', $e->getMessage());
         }
+        // always persist, there might be transaction status changes
+        $em->flush();
 
         return $this->redirectToDetailsPage($adminUrlGenerator, $statement);
     }

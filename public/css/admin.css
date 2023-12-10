@@ -10,7 +10,7 @@
 }
 
 /* overwrite default spacing between action buttons on index page */
-.content-header .page-actions .btn+.btn {
+.content-header .page-actions .btn + .btn {
     margin-left: 0;
 }
 
@@ -161,6 +161,14 @@ span.transaction-description {
 .card.collapsible.collapsed .card-header {
     padding-top: 0.2rem;
     padding-bottom: 0.2rem;
-    background-color:  #ccc;
+    background-color: #ccc;
     color: #fff;
+}
+
+ul.invoice-uids-list li {
+    line-height: .8em;
+    list-style-type: none;
+    color: #344CC4FF;
+    font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+    font-size: 13px;
 }

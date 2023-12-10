@@ -20,7 +20,7 @@ trait FileOwnerTrait
         return $this->ownerId;
     }
 
-    public function setOwnerId(?int $ownerId): self
+    public function setOwnerId(?int $ownerId): static
     {
         $this->ownerId = $ownerId;
 
@@ -32,7 +32,7 @@ trait FileOwnerTrait
         return $this->ownerType;
     }
 
-    public function setOwnerType(?string $ownerType): self
+    public function setOwnerType(?string $ownerType): static
     {
         $this->ownerType = $ownerType;
 
@@ -44,7 +44,7 @@ trait FileOwnerTrait
         return $this->ownerKey;
     }
 
-    public function setOwnerKey(?string $ownerKey): self
+    public function setOwnerKey(?string $ownerKey): static
     {
         $this->ownerKey = $ownerKey;
 

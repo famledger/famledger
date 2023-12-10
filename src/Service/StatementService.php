@@ -6,20 +6,17 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Throwable;
 
+use App\Constant\DocumentType;
 use App\Entity\Document;
 use App\Entity\Invoice;
 use App\Entity\Statement;
 use App\Entity\Transaction;
 use App\Exception\DocumentCreationException;
 use App\Exception\StatementValidationFailedException;
-use App\Repository\AttachmentRepository;
-use App\Repository\DocumentRepository;
 
 class StatementService
 {
     public function __construct(
-        private readonly AttachmentRepository   $attachmentRepository,
-        private readonly DocumentRepository     $documentRepository,
         private readonly DocumentService        $documentService,
         private readonly EntityManagerInterface $em
     ) {
@@ -34,31 +31,77 @@ class StatementService
         );
     }
 
+    /**
+     * @throws StatementValidationFailedException
+     */
     public function validate(Statement $statement): void
     {
-        try {
-            foreach ($statement->getTransactions() as $transaction) {
-                $this->validateTransaction($transaction);
+        $statement->setStatus(Statement::STATUS_PENDING);
+
+        $this->validateTransactionConsistency($statement);
+
+        // all transactions are valid, so we can
+        // - establish the transaction type
+        // - associate the transaction with a customer (if applicable)
+        foreach ($statement->getTransactions() as $transaction) {
+            // handle income transactions
+            if ($transaction->getAmount() > 0) {
+                // TODO: once the system is fully operational and legacy statements have been verified,
+                //       we can probably remove the following validation and directly set the transaction type
+                //       and customer of the first invoice
+                // make sure all invoices are issued to the same customer
+                $customer    = null;
+                $customerIds = [];
+                foreach ($transaction->getDocuments() as $document) {
+                    if ($document->getType() === DocumentType::INCOME or $document->getType() === DocumentType::PAYMENT) {
+                        $invoice       = $document->getInvoice();
+                        $customer      = $invoice->getCustomer();
+                        $customerIds[] = $customer->getId();
+                    }
+                }
+                if (count(array_unique($customerIds)) > 1) {
+                    throw new StatementValidationFailedException(sprintf('Transaction %d has invoice for multiple customers',
+                        $transaction->getSequenceNo()
+                    ));
+                }
+                // TODO: end of todo
+
+                $transaction
+                    ->setType(DocumentType::INCOME)
+                    ->setCustomer($customer);
             }
-        } catch (StatementValidationFailedException $e) {
-            $statement->setStatus(Statement::STATUS_PENDING);
+
+            // TODO: handle expense transactions etc. they could potentially be linked to 'suppliers'
         }
+
         $statement->setStatus(Statement::STATUS_CONSOLIDATED);
     }
 
     /**
+     * For each transaction, the updateConsolidationStatus() will check whether the documents associated
+     * with the transaction are consistent with the transaction's amount.
+     * This should actually be obsolete, since the method is called whenever a document is added/removed,
+     * but we keep it for transactions that have been created from legacy files
+     *
      * @throws StatementValidationFailedException
      */
-    private function validateTransaction(Transaction $transaction): void
+    private function validateTransactionConsistency(Statement $statement): void
     {
-        if (Transaction::STATUS_CONSOLIDATED !== $transaction->getStatus()) {
-            throw new StatementValidationFailedException(sprintf('Transaction %d is not consolidated',
-                $transaction->getSequenceNo()
+        $unconsolidatedSequenceNumbers = [];
+        foreach ($statement->getTransactions() as $transaction) {
+            if ($transaction->getType() === DocumentType::ACCOUNT_STATEMENT) {
+                continue;
+            }
+            $transaction->updateConsolidationStatus();
+            if ($transaction->getStatus() !== Transaction::STATUS_CONSOLIDATED) {
+                $unconsolidatedSequenceNumbers[] = $transaction->getSequenceNo();
+            }
+        }
+        if (count($unconsolidatedSequenceNumbers) > 0) {
+            throw new StatementValidationFailedException(sprintf('Transaction(s) %s could not be consolidated',
+                implode(', ', $unconsolidatedSequenceNumbers)
             ));
         }
-
-        // TODO: check whether all expenses have a corresponding attachment
-        //       probably not possible for legacy months
     }
 
     public function linkDocument(Transaction $transaction, ?Document $document): void
@@ -116,10 +159,11 @@ class StatementService
         if (null !== $invoice = $document->getInvoice()) {
 
             // remove invoice files from the accounting folder
-            $this->documentService->removeDocument($document);
             if (null !== $attachment = $invoice->getAttachment()) {
                 $this->documentService->removeDocument($attachment);
+                $invoice->setAttachment(null);
             }
+            $this->documentService->removeDocument($document);
 
             $invoice->setPaymentDate(null);
         } else {

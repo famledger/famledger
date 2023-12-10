@@ -6,5 +6,5 @@ interface LiveModeAwareInterface
 {
     public function getLiveMode(): ?bool;
 
-    public function setLiveMode(bool $liveMode): self;
+    public function setLiveMode(bool $liveMode): static;
 }

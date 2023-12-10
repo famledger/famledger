@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Constant\InvoiceStatus;
 use App\Entity\Invoice;
+use App\Entity\Receipt;
 
 /**
  * The InvoiceFileNamer is in charge of providing both
@@ -49,7 +50,10 @@ class InvoiceFileNamer
      */
     static public function buildDocumentName(Invoice $invoice, ?string $extension = 'pdf'): string
     {
-        return 'Ingreso Factura ' . self::buildFileName($invoice, $extension);
+        return ($invoice instanceof Receipt
+                ? 'Recibo de Pago '
+                : 'Ingreso Factura '
+               ) . self::buildFileName($invoice, $extension);
     }
 
     static public function buildFileName(Invoice $invoice, string $extension): string

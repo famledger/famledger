@@ -5,6 +5,7 @@ namespace App\Service\Strategies\Statement;
 use DateTime;
 use InvalidArgumentException;
 
+use App\Entity\PaymentTransaction;
 use App\Entity\Statement;
 use App\Entity\Transaction;
 use App\Service\DocumentSpecs\BaseDocumentSpecs;
@@ -49,7 +50,10 @@ class BBVAStatementStrategy implements StrategyInterface
         $year      = $statement->getYear();
 
         foreach ($this->parseTransactions($text, $year) as $idx => $transactionData) {
-            $transaction = (new Transaction())
+            $transaction = $transactionData['amount'] > 0
+                ? new PaymentTransaction()
+                : new Transaction();
+            $transaction
                 ->setStatement($statement)
                 ->setSequenceNo($idx + 1)
                 ->setBookingDate($transactionData['bookingDate'])

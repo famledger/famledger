@@ -2,16 +2,16 @@
 
 namespace App\Service;
 
-use App\Entity\Transaction;
 use Exception;
 use Throwable;
 
 use App\Constant\DocumentType;
 use App\Entity\Attachment;
 use App\Entity\Document;
-use App\Entity\FinancialMonth;
 use App\Entity\Invoice;
+use App\Entity\Receipt;
 use App\Entity\Statement;
+use App\Entity\Transaction;
 use App\Exception\DocumentCreationException;
 use App\Exception\StatementCreationException;
 use App\Service\Accounting\AccountingDocumentService;
@@ -75,8 +75,9 @@ class DocumentService
     public function createDocumentFromInvoice(Transaction $transaction, Invoice $invoice): Document
     {
         try {
+            $type = $invoice instanceof Receipt ? DocumentType::PAYMENT : DocumentType::INCOME;
             // instantiate a document entity
-            $invoiceDocument = DocumentFactory::create(DocumentType::INCOME)
+            $invoiceDocument = DocumentFactory::create($type)
                 ->setInvoice($invoice)
                 ->setAmount($invoice->getAmount())
                 ->setFilename(InvoiceFileNamer::buildDocumentName($invoice));

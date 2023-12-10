@@ -25,6 +25,8 @@ use App\Entity\Invoice;
 use App\Entity\InvoiceSchedule;
 use App\Entity\InvoiceTask;
 use App\Entity\Property;
+use App\Entity\Receipt;
+use App\Entity\ReceiptTask;
 use App\Entity\Series;
 use App\Entity\Statement;
 use App\Entity\Tenant;
@@ -106,14 +108,16 @@ HTML
         yield MenuItem::section('Invoicing');
         yield MenuItem::linkToCrud('Invoice Schedules', 'fa fa-calendar', InvoiceSchedule::class);
         yield MenuItem::linkToCrud('Invoice Tasks', 'fas fa-tasks', InvoiceTask::class);
+        yield MenuItem::linkToCrud('Receipt Tasks', 'fas fa-tasks', ReceiptTask::class);
         yield MenuItem::linkToRoute('Invoice History', 'fas fa-history', 'admin_invoice_history');
+        yield MenuItem::linkToRoute('Payment History', 'fas fa-history', 'admin_payment_history');
         yield MenuItem::linkToCrud('Invoices', 'fas fa-file-invoice', Invoice::class);
+        yield MenuItem::linkToCrud('Receipts', 'fas fa-file-invoice', Receipt::class);
         yield MenuItem::linkToRoute($liveModeLabel, $liveModeToggleIcon, 'liveModeSwitch',
             ['redirectUrl' => $redirectUrl])->setCssClass($liveModeCss);
         yield MenuItem::section('Accounting');
         yield MenuItem::linkToRoute('Inbox', 'fas fa-inbox', 'admin_inbox');
         yield MenuItem::linkToCrud('Statements', 'fas fa-balance-scale', Statement::class);
-        yield MenuItem::linkToRoute('Payment History', 'fas fa-history', 'admin_payment_history');
         yield MenuItem::linkToCrud('Bank Accounts', 'fas fa-bank', Account::class);
         yield MenuItem::linkToCrud('Financial Months', 'fas fa-calendar', FinancialMonth::class);
         yield MenuItem::linkToCrud('Documents', 'fas fa-file', Document::class);

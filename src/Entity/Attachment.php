@@ -41,7 +41,7 @@ class Attachment extends Document
     /**
      * @throws Exception
      */
-    public function setType(DocumentType $type): Document
+    public function setType(DocumentType $type): static
     {
         throw new Exception('Cannot set type on Attachment');
     }
@@ -49,7 +49,7 @@ class Attachment extends Document
     /**
      * @throws Exception
      */
-    public function setTypeString(string $type): Document
+    public function setTypeString(string $type): static
     {
         throw new Exception('Cannot set type on Attachment');
     }
@@ -59,7 +59,7 @@ class Attachment extends Document
         return $this->parent;
     }
 
-    public function setParent(?Document $parent): self
+    public function setParent(?Document $parent): static
     {
         $this->parent = $parent;
 
@@ -71,7 +71,7 @@ class Attachment extends Document
         return $this->account;
     }
 
-    public function setAccount(?Account $account): self
+    public function setAccount(?Account $account): static
     {
         $this->account = $account;
 
@@ -83,7 +83,7 @@ class Attachment extends Document
         return (bool)$this->isLegacy;
     }
 
-    public function setIsLegacy(bool $isLegacy): self
+    public function setIsLegacy(bool $isLegacy): static
     {
         $this->isLegacy = $isLegacy;
 
@@ -95,7 +95,7 @@ class Attachment extends Document
         return $this->displayFilename;
     }
 
-    public function setDisplayFilename(?string $displayFilename): self
+    public function setDisplayFilename(?string $displayFilename): static
     {
         $this->displayFilename = $displayFilename;
 
@@ -107,7 +107,7 @@ class Attachment extends Document
         return $this->description;
     }
 
-    public function setDescription(?string $description): self
+    public function setDescription(?string $description): static
     {
         $this->description = $description;
 
@@ -137,7 +137,6 @@ class Attachment extends Document
 
         return $this;
     }
-
 
     public function setInvoice(?Invoice $invoice): static
     {

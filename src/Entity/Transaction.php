@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Constant\InvoiceStatus;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -11,9 +10,16 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 use App\Constant\DocumentType;
+use App\Constant\InvoiceStatus;
 use App\Repository\TransactionRepository;
 
 #[ORM\Entity(repositoryClass: TransactionRepository::class)]
+#[ORM\InheritanceType('SINGLE_TABLE')]
+#[ORM\DiscriminatorColumn(name: 'discr', type: 'string', length: 20)]
+#[ORM\DiscriminatorMap([
+    'transaction'         => Transaction::class,
+    'payment-transaction' => PaymentTransaction::class,
+])]
 #[Gedmo\Loggable]
 class Transaction
 {
@@ -181,17 +187,16 @@ class Transaction
         return $this->documents;
     }
 
-    public function addDocument(Document $document): self
+    public function addDocument(Document $document): static
     {
         if ($document->getInvoice() !== null) {
             $invoiceCustomer = $document->getInvoice()->getCustomer();
 
-            if ($this->customer !== null and $invoiceCustomer !== $this->customer) {
-                // TODO: re-enamble after cleanup
-                //throw new \LogicException('Cannot add invoices from different customers to the same transaction.');
+            if (null === $this->customer) {
+                $this->customer = $invoiceCustomer;
+            } elseif ($invoiceCustomer !== $this->customer) {
+                throw new \LogicException('Cannot add invoices from different customers to the same transaction.');
             }
-
-            $this->customer = $invoiceCustomer;
         }
 
         $this->documents[] = $document;
@@ -203,7 +208,7 @@ class Transaction
         return $this;
     }
 
-    public function removeDocument(Document $document): self
+    public function removeDocument(Document $document): static
     {
         if ($this->documents->removeElement($document)) {
             // Check if it's the last document with an invoice from the current customer
@@ -239,9 +244,14 @@ class Transaction
 
     public function updateConsolidationStatus(): void
     {
-        $supportingDocuments = $this->documents->filter(function ($document) {
+        $supportingDocuments = $this->documents->filter(function (Document $document) {
             // Exclude if it's an Attachment
             if ($document instanceof Attachment) {
+                return false;
+            }
+
+            // Exclude Payments
+            if ($document->getType() == DocumentType::PAYMENT) {
                 return false;
             }
 
@@ -336,5 +346,19 @@ class Transaction
         $this->comment = $comment;
 
         return $this;
+    }
+
+    /**
+     * returns all invoices associated with this transaction that are paid by this transaction
+     */
+    public function getPaidInvoices(): array
+    {
+        $invoices = array_filter(array_map(function (Document $document) {
+            return $document->getInvoice();
+        }, $this->getDocuments()->toArray()));
+
+        return array_filter($invoices, function (Invoice $invoice) use (&$numbers) {
+            return (!$invoice instanceof Receipt and strtolower($invoice->getStatus()) === 'vigente');
+        });
     }
 }
