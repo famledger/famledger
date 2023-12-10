@@ -82,9 +82,7 @@ class InvoiceSynchronizer
         $countAdded = 0;
         foreach (($invoices['Comprobantes'] ?? []) as $invoiceData) {
             if (in_array($invoiceData['folio'], $existingInvoices)) {
-                if ($series->getCode() !== 'REP') {
-                    continue;
-                }
+                continue;
             }
             $invoice = $this->initInvoiceFromData(
                 InvoiceFactory::create($series),

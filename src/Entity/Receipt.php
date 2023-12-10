@@ -17,7 +17,7 @@ class Receipt extends Invoice
     private Collection $invoices;
 
     #[ORM\OneToOne(inversedBy: 'receipt', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?ReceiptTask $task = null;
 
     public function __construct()

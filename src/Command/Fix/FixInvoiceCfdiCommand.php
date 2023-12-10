@@ -25,6 +25,10 @@ class FixInvoiceCfdiCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $invoices = $this->em->getRepository(Invoice::class)->findBy(['cfdi' => null]);
@@ -46,6 +50,61 @@ class FixInvoiceCfdiCommand extends Command
             }
         }
         $this->em->flush();
+
+        // find duplicates
+        $freeInvoices     = [];
+        $documentInvoices = [];
+        foreach ($this->em->getRepository(Invoice::class)->findAll() as $invoice) {
+            $key = $invoice->getSeries() . '-' . $invoice->getNumber() . '-' . $invoice->getTenant()->getId() . '-' . $invoice->getLiveMode();
+            if (null === $invoice->getDocument()) {
+                $freeInvoices[$key][] = $invoice;
+            } else {
+                if (isset($documentInvoices[$key])) {
+                    throw new Exception(sprintf('Duplicate invoice with associated document: %s', $key));
+                } else {
+                    $documentInvoices[$key] = $invoice;
+                }
+            }
+        }
+
+        // $invoices contains potentially duplicate invoices
+        // if there is an invoice associated with a document, we can delete the others
+        // otherwise, we can delete all but one
+        $removableInvoices = [];
+        foreach ($freeInvoices as $key => $invoices) {
+            if (isset($documentInvoices[$key])) {
+                $removableInvoices = array_merge($removableInvoices, $invoices);
+            } elseif (count($invoices) > 1) {
+                $removableInvoices = array_merge($removableInvoices,
+                    array_filter($invoices, function (Invoice $invoice) {
+                        return null === $invoice->getData();
+                    }));
+            }
+        }
+
+        $output->writeln(sprintf('Found %d removable invoices', count($removableInvoices)));
+
+        // there is an invoice with a corresponding document, we can delete the others
+        foreach ($removableInvoices as $removableInvoice) {
+            /** @var Invoice $removableInvoice */
+            $output->writeln(sprintf('Removing %s: [%s]  %s-%s',
+                $removableInvoice->getId(),
+                $removableInvoice->getTenant()->getId(),
+                $removableInvoice->getSeries(),
+                $removableInvoice->getNumber()
+            ));
+
+            $pdfPath = $this->invoiceFileManager->getPdfPath($removableInvoice);
+            if (file_exists($pdfPath)) {
+                unlink($pdfPath);
+            }
+            $xmlPath = $this->invoiceFileManager->getXmlPath($removableInvoice);
+            if (file_exists($xmlPath)) {
+                unlink($xmlPath);
+            }
+            $this->em->remove($removableInvoice);
+            $this->em->flush();
+        }
 
         return Command::SUCCESS;
     }

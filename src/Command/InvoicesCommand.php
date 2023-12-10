@@ -19,7 +19,6 @@ use App\EventListener\DocumentListener;
 use App\Exception\EfClientException;
 use App\Exception\EfStatusException;
 use App\Repository\InvoiceRepository;
-use App\Repository\SeriesRepository;
 use App\Service\InvoiceFileNamer;
 use App\Service\Invoice\InvoiceSynchronizer;
 
@@ -33,7 +32,6 @@ class InvoicesCommand extends Command
         private readonly EntityManagerInterface $em,
         private readonly InvoiceSynchronizer    $invoiceSynchronizer,
         private readonly InvoiceRepository      $invoiceRepo,
-//        private readonly SeriesRepository       $seriesRepository,
     ) {
         parent::__construct();
     }
@@ -112,7 +110,7 @@ EOT
                         ->addOrderBy('i.number', 'ASC');
 
                     $invoices = $qb->getQuery()->getResult();
-                    foreach($invoices as $invoice) {
+                    foreach ($invoices as $invoice) {
                         /** @var Invoice $invoice */
                         $invoice->getDocument()->setFilename(InvoiceFileNamer::buildDocumentName($invoice));
                     }
@@ -134,7 +132,6 @@ EOT
                         }
                     }
                     break;
-
 
                 case 'fetch-single':
                     // TODO: remove this case once it is clear that it is no longer needed

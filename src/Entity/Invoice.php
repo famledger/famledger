@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Constant\SeriesType;
 use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -13,6 +12,7 @@ use App\Annotation\LiveModeFilterable;
 use App\Annotation\TenantDependent;
 use App\Annotation\TenantFilterable;
 use App\Constant\InvoiceStatus;
+use App\Constant\SeriesType;
 use App\Repository\InvoiceRepository;
 use App\Service\MonthConverter;
 use App\Service\Strategies\StrategyHelper;
@@ -20,6 +20,9 @@ use App\Service\Strategies\StrategyHelper;
 #[ORM\Entity(repositoryClass: InvoiceRepository::class)]
 #[LiveModeFilterable(livemodeFieldName: 'live_mode')]
 #[LiveModeDependent (livemodeFieldName: 'live_mode')]
+#[ORM\UniqueConstraint(name: 'invoice_url_pdf', columns: ['url_pdf', 'tenant_id', 'live_mode'])]
+#[ORM\UniqueConstraint(name: 'invoice_url_xml', columns: ['url_xml', 'tenant_id', 'live_mode'])]
+#[ORM\UniqueConstraint(name: 'invoice_tenant_series_number', columns: ['tenant_id', 'series', 'number', 'live_mode'])]
 #[ORM\InheritanceType('SINGLE_TABLE')]
 #[ORM\DiscriminatorColumn(name: 'discr', type: 'string', length: 20)]
 #[ORM\DiscriminatorMap([
@@ -87,11 +90,11 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface
     #[Gedmo\Versioned]
     private ?array $data = null;
 
-    #[ORM\Column(length: 1024, unique: true, nullable: true)]
+    #[ORM\Column(length: 512, nullable: true)]
     #[Gedmo\Versioned]
     private ?string $urlPdf = null;
 
-    #[ORM\Column(length: 1024, unique: true, nullable: true)]
+    #[ORM\Column(length: 512, nullable: true)]
     #[Gedmo\Versioned]
     private ?string $urlXml = null;
 
