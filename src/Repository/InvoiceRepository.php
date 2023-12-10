@@ -2,6 +2,8 @@
 
 namespace App\Repository;
 
+use App\Entity\Customer;
+use App\Entity\Receipt;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -69,7 +71,7 @@ class InvoiceRepository extends ServiceEntityRepository
             )->setParameter('startDate', $startDate);
         } else {
             $startOfYear = (new \DateTime())->setDate($year, 1, 1);
-            $endOfYear = (new \DateTime())->setDate($year, 12, 31);
+            $endOfYear   = (new \DateTime())->setDate($year, 12, 31);
             $qb->andWhere(
                 $qb->expr()->orX(
                     $qb->expr()->eq('i.year', $qb->expr()->literal($year)),
@@ -85,11 +87,11 @@ class InvoiceRepository extends ServiceEntityRepository
         $invoices = [];
         foreach ($qb->getQuery()->getResult() as $invoice) {
             /** @var Invoice $invoice */
-            $invoiceYear = $invoice->getYear() ?? $invoice->getIssueDate()->format('Y');
+            $invoiceYear  = $invoice->getYear() ?? $invoice->getIssueDate()->format('Y');
             $invoiceMonth = $invoice->getMonth() ?? $invoice->getIssueDate()->format('m');
 
             // Add the current invoice to the array
-            $invoiceKey = $invoice->getSeries() . '-' . $invoice->getNumber();
+            $invoiceKey                                         = $invoice->getSeries() . '-' . $invoice->getNumber();
             $invoices[$invoiceYear][$invoiceMonth][$invoiceKey] = $invoice;
         }
 
@@ -101,6 +103,7 @@ class InvoiceRepository extends ServiceEntityRepository
 
     public function findInvoicesWithoutDocuments(array $series): array
     {
+        // Step 1: Retrieve all invoices that are not associated with a document.
         $qb = $this->createQueryBuilder('i');
 
         $qb
@@ -120,13 +123,49 @@ class InvoiceRepository extends ServiceEntityRepository
             ->addOrderBy('i.series', 'ASC')
             ->addOrderBy('i.issueDate', 'ASC');
 
-        $invoices = [];
-        foreach ($qb->getQuery()->getResult() as $invoice) {
-            /** @var Invoice $invoice */
-            $invoices[$invoice->getCustomer()->getName()][] = $invoice;
+        $unAssociatedInvoices = $qb->getQuery()->getResult();
+        // get the customer ids
+        $customerIds = array_map(fn($invoice) => $invoice->getCustomer()->getId(), $unAssociatedInvoices);
+        // get all series codes that are not used for receipts
+
+
+        $customerIds = join(',', array_unique($customerIds));
+        // get the highest number per customer of any invoice considering only the payment date
+        $query              = <<<EOT
+SELECT i.customer_id, MAX(i.number) AS highestNumber
+FROM invoice i
+WHERE i.discr = 'invoice'
+AND i.customer_id IN ($customerIds)
+AND i.payment_date IS NOT NULL
+GROUP BY i.customer_id
+EOT;
+        $highestPaidNumbers = [];
+        foreach ($this->getEntityManager()->getConnection()->executeQuery($query)->fetchAllAssociative() as $row) {
+            $highestPaidNumbers[$row['customer_id']] = $row['highestNumber'];
         }
 
-        return $invoices;
+        // Step 3: Mark unpaid invoices that have a lower number than the highest paid invoice number for the same customer.
+        $invoicesByCustomer = [];
+        foreach ($unAssociatedInvoices as $invoice) {
+            /** @var Invoice $invoice */
+            $customerName = $invoice->getCustomer()->getName();
+            $customerId   = $invoice->getCustomer()->getId();
+            // Assuming you've added a setUnPaid() method to the Invoice entity
+            if (($highestPaidNumbers[$customerId] ?? 0) > $invoice->getNumber()
+                and $invoice->getStatus() === InvoiceStatus::VIGENTE
+                    and !$invoice instanceof Receipt
+            ) {
+                $invoice->setUnPaid(true);
+            }
+
+            // Group by customer name
+            if (!isset($invoicesByCustomer[$customerName])) {
+                $invoicesByCustomer[$customerName] = [];
+            }
+            $invoicesByCustomer[$customerName][] = $invoice;
+        }
+
+        return $invoicesByCustomer;
     }
 
     public function fetchIncomplete(Tenant $tenant, Series $series, ?bool $liveMode = true): array

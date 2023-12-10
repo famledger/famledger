@@ -164,6 +164,10 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $cfdi = null;
 
+
+    // flag to mark invoices that have not been paid but newer ones have
+    private bool $unPaid = false;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -682,5 +686,15 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface
         $this->cfdi = $cfdi;
 
         return $this;
+    }
+
+    public function setUnPaid(bool $unPaid)
+    {
+        $this->unPaid = $unPaid;
+    }
+
+    public function getUnPaid(): bool
+    {
+        return $this->unPaid;
     }
 }
