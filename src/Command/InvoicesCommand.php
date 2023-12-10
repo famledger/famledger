@@ -120,6 +120,9 @@ EOT
                     $incompleteInvoices = $this->invoiceRepo->findIncompleteInvoices($tenant);
 
                     foreach ($incompleteInvoices as $invoice) {
+                        if ('Anulado' === $invoice->getStatus()) {
+                            continue;
+                        }
                         try {
                             $output->writeln(sprintf('Fetching details for %s %s ... ',
                                 $invoice->getTenant()->getRfc(),

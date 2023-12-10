@@ -72,12 +72,17 @@ class InvoiceSynchronizer
      */
     public function synchronizeSeries(Series $series, bool $liveMode): int
     {
-        $existingInvoices = $this->invoiceRepo->findExistingNumbersForSeries($series, $liveMode);
-
         // before calling the EF API, set the livemode and tenant contexts from the series
         $this->liveModeContext->setLiveMode($liveMode);
         $this->tenantContext->setTenant($series->getTenant());
+
+        // TODO: figure out why the tenant and livemode filters are not working as expected and have to be disabled
         $invoices = $this->client->listInvoices($series->getCode(), new DateTime('2017-01-01'));
+        $this->em->getFilters()->disable('tenant_filter');
+        $this->em->getFilters()->disable('livemode_filter');
+        $existingInvoices = $this->invoiceRepo->findExistingNumbersForSeries($series, $liveMode);
+        $this->em->getFilters()->enable('tenant_filter');
+        $this->em->getFilters()->enable('livemode_filter');
 
         $countAdded = 0;
         foreach (($invoices['Comprobantes'] ?? []) as $invoiceData) {
