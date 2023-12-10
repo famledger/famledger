@@ -33,6 +33,7 @@ class PaymentCrudController extends AbstractCrudController
     {
         return $crud
             ->showEntityActionsInlined()
+            ->setSearchFields(['recipientName', 'number', 'invoices.number'])
             ->setDefaultSort(['issueDate' => 'DESC']);
     }
 
