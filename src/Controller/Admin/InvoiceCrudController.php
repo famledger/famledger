@@ -230,6 +230,7 @@ class InvoiceCrudController extends AbstractCrudController
     public function configureFilters(Filters $filters): Filters
     {
         return $filters
+            ->add(EntityFilter::new('payment'))
             ->add(NumericFilter::new('amount'))
             ->add(EntityFilter::new('customer'))
             ->add(EntityFilter::new('property'))
@@ -252,6 +253,7 @@ class InvoiceCrudController extends AbstractCrudController
             IntegerField::new('month')->hideOnIndex(),
             TextField::new('recipientRFC', 'RFC')->hideOnIndex(),
             TextField::new('checksum')->hideOnIndex(),
+            AssociationField::new('payment'),
             AssociationField::new('property'),
             AssociationField::new('customer'),
             AssociationField::new('document'),
