@@ -278,7 +278,7 @@ class InvoiceCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setSearchFields(['series', 'number', 'customer.name', 'property.slug'])
+            ->setSearchFields(['series', 'number', 'description', 'customer.name', 'property.slug'])
             ->overrideTemplate('crud/detail', 'admin/Invoice/details.html.twig')
             ->showEntityActionsInlined()
             ->setEntityLabelInSingular(function ($entity) {
