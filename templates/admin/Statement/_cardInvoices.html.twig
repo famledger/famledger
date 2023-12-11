@@ -15,7 +15,7 @@
                             class="detail-row invoice draggable{% if invoice.unpaid %} unpaid{% endif %}"
                             title="{{ loop.index }}"
 
-                            >
+                        >
                             <td class="drag-handle" title="Drag to move"><i class="fa fa-arrows-alt"></i></td>
                             <td class="nowrap">
                                 {% if invoice.year is not null %}
@@ -27,7 +27,23 @@
                             <td class="nowrap">{{ invoice.series }}-{{ invoice.number }}</td>
                             <td class="nowrap">{% if invoice.payment %}{{ invoice.payment.series }}-{{ invoice.payment.number }}{% endif %}</td>
                             <td>{{ invoice.recipientName }}</td>
-                            <td>{{ invoice.description }}</td>
+                            <td>
+                                {% if invoice.invoices is defined %}
+                                    {% for series, numbers in invoice.invoices %}
+                                        <div>{{ series }}:
+                                            {% for invoiceId, number in numbers %}
+                                                {% if loop.index > 1 %}&middot; {% endif %}
+                                                <a href="{{ ea_url()
+                                                    .setController('App\\Controller\\Admin\\InvoiceCrudController')
+                                                    .setAction('detail')
+                                                    .setEntityId(invoiceId) }}">{{ number }}</a>
+                                            {% endfor %}
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    {{ invoice.description }}
+                                {% endif %}
+                            </td>
                             <td class="text-right">{{ invoice.amount|cent_amount }}</td>
                             <td class="text-right">{{ invoice.status|invoice_status }}</td>
                             <td class="text-right"><a target="download" class="text-danger"
