@@ -49,12 +49,11 @@ class AccountingDocumentService
 
         // handle the case where the filename has already been prefixed with the sequence number
         // remove once all documents have been named correctly
-
         if (preg_match('/^[0-9]{2} /', $document->getFilename())) {
             $document->setFilename(substr($document->getFilename(), 3));
         }
 
-        return ($document->isAttachment())
+        return ($document->isAttachment() or (int)$document->getSequenceNo() === 0)
             ? $document->getFilename()
             : sprintf('%02d %s', $document->getSequenceNo(), $document->getFilename());
     }
