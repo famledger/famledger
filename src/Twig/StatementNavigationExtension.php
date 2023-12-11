@@ -54,7 +54,7 @@ class StatementNavigationExtension extends AbstractExtension
             // Check if the current statement is the same as the provided statement
             if ($stmt->getId() === $statement->getId()) {
                 // Format as gray text without a hyperlink
-                return sprintf('<span style="color: gray;">%s</span>',
+                return sprintf('<span style="color: gray; border-top: 1px solid gray;">%s</span>',
                     MonthConverter::fromNumericMonth($stmt->getMonth(), true)
                 );
             } else {
