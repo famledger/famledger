@@ -26,7 +26,7 @@
         {{ include('admin/Statement/_descriptionContainer.html.twig') }}
         {% if transaction.documents|length %}
             <div style="margin-top:4px; padding:4px 12px; border-top:1px solid #999;">
-                <table>
+                <table class="inline-hover">
                     {% set total = 0 %}
                     {% for document in transaction.documents %}
                         {% set isInvoiceAttachment = (document.isAttachment and document.invoice is not null) %}
