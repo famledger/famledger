@@ -168,6 +168,9 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface
     // flag to mark invoices that have not been paid but newer ones have
     private bool $unPaid = false;
 
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $uuid = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -203,11 +206,6 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface
     public function getHID(): ?string
     {
         return $this->series . '-' . $this->number;
-    }
-
-    public function getFolioFiscalUUID(): ?string
-    {
-        return $this->getData('folioFiscalUUID');
     }
 
     public function getSeries(): ?string
@@ -323,6 +321,7 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface
         $this->data   = $data;
         $this->urlPdf = $data['descargaArchivoPDF'] ?? null;
         $this->urlXml = $data['descargaXmlCFDi'] ?? null;
+        $this->uuid   = $data['folioFiscalUUID'] ?? null;
         if (isset($data['peticion'])) {
             $peticion = json_decode($data['peticion'], true);
             if (isset($peticion['CFDi']['Partidas'])) {
@@ -696,5 +695,22 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface
     public function getUnPaid(): bool
     {
         return $this->unPaid;
+    }
+
+    public function getFolioFiscalUUID(): ?string
+    {
+        return $this->uuid;
+    }
+
+    public function getUuid(): ?string
+    {
+        return $this->uuid;
+    }
+
+    public function setUuid(?string $uuid): static
+    {
+        $this->uuid = $uuid;
+
+        return $this;
     }
 }
