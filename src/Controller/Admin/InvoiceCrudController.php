@@ -41,6 +41,7 @@ use App\Entity\Invoice;
 use App\Entity\Receipt;
 use App\Exception\EfClientException;
 use App\Form\InvoiceCancelType;
+use App\Service\EDocService;
 use App\Service\EFClient;
 use App\Service\Invoice\InvoiceSynchronizer;
 use App\Service\TenantContext;
@@ -49,7 +50,8 @@ class InvoiceCrudController extends AbstractCrudController
 {
 
     public function __construct(
-        private readonly AdminUrlGenerator $adminUrlGenerator
+        private readonly AdminUrlGenerator $adminUrlGenerator,
+        private readonly EDocService       $eDocService
     ) {
     }
 
@@ -88,7 +90,8 @@ class InvoiceCrudController extends AbstractCrudController
             'pageName'     => Crud::PAGE_DETAIL,
             'templateName' => 'crud/detail',
             'entity'       => $context->getEntity(),
-            'cancelForm'   => $cancelForm
+            'cancelForm'   => $cancelForm,
+            'eDocsByType'  => $this->eDocService->getEDocsByType($invoice),
         ]));
     }
 

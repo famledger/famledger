@@ -32,8 +32,16 @@ use App\Service\Strategies\StrategyHelper;
 #[TenantDependent(tenantFieldName: 'tenant_id')]
 #[TenantFilterable(tenantFieldName: 'tenant_id')]
 #[Gedmo\Loggable]
-class Invoice implements TenantAwareInterface, LiveModeAwareInterface
+class Invoice implements TenantAwareInterface, LiveModeAwareInterface, FileOwnerInterface
 {
+    public function getOwnerKey(): ?string
+    {
+        return sprintf('%s-%s',
+            $this->getSeries(),
+            $this->getNumber()
+        );
+    }
+
     use LoggableTrait;
 
     #[ORM\Id]
