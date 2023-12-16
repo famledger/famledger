@@ -43,8 +43,10 @@ class AccountingDocumentService
      */
     static public function composeFilename(Document $document): string
     {
+        $isStatement = false;
         if ($document->getType() === DocumentType::ACCOUNT_STATEMENT) {
             $document->setSequenceNo(0);
+            $isStatement = true;
         }
 
         // handle the case where the filename has already been prefixed with the sequence number
@@ -53,7 +55,7 @@ class AccountingDocumentService
             $document->setFilename(substr($document->getFilename(), 3));
         }
 
-        return ($document->isAttachment() or (int)$document->getSequenceNo() === 0)
+        return ($document->isAttachment() or ((int)$document->getSequenceNo() === 0 and !$isStatement))
             ? $document->getFilename()
             : sprintf('%02d %s', $document->getSequenceNo(), $document->getFilename());
     }
