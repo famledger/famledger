@@ -6,6 +6,10 @@
             <div class="value">{{ invoice.amount|cent_amount }} {{ invoice.currency }}</div>
         </div>
         <div class="field-group">
+            <div class="caption">UUID</div>
+            <div class="value"><code class="text-muted">{{ invoice.uuid }}</code></div>
+        </div>
+        <div class="field-group">
             <div class="caption">Month invoiced</div>
             <div class="value">{{ invoice.month|month_name }} {{ invoice.year }}</div>
         </div>
