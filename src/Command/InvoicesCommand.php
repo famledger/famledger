@@ -4,6 +4,7 @@ namespace App\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -32,6 +33,7 @@ class InvoicesCommand extends Command
         private readonly EntityManagerInterface $em,
         private readonly InvoiceSynchronizer    $invoiceSynchronizer,
         private readonly InvoiceRepository      $invoiceRepo,
+        private readonly LoggerInterface        $logger,
     ) {
         parent::__construct();
     }
@@ -130,8 +132,8 @@ EOT
                             ));
                             $this->invoiceSynchronizer->syncInvoiceDetails($invoice);
                             $this->em->flush();
-                        } catch (EfStatusException|EfClientException) {
-                            // Handle exceptions, possibly logging them or notifying someone.
+                        } catch (Throwable $e) {
+                            $this->logger->error($e->getMessage());
                         }
                     }
                     break;
