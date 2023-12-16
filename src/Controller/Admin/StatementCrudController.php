@@ -33,7 +33,7 @@ class StatementCrudController extends AbstractCrudController
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
-        private readonly EDocService            $eDocService
+        private readonly EDocService            $eDocService,
     ) {
     }
 

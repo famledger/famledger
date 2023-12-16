@@ -24,6 +24,8 @@
 {% endblock %}
 
 {% block main %}
+    <div>{{ invoice_navigation(invoice, 4) }}</div>
+
     {% set invoice = entity.instance %}
 
     <div class="row">

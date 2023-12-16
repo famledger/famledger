@@ -2,7 +2,6 @@
 
 namespace App\Twig;
 
-use App\Controller\Admin\StatementCrudController;
 use DateTime;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
@@ -10,6 +9,7 @@ use Exception;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
+use App\Controller\Admin\StatementCrudController;
 use App\Entity\Statement;
 use App\Repository\StatementRepository;
 use App\Service\MonthConverter;
@@ -18,7 +18,7 @@ class StatementNavigationExtension extends AbstractExtension
 {
     public function __construct(
         private readonly AdminUrlGenerator   $urlGenerator,
-        private readonly StatementRepository $statementRepository
+        private readonly StatementRepository $statementRepository,
     ) {
     }
 

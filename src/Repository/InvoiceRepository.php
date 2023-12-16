@@ -2,15 +2,14 @@
 
 namespace App\Repository;
 
-use App\Entity\Customer;
-use App\Entity\Receipt;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
-use App\Constant\DocumentType;
 use App\Constant\InvoiceStatus;
+use App\Entity\Customer;
 use App\Entity\Invoice;
+use App\Entity\Receipt;
 use App\Entity\Series;
 use App\Entity\Tenant;
 
@@ -27,6 +26,19 @@ class InvoiceRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Invoice::class);
+    }
+
+    public function findInvoicesForCustomer(Customer $customer)
+    {
+        $qb = $this->createQueryBuilder('i');
+        $qb
+            ->where($qb->expr()->andX()
+                ->add($qb->expr()->not($qb->expr()->isInstanceOf('i', Receipt::class)))
+                ->add($qb->expr()->eq('i.customer', $qb->expr()->literal($customer->getId())))
+            )
+            ->orderBy('i.issueDate', 'ASC');
+
+        return $qb->getQuery()->getResult();
     }
 
     public function getSubstitutionInvoices(Invoice $invoiceToCancel): QueryBuilder
