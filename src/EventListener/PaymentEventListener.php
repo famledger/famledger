@@ -12,6 +12,9 @@ use App\Event\Invoice\InvoiceUpdatedEvent;
 use App\Repository\InvoiceRepository;
 use App\Service\StatementService;
 
+/**
+ * Handles the linking of invoices to newly created or updated payments (Receipts)
+ */
 #[AsEventListener(event: InvoiceUpdatedEvent::class, method: 'onInvoiceUpdated')]
 class PaymentEventListener
 {
@@ -40,76 +43,43 @@ class PaymentEventListener
         $amount          = $pago['monto'];
 
         $payment->setAmount($amount * 100);
-        $transactions = [];
-        $invoices     = [];
-        $invoiceTotal = 0;
+        $invoices = [];
         foreach ($relatedInvoices as $relatedInvoice) {
-            $series = $relatedInvoice['serie'];
-            $number = $relatedInvoice['folioInterno'];
-
-            $invoice    = $this->invoiceRepository->findOneBy(['series' => $series, 'number' => $number]);
+            $invoice    = $this->invoiceRepository->findOneBy(['uuid' => $relatedInvoice['idDocumento']]);
             $invoices[] = $invoice;
             $payment->addInvoice($invoice);
-            if (null !== ($transaction = $invoice->getDocument()?->getTransaction())) {
-                $transactions[] = $transaction;
-                $invoiceTotal   += $invoice->getAmount();
+        }
+
+        // if all paid invoices are already linked to the same transaction, we link the payment to that transaction
+        $transaction  = null;
+        $invoiceTotal = 0;
+        foreach ($invoices as $invoice) {
+            $_transaction = $invoice->getDocument()?->getTransaction();
+
+            // If first iteration or same transaction, add amount and continue
+            if ($transaction === null or ($_transaction && $_transaction->getId() === $transaction->getId())) {
+                $transaction  = $_transaction;
+                $invoiceTotal += $invoice->getAmount();
+                continue;
             }
+
+            $transaction = null;
+            break;
         }
 
         // create a document for the payment and associate it with the transaction
         try {
-            $this->validate($transactions, $invoices, (int)($amount * 100), $invoiceTotal);
-            $this->statementService->linkInvoice($transactions[0], $payment);
+            if (null !== $transaction) {
+                if ($invoiceTotal !== $amount) {
+                    throw new Exception(sprintf('The sum of all invoice amounts does not match the payment amount: %.2f vs %.2f',
+                        $invoiceTotal / 100,
+                        $amount / 100
+                    ));
+                }
+                $this->statementService->linkInvoice($transaction, $payment);
+            }
         } catch (Throwable $e) {
             $this->logger->error($e->getMessage());
         }
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function validate(array $transactions, array $invoices, int $amount, int $invoiceTotal): void
-    {
-        // we cannot link the payment to a transaction
-
-        // - if the invoices to not all belong to the same transaction
-        $transactionIds = array_unique(array_map(fn($transaction) => $transaction->getId(), $transactions));
-        if (1 !== count($transactionIds)) {
-            throw new Exception(
-                'The invoices referenced in the payment do not belong to the same transaction.'
-                . $this->getInvoiceInfo($transactions, $invoices)
-            );
-        }
-
-        // - not all invoices have a transaction
-        if (count($transactions) !== count($invoices)) {
-            throw new Exception(
-                'Not all invoices are associated with a transaction.'
-                . $this->getInvoiceInfo($transactions, $invoices)
-            );
-        }
-
-        // - if the total amount of the invoices does not match the payment amount
-        if (abs($invoiceTotal - $amount) > 1) {
-            throw new Exception(sprintf('The sum of all invoice amounts does not match the payment amount: %.2f vs %.2f',
-                $invoiceTotal / 100,
-                $amount / 100
-            ));
-        }
-    }
-
-    private function getInvoiceInfo(array $transactions, array $invoices): string
-    {
-        $transactionInfo = join(' | ', array_map(fn($transaction) => sprintf('%s: sequence %s',
-            $transaction->getStatement(),
-            $transaction->getSequenceNo()
-        ), $transactions));
-
-        $invoiceInfo = join(' | ', array_map(fn($invoice) => sprintf('%s-%s',
-            $invoice->getSeries(),
-            $invoice->getNumber()
-        ), $invoices));
-
-        return "\nInvoices: $invoiceInfo\nTransactions: $transactionInfo";
     }
 }
