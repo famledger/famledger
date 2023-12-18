@@ -26,7 +26,7 @@ perform_backup () {
   local dump_file="${backup_dir}/${FILE_NAME}"
 
   # Dump the database into an SQL file
-  mysqldump -h ${DB_HOST} -u ${DB_USER} -p"${DB_PASSWORD}" ${DB_NAME} > "${dump_file}"
+  /opt/homebrew/bin/mysqldump -h ${DB_HOST} -u ${DB_USER} -p"${DB_PASSWORD}" ${DB_NAME} > "${dump_file}"
 
   if [ $? -eq 0 ]; then
     echo "$(date): Backup successfully created at ${dump_file}"
