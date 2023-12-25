@@ -20,7 +20,7 @@
         {% endif %}
         data-transaction-id="{{ transaction.id }}"
 >
-    <td>{{ transaction.sequenceNo }}</td>
+    <td title="{{ transaction.id }}">{{ transaction.sequenceNo }}</td>
     <td title="{{ transaction.bookingDate|format_date('long') }}">{{ transaction.bookingDate|date('d M') }}</td>
     <td>
         {{ include('admin/Statement/_descriptionContainer.html.twig') }}
@@ -55,7 +55,7 @@
                                 <a target="download" title="view document" class="text-muted"
                                    href="{{ path('admin_document_download', {document:document.id}) }}"><i
                                             class="{{ file_icon(document.filename) }}"></i> </a>
-                                <a href="{{ document|ea_url('detail') }}"><i class="fa fa-eye"></i></a>
+                                <a href="{{ document|ea_url('detail', 'Document') }}"><i class="fa fa-eye"></i></a>
                             </td>
                             <td colspan="2" class="text-right">
                                 <span{% if not document.affectsTransactionSum %} style="opacity:.5"{% endif %}>{{ document.amount|cent_amount }}</span>

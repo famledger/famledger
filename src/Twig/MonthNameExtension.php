@@ -16,6 +16,7 @@ class MonthNameExtension extends AbstractExtension
 
     public function monthName(?int $month): string
     {
+        // TODO: use src/Service/MonthConverter adding a locale parameter
         $months = array_flip([
             'enero'      => 1,
             'febrero'    => 2,

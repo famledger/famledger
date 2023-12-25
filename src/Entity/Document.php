@@ -2,24 +2,25 @@
 
 namespace App\Entity;
 
-use App\Constant\InvoiceStatus;
 use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Exception;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 use App\Annotation\TenantDependent;
 use App\Annotation\TenantFilterable;
 use App\Constant\DocumentType;
+use App\Constant\InvoiceStatus;
 use App\Repository\DocumentRepository;
 
 #[ORM\Entity(repositoryClass: DocumentRepository::class)]
 #[ORM\InheritanceType('SINGLE_TABLE')]
 #[ORM\DiscriminatorColumn(name: 'discr', type: 'string', length: 20)]
 #[ORM\DiscriminatorMap([
-    'document'   => Document::class,
-    'attachment' => Attachment::class,
+    'document'    => Document::class,
+    'tax-payment' => TaxPayment::class,
+    'attachment'  => Attachment::class,
+    'tax-notice'  => TaxNotice::class,
 ])]
 #[TenantDependent(tenantFieldName: 'tenant_id')]
 #[TenantFilterable(tenantFieldName: 'tenant_id')]
@@ -43,10 +44,17 @@ class Document implements TenantAwareInterface
     #[Gedmo\Versioned]
     private ?DocumentType $type = null;
 
+    #[ORM\Column(length: 32, nullable: true)]
+    private ?string $subType = null;
+
     #[ORM\ManyToOne(inversedBy: 'documents')]
     #[ORM\JoinColumn(nullable: true)]
     #[Gedmo\Versioned]
     private ?FinancialMonth $financialMonth = null;
+
+    #[ORM\OneToOne]
+    #[Gedmo\Versioned]
+    private ?Statement $statement = null;
 
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     #[Gedmo\Versioned]
@@ -94,8 +102,11 @@ class Document implements TenantAwareInterface
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     private ?int $month = null;
 
-    #[ORM\Column(length: 32, nullable: true)]
-    private ?string $subType = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $comment = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?bool $isRelated = null;
 
     public function __toString(): string
     {
@@ -276,7 +287,7 @@ class Document implements TenantAwareInterface
 
     public function isAttachment(): bool
     {
-        return $this->type === DocumentType::ATTACHMENT;
+        return ($this instanceof Attachment);
     }
 
     public function getAttachment(): ?Attachment
@@ -373,6 +384,42 @@ class Document implements TenantAwareInterface
     public function setSubType(?string $subType): static
     {
         $this->subType = $subType;
+
+        return $this;
+    }
+
+    public function getComment(): ?string
+    {
+        return $this->comment;
+    }
+
+    public function setComment(?string $comment): static
+    {
+        $this->comment = $comment;
+
+        return $this;
+    }
+
+    public function getIsRelated(): ?bool
+    {
+        return (bool)$this->isRelated;
+    }
+
+    public function setIsRelated(?bool $isRelated): static
+    {
+        $this->isRelated = (bool)$isRelated;
+
+        return $this;
+    }
+
+    public function getStatement(): ?Statement
+    {
+        return $this->statement;
+    }
+
+    public function setStatement(?Statement $statement): static
+    {
+        $this->statement = $statement;
 
         return $this;
     }

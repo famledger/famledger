@@ -39,7 +39,7 @@ class DeclaracionProvisionalStrategy implements StrategyInterface
 
         return (new AttachmentSpecs())
             ->setAccountNumber(StrategyHelper::getAccountNumber($rfc))
-            ->setSubType(DocumentSubType::TAX_CALCULUS)
+            ->setSubType(DocumentSubType::TAX_CALCULUS) // TODO: not sure whether sub-types are of any use yet
             ->setYear($year)
             ->setMonth($month);
     }

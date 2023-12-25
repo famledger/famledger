@@ -3,13 +3,16 @@
 {% block head_stylesheets %}
     {{ parent() }}
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
-    {#    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet"> #}
-    {#    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300&display=swap" rel="stylesheet"> #}
-    {#    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300&display=swap" rel="stylesheet"> #}
-    {#    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300&display=swap" rel="stylesheet"> #}
-    {#    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300&display=swap" rel="stylesheet"> #}
+    {#    <link href="https://font.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet"> #}
+    {#    <link href="https://font.googleapis.com/css2?family=Lato:wght@300&display=swap" rel="stylesheet"> #}
+    {#    <link href="https://font.googleapis.com/css2?family=Raleway:wght@300&display=swap" rel="stylesheet"> #}
+    {#    <link href="https://font.googleapis.com/css2?family=Roboto+Slab:wght@300&display=swap" rel="stylesheet"> #}
+    {#    <link href="https://font.googleapis.com/css2?family=Ubuntu:wght@300&display=swap" rel="stylesheet"> #}
     {{ encore_entry_link_tags('app') }}
     {{ encore_entry_link_tags('dropzone') }}
+
+    {# Include Fontello CSS #}
+    <link href="{{ asset('/font/fontello-2e16f1f6/css/miridisfamily.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block head_javascript %}

@@ -1,0 +1,95 @@
+{% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-link', title: 'Associations' } %}
+    {% block card_body %}
+
+        <div class="field-group">
+            <div class="caption"><i class="fa fa-balance-scale"></i> Statement</div>
+            <div class="value">
+                {% if document.transaction is not null %}
+                    {% set statement = document.transaction.statement %}
+                {% elseif document.statement is not null %}
+                    {% set statement = document.statement %}
+                {% else %}
+                    {% set statement = null %}
+                {% endif %}
+                {% if statement is null %}
+                    - not assigned -
+                {% else %}
+                    <a href="{{ ea_url()
+                        .setController('App\\Controller\\Admin\\StatementCrudController')
+                        .setAction('detail')
+                        .setEntityId(statement.id) }}">{{ statement }}</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="field-group">
+            <div class="caption"><i class="fa fa-calendar"></i> Financial month</div>
+            <div class="value">
+                {% if document.financialMonth is not null %}
+                    {% set financialMonth = document.financialMonth %}
+                    <a href="{{ ea_url()
+                        .setController('App\\Controller\\Admin\\FinancialMonthCrudController')
+                        .setAction('detail')
+                        .setEntityId(financialMonth.id) }}">{{ financialMonth }}</a>
+                {% else %}
+                    - not assigned -
+                {% endif %}
+            </div>
+        </div>
+        {% if document is instanceof('App\\Entity\\TaxPayment') %}
+            <div class="field-group">
+                <div class="caption"><i class="fa fa-file-invoice"></i> Tax notice</div>
+                <div class="value">
+                    {% if document.taxNotice is not null %}
+                        {% set taxNotice = document.taxNotice %}
+                        <a href="{{ path('admin_document_download', {document:taxNotice.id}) }}"><i
+                                    class="fa fa-file-pdf text-success"></i></a>
+                        <a href="{{ ea_url()
+                            .setController('App\\Controller\\Admin\\DocumentCrudController')
+                            .setAction('detail')
+                            .setEntityId(taxNotice.id) }}">{{ taxNotice }}</a>
+                    {% else %}
+                        - not assigned -
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if document is instanceof('App\\Entity\\TaxNotice') %}
+            <div class="field-group">
+                <div class="caption"><i class="fa fa-file-invoice"></i> Tax payment</div>
+                <div class="value">
+                    {% if document.taxPayment is not null %}
+                        {% set taxPayment = document.taxPayment %}
+                        <a href="{{ path('admin_document_download', {document:taxPayment.id}) }}"><i
+                                    class="fa fa-file-pdf text-success"></i></a>
+                        <a href="{{ ea_url()
+                            .setController('App\\Controller\\Admin\\DocumentCrudController')
+                            .setAction('detail')
+                            .setEntityId(taxPayment.id) }}">{{ taxPayment }}</a>
+                    {% else %}
+                        - not assigned -
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if document.type.value == 'income' %}
+            <div class="field-group">
+                <div class="caption"><i class="fa fa-file-invoice"></i> Invoice</div>
+                <div class="value">
+                    {% if document.invoice is not null %}
+                        {% set invoice = document.invoice %}
+                        <a href="{{ ea_url()
+                            .setController('App\\Controller\\Admin\\InvoiceCrudController')
+                            .setAction('detail')
+                            .setEntityId(invoice.id) }}">{{ invoice }}</a>
+                    {% else %}
+                        - not assigned -
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+
+    {% endblock %}
+{% endembed %}

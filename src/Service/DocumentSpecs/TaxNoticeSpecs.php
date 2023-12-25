@@ -4,13 +4,18 @@ namespace App\Service\DocumentSpecs;
 
 use App\Constant\DocumentType;
 
-class TaxSpecs extends ExpenseSpecs
+class TaxNoticeSpecs extends AttachmentSpecs
 {
     protected ?string $captureLine = null;
 
     public function getDocumentType(): DocumentType
     {
-        return DocumentType::TAX;
+        return DocumentType::TAX_NOTICE;
+    }
+
+    public function getCaptureLine(): ?string
+    {
+        return $this->captureLine;
     }
 
     public function setCaptureLine(?string $captureLine): self
@@ -18,11 +23,6 @@ class TaxSpecs extends ExpenseSpecs
         $this->captureLine = $captureLine;
 
         return $this;
-    }
-
-    public function getCaptureLine(): ?string
-    {
-        return $this->captureLine;
     }
 
     public function serialize(): array

@@ -9,21 +9,91 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 use App\Constant\DocumentType;
 use App\Entity\Account;
+use App\Entity\TaxNotice;
+use App\Entity\TaxPayment;
 use App\Event\DocumentCreatedEvent;
+use App\Event\DocumentPreCreateEvent;
+use App\Event\DocumentRebuildEvent;
 use App\Event\Invoice\InvoiceUpdatedEvent;
-use App\Repository\AttachmentRepository;
 use App\Service\DocumentSpecs\StatementSpecs;
 use App\Service\InvoiceFileNamer;
 
 #[AsEventListener(event: DocumentCreatedEvent::class, method: 'onDocumentCreated')]
+#[AsEventListener(event: DocumentPreCreateEvent::class, method: 'onDocumentPreCreate')]
+#[AsEventListener(event: DocumentRebuildEvent::class, method: 'onDocumentRebuild')]
 #[AsEventListener(event: InvoiceUpdatedEvent::class, method: 'onInvoiceUpdated', priority: 0)]
 class DocumentEventListener
 {
     public function __construct(
-        private readonly AttachmentRepository   $attachmentRepository,
         private readonly EntityManagerInterface $em,
         private readonly LoggerInterface        $logger
     ) {
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function onDocumentPreCreate(DocumentPreCreateEvent $event): void
+    {
+        $document = $event->getDocument();
+
+        // Tax payments must be associated with the tax notice they were paid for.
+        // The year and month must be overwritten with the year and month of the tax notice.
+        // The file name of the tax payment is being overwritten by associating it with the tax notice.
+        if ($document instanceof TaxPayment) {
+//            // lookup tax notice and associate it
+//            $repo = $this->em->getRepository(TaxNotice::class);
+//            if (null === $taxNotice = $repo->findOneBy([
+//                    'type'        => DocumentType::TAX_NOTICE->value,
+//                    'captureLine' => $document->getCaptureLine()
+//                ])) {
+//                throw new ProcessingException(sprintf('No tax notice found for capture line: %s',
+//                    $document->getCaptureLine()));
+//            }
+//            $document
+//                ->setTaxNotice($taxNotice)
+//                ->setYear($taxNotice->getYear())
+//                ->setMonth($taxNotice->getMonth());
+
+            $taxNotice = $this->handleTaxNotice($document);
+            $event->setRelatedDocuments([$taxNotice]);
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function onDocumentRebuild(DocumentRebuildEvent $event): void
+    {
+        $document = $event->getDocument();
+        if ($document instanceof TaxPayment) {
+            $this->handleTaxNotice($document);
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function handleTaxNotice(TaxPayment $document): ?TaxNotice
+    {
+        // Tax payments must be associated with the tax notice they were paid for.
+        // The year and month must be overwritten with the year and month of the tax notice.
+        // The file name of the tax payment is being overwritten by associating it with the tax notice.
+        // lookup tax notice and associate it
+        $repo = $this->em->getRepository(TaxNotice::class);
+        if (null === $taxNotice = $repo->findOneBy([
+                'type'        => DocumentType::TAX_NOTICE->value,
+                'captureLine' => $document->getCaptureLine()
+            ])) {
+            throw new Exception(sprintf('No tax notice found for capture line: %s',
+                $document->getCaptureLine()));
+        }
+        $document
+            ->setTaxNotice($taxNotice)
+            ->setYear($taxNotice->getYear())
+            ->setMonth($taxNotice->getMonth());
+
+        return $taxNotice;
     }
 
     /**

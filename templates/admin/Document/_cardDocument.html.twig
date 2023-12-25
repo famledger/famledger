@@ -1,0 +1,45 @@
+{% set isAttachment = document is instanceof('App\\Entity\\Attachment') %}
+{% embed 'admin/_common/collapsible_card.twig' with { icon:isAttachment ? 'fa fa-paperclip' : 'fa fa-file', title: isAttachment ? 'Attachment': 'Document', width:12 } %}
+    {% block card_body %}
+        <div class="field-group">
+            <div class="caption">Amount</div>
+            <div class="value">{{ document.amount|cent_amount(true) }}</div>
+        </div>
+        {% if document is instanceof('App\\Entity\\TaxPayment') %}
+            <div class="field-group">
+                <div class="caption">Capture line</div>
+                <div class="value">{{ document.captureLine|default('-') }}</div>
+            </div>
+        {% endif %}
+        <div class="field-group">
+            <div class="caption">Type</div>
+            <div class="value">{{ document.type.value }}</div>
+        </div>
+        <div class="field-group">
+            <div class="caption">Month&middot;Year</div>
+            <div class="value">{{ document.month|month_name }}&middot;{{ document.year }}</div>
+        </div>
+        <div class="field-group">
+            <div class="caption">Sequence #</div>
+            <div class="value">{{ document.sequenceNo|default('-') }}</div>
+        </div>
+        <div class="field-group">
+            <div class="caption">Filename</div>
+            <div class="value">{{ document.filename }}</div>
+        </div>
+        {% if isAttachment %}
+            <div class="field-group">
+                <div class="caption">Display filename</div>
+                <div class="value">{{ document.displayFilename }}</div>
+            </div>
+        {% endif %}
+        <div class="field-group">
+            <div class="caption">Comment</div>
+            <div class="value" {% if document.comment is not empty %}style="background-color: #fff9db; padding: 2px 4px"{% endif %}>{{ document.comment|default('-') }}</div>
+        </div>
+        <div class="field-group">
+            <div class="caption">Consolidated</div>
+            <div class="value">{% if document.isConsolidated %}yes{% else %}no{% endif %}</div>
+        </div>
+    {% endblock %}
+{% endembed %}

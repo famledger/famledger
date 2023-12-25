@@ -7,7 +7,6 @@ use Doctrine\ORM\Event\PostUpdateEventArgs;
 use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Events;
-use Doctrine\ORM\Mapping\PostUpdate;
 use Exception;
 
 use App\Entity\Document;
@@ -17,7 +16,6 @@ use App\Exception\MissingDocumentFileException;
 use App\Repository\DocumentRepository;
 use App\Service\ChecksumHelper;
 use App\Service\DocumentService;
-use App\Service\TenantContext;
 
 /**
  * DocumentListener is responsible for managing the lifecycle events of Document entities within the Doctrine ORM.
@@ -156,11 +154,11 @@ class DocumentListener
         }
 
         if ($sourceFile !== $targetFile) {
-            if (@rename($sourceFile, $targetFile)) {
+            if (rename($sourceFile, $targetFile)) {
                 return $sourceFile;
             } else {
-                throw new FileRenameException($sourceFile, $targetFile);
-            }
+                $errorDetails = error_get_last();
+                throw new FileRenameException($sourceFile, $targetFile, $errorDetails['message']);            }
         }
 
         return null;

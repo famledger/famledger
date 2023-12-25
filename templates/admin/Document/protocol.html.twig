@@ -50,9 +50,20 @@
                         </tr>
                         <tr>
                             <td>Statement</td>
-                            <td><a href="{{ financialMonth.statement|ea_url('detail') }}">{{ financialMonth.statement }}</a></td>
+                            <td>
+                                {% if financialMonth.statement is not empty %}
+                                    <a href="{{ financialMonth.statement|ea_url('detail') }}">{{ financialMonth.statement }}</a>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endif %}
+                    {% if document.specs is defined and document.specs is not empty %}
+                    <tr>
+                        <td>Specs</td>
+                        <td>
+                            <pre style="margin-left: 8px;">{{ document.specs|json }}</pre>
+                        </td>
+                        {% endif %}
                 </table>
             {% else %}
                 <div class="mt-2">- none found -</div>

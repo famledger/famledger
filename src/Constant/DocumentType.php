@@ -8,20 +8,22 @@ enum DocumentType: string
     case ATTACHMENT = 'attachment';
     case EXPENSE = 'expense';
     case INCOME = 'income';
-    case PAYMENT = 'payment';
+    case PAYMENT = 'payment'; // used for "recibos de pago"
     case ANNOTATION = 'annotation';
     case TAX = 'tax';
+    case TAX_NOTICE = 'tax-notice';
 
     public static function getPriority(DocumentType $type): int
     {
         return match ($type) {
             self::ACCOUNT_STATEMENT => 1,
-            self::EXPENSE           => 2,
-            self::ATTACHMENT        => 3,
-            self::INCOME            => 4,
-            self::ANNOTATION        => 5,
-            self::TAX               => 6,
-            default                 => 7,
+            self::TAX               => 2,
+            self::TAX_NOTICE        => 3,
+            self::EXPENSE           => 4,
+            self::ATTACHMENT        => 5,
+            self::INCOME            => 6,
+            self::ANNOTATION        => 7,
+            default                 => 99,
         };
     }
 
@@ -34,6 +36,7 @@ enum DocumentType: string
             self::INCOME->value            => self::INCOME->value,
             self::ANNOTATION->value        => self::ANNOTATION->value,
             self::TAX->value               => self::TAX->value,
+            self::TAX_NOTICE->value        => self::TAX_NOTICE->value,
         ];
     }
 }

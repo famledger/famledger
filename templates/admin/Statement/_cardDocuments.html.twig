@@ -61,12 +61,10 @@
                                     {% if document.type.value == 'annotation' %}
                                         <a href="{{ document|ea_url('edit') }}"><i class="fa fa-pencil"></i></a>
                                     {% endif %}
-                                    <a target="download" class="text-muted"
-                                       href="{{ path('admin_document_download', {document:document.id}) }}"><i
-                                                class="text-muted {{ file_icon(document.filename) }}"></i> </a>
-                                    <a target="download"
-                                       href="{{ path('admin_document_download', {document:document.id}) }}"><i
-                                                class="tx-delete-btn fa fa-trash text-danger"></i></a>
+                                    <a target="download" href="{{ document|ea_url('detail', 'Document') }}"><i
+                                                class="fa fa-eye"></i></a>
+                                    <a target="download" href="{{ path('admin_document_download', {document:document.id}) }}"><i
+                                                class="text-muted {{ file_icon(document.filename) }}"></i></a>
                                 </div>
                             </td>
                         </tr>

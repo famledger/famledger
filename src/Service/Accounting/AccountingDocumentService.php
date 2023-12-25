@@ -51,7 +51,7 @@ class AccountingDocumentService
 
         // handle the case where the filename has already been prefixed with the sequence number
         // remove once all documents have been named correctly
-        if (preg_match('/^[0-9]{2} /', $document->getFilename())) {
+        if (!$document->isAttachment() and preg_match('/^[0-9]{2} /', $document->getFilename())) {
             $document->setFilename(substr($document->getFilename(), 3));
         }
 
@@ -74,7 +74,6 @@ class AccountingDocumentService
      * - a sourceFilepath where the file described by the document specs is located
      * and performs the following operations:
      *
-     * - creates and persists a Document entity from the DocumentSpecs object
      * - associates the Document entity with the FinancialMonth entity
      * - copies the file to the target folder identified by the FinancialMonth entity
      * - returns the Document entity

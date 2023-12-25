@@ -72,6 +72,7 @@ class StatementCrudController extends AbstractCrudController
             'entity'           => $context->getEntity(),
             'transactions'     => $statement->getTransactionsOrdered(),
             'documents'        => $this->em->getRepository(Document::class)->findUnLinked($statement),
+            'otherDocuments'   => $this->em->getRepository(Document::class)->findOtherDocuments($statement),
             'attachments'      => $this->em->getRepository(Attachment::class)->findPendingAttachments($statement),
             'customerInvoices' => $this->em->getRepository(Invoice::class)->findInvoicesWithoutDocuments($activeSeries),
             'eDocsByType'      => $this->eDocService->getEDocsByType($statement),

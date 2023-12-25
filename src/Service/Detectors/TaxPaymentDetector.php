@@ -10,16 +10,12 @@ use App\Service\Strategies\Expense\PABExpenseStrategy;
 use App\Service\Strategies\Expense\TaxExpenseStrategy;
 use App\Service\Strategies\Expense\TulumExpenseStrategy;
 
-class ExpenseDetector extends BaseDetector
+class TaxPaymentDetector extends BaseDetector
 {
     public function getStrategies(): array
     {
         return [
-            new CAPExpenseStrategy(),
-            new EnlaceFiscalExpenseStrategy(),
-            new PABExpenseStrategy(),
-            new TulumExpenseStrategy(),
-            new GenericExpenseStrategy(),
+            new TaxExpenseStrategy(),
         ];
     }
 
@@ -30,6 +26,6 @@ class ExpenseDetector extends BaseDetector
 
     public function supportsType(): DocumentType
     {
-        return DocumentType::EXPENSE;
+        return DocumentType::TAX;
     }
 }

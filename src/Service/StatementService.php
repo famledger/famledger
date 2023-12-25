@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\TaxPayment;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Throwable;
@@ -107,9 +108,12 @@ class StatementService
     public function linkDocument(Transaction $transaction, ?Document $document): void
     {
         $transaction->addDocument($document);
-        $document
-            ->setSequenceNo($transaction->getSequenceNo())
-            ->setFinancialMonth($transaction->getStatement()->getFinancialMonth());
+        $document->setFinancialMonth($transaction->getStatement()->getFinancialMonth());
+        if ($document instanceof TaxPayment) {
+            $taxNotice = $document->getTaxNotice();
+            $transaction->addDocument($taxNotice);
+            $taxNotice->setFinancialMonth($transaction->getStatement()->getFinancialMonth()); // probably obsolete
+        }
     }
 
     /**
@@ -168,6 +172,10 @@ class StatementService
             $invoice->setPaymentDate(null);
         } else {
             $transaction->removeDocument($document);
+            if ($document instanceof TaxPayment) {
+                $taxNotice = $document->getTaxNotice();
+                $transaction->removeDocument($taxNotice);
+            }
         }
     }
 }

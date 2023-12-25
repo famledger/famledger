@@ -6,11 +6,12 @@ use Exception;
 
 class FileRenameException extends Exception
 {
-    public function __construct(string $sourceFilepath, string $targetFilepath)
+    public function __construct(string $sourceFilepath, string $targetFilepath, string $message)
     {
-        parent::__construct(sprintf('Could not rename %s to %s',
+        parent::__construct(sprintf('Could not rename %s to %s. Error: %s',
             $sourceFilepath,
-            $targetFilepath
+            $targetFilepath,
+            $message
         ));
     }
 }

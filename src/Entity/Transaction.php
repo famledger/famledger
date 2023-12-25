@@ -86,6 +86,11 @@ class Transaction
         $this->status    = self::STATUS_PENDING;
     }
 
+    public function __toString(): string
+    {
+        return 'TX #' . $this->getId();
+    }
+
     public function getId(): ?int
     {
         return $this->id;

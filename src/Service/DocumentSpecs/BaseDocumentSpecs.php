@@ -146,6 +146,7 @@ abstract class BaseDocumentSpecs
     {
         return [
             'type'            => $this->type,
+            'subType'         => $this->subType,
             'month'           => $this->month,
             'year'            => $this->year,
             'accountNumber'   => $this->accountNumber,

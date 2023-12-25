@@ -29,6 +29,7 @@ use App\Entity\Receipt;
 use App\Entity\ReceiptTask;
 use App\Entity\Series;
 use App\Entity\Statement;
+use App\Entity\TaxNotice;
 use App\Entity\Tenant;
 use App\Entity\User;
 use App\Entity\Vehicle;
@@ -39,10 +40,11 @@ use App\Service\TenantContext;
 class DashboardController extends AbstractDashboardController
 {
     public function __construct(
+        private readonly AdminUrlGenerator      $adminUrlGenerator,
         private readonly EntityManagerInterface $em,
         private readonly LiveModeContext        $liveModeContext,
+        private readonly RequestStack           $requestStack,
         private readonly TenantContext          $tenantContext,
-        private readonly RequestStack           $requestStack
     ) {
     }
 
@@ -53,9 +55,7 @@ class DashboardController extends AbstractDashboardController
 
         // Option 1. You can make your dashboard redirect to some common page of your backend
         //
-        $adminUrlGenerator = $this->container->get(AdminUrlGenerator::class);
-
-        return $this->redirect($adminUrlGenerator->setController(TenantCrudController::class)->generateUrl());
+        return $this->redirect($this->adminUrlGenerator->setController(TenantCrudController::class)->generateUrl());
 
         // Option 2. You can make your dashboard redirect to different pages depending on the user
         //
@@ -116,6 +116,7 @@ HTML
         yield MenuItem::linkToRoute($liveModeLabel, $liveModeToggleIcon, 'liveModeSwitch',
             ['redirectUrl' => $redirectUrl])->setCssClass($liveModeCss);
         yield MenuItem::section('Accounting');
+        yield MenuItem::linkToCrud('Tax Payments', 'fas fa-cash-register', TaxNotice::class);
         yield MenuItem::linkToRoute('Inbox', 'fas fa-inbox', 'admin_inbox');
         yield MenuItem::linkToCrud('Statements', 'fas fa-balance-scale', Statement::class);
         yield MenuItem::linkToCrud('Bank Accounts', 'fas fa-bank', Account::class);
@@ -144,12 +145,12 @@ HTML
         // user menu with some menu items already created ("sign out", "exit impersonation", etc.)
         // if you prefer to create the user menu from scratch, use: return UserMenu::new()->...
         $menu          = parent::configureUserMenu($user)
-//            // use the given $user object to get the user name
+//            // use the given $user object to get the username
             ->setName($user->getUserIdentifier())
 //            // use this method if you don't want to display the name of the user
-            ->displayUserName(true)
+            ->displayUserName()
 //
-//            // you can return an URL with the avatar image
+//            // you can return a URL with the avatar image
 //            ->setAvatarUrl('https://avatars1.githubusercontent.com/u/1295390?s=60&v=4')
 //            //->setAvatarUrl($user->getProfileImageUrl())
 //            // use this method if you don't want to display the user image

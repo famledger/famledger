@@ -8,8 +8,10 @@ class AttachmentSpecs extends BaseDocumentSpecs
 {
     protected ?string $displayFilename = null;
     protected ?string $propertyKey     = null;
-    protected ?string $invoiceSeries = null;
-    protected ?int    $invoiceNumber = null;
+    protected ?string $invoiceSeries   = null;
+    protected ?int    $invoiceNumber   = null;
+
+    protected ?string $captureLine = null;
 
     public function getDocumentType(): DocumentType
     {
@@ -64,11 +66,24 @@ class AttachmentSpecs extends BaseDocumentSpecs
         return $this->invoiceNumber;
     }
 
+    public function getCaptureLine(): ?string
+    {
+        return $this->captureLine;
+    }
+
+    public function setCaptureLine(?string $captureLine): self
+    {
+        $this->captureLine = $captureLine;
+
+        return $this;
+    }
+
     public function serialize(): array
     {
         return array_merge(
             parent::serialize(),
             [
+                'captureLine'     => $this->getCaptureLine(),
                 'displayFilename' => $this->getDisplayFilename(),
                 'propertyKey'     => $this->getPropertyKey(),
                 'description'     => $this->getDescription(),

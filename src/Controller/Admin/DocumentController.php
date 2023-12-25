@@ -2,6 +2,9 @@
 
 namespace App\Controller\Admin;
 
+use App\Service\DocumentFactory;
+use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

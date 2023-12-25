@@ -33,19 +33,6 @@ class Attachment extends Document
     #[ORM\Column(nullable: true)]
     private ?int $invoiceNumber = null;
 
-    public function __construct()
-    {
-        parent::setType(DocumentType::ATTACHMENT);
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function setType(DocumentType $type): static
-    {
-        throw new Exception('Cannot set type on Attachment');
-    }
-
     /**
      * @throws Exception
      */

@@ -12,7 +12,11 @@ class TaxExpenseStrategy extends BaseBBVAExpenseStrategy
 {
     protected function specificMatchLogic(array $properties, string $content): bool
     {
-        return str_contains($content, 'Pago Referenciado SAT');
+        return str_contains($content, 'Pago Referenciado SAT')
+               and (
+                   str_contains($content, 'Línea de Captura')
+                   or str_contains($content, 'Línea de captura')
+               );
     }
 
     /**
@@ -32,6 +36,14 @@ class TaxExpenseStrategy extends BaseBBVAExpenseStrategy
 
     public function parse(string $content, ?string $filePath = null): ExpenseSpecs
     {
-        return new TaxSpecs($this->getExpenseData($content, $filePath));
+        $captureLine = $this->properties['Línea de Captura'] ?? $this->properties['Línea de captura'];
+        // remove all spaces from the capture line and add a space after each 4 characters
+        // older documents have no spaces in the capture line
+        $captureLine = implode(' ', str_split(str_replace(' ', '', $captureLine), 4));
+
+        return new TaxSpecs(array_merge(
+            ['captureLine' => $captureLine],
+            $this->getExpenseData($content, $filePath)
+        ));
     }
 }

@@ -52,7 +52,19 @@ class DocumentService
         // all attachments are stored in the attachment folder
         // attachments for invoices only exists when they have been associated with a transaction,
         // so we don't have to consider them here
-        $folderPath = ($document instanceof Attachment and null == $document->getTransaction())
+
+        // handle legacy case where an attachment without a transaction, could potentially be located in the accounting folder
+        if ($document->isAttachment() and null === $document->getTransaction() and null !== $document->getFinancialMonth()) {
+            $filepath = $this->accountingFolderManager->getAccountingFolderPath(
+                    $document->getFinancialMonth(),
+                    $document->isAttachment(),
+                    $absolute) . '/' . $document->getFilename();
+            if (is_file($filepath)) {
+                return $filepath;
+            }
+        }
+
+        $folderPath = ($document->isAttachment() and null == $document->getTransaction())
             ? $this->attachmentFolderManager->getAttachmentFolderPath(
                 $document->getAccount(),
                 $absolute

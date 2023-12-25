@@ -34,9 +34,14 @@ class AttachmentRepository extends ServiceEntityRepository
         $qb->where($qb->expr()->andX()
             ->add($qb->expr()->isNull('d.transaction'))
             ->add($qb->expr()->orX()
+                ->add($qb->expr()->isNull('d.isRelated'))
+                ->add($qb->expr()->eq('d.isRelated', $qb->expr()->literal(false)))
+            )
+            ->add($qb->expr()->orX()
                 ->add($qb->expr()->eq('d.isLegacy', $qb->expr()->literal(false)))
                 ->add($qb->expr()->eq('d.financialMonth', $qb->expr()->literal($financialMonth->getId())))
-            ));
+            )
+        );
 
         return $qb->getQuery()->getResult();
     }

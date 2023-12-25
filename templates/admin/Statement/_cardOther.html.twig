@@ -1,22 +1,18 @@
 {% embed 'admin/_common/collapsible_card.twig' with {
     icon:'fa fa-paperclip',
-    title: 'Attachments',
+    title: 'Related Documents',
 } %}
     {% block card_body %}
 
-        {% if attachments|length %}
+        {% if otherDocuments|length %}
             <table class="table table-hover">
-                {% for document in attachments %}
+                {% for document in otherDocuments %}
                     <tr data-droppable-id="{{ document.id }}" data-droppable-type="attachment"
                         class="attachment draggable">
-                        <td class="drag-handle" title="Drag to move"><i class="fa fa-arrows-alt"></i></td>
                         <td>{{ document.sequenceNo }}</td>
                         <td>{{ document.type.value }}</td>
                         <td>
                             {{ document.filename }}
-                            {% if document.displayFilename is not empty %}
-                                <br/>{{ document.displayFilename }}
-                            {% endif %}
                         </td>
                         <td class="text-right">{{ document.amount|cent_amount(true) }}</td>
                         <td class="text-right" style="white-space: nowrap">
@@ -25,22 +21,22 @@
                             <a target="download" href="{{ path('admin_document_download', {document:document.id}) }}"><i
                                         class="text-muted {{ file_icon(document.filename) }}"></i></a>
 
-                            {#                    Document can me marked as related #}
-                            {% if not document.isRelated %}
-                                <a title="link to statement"
+                            {% if document.isRelated and document.statement %}
+                                <a title="un-link from statement"
                                    href="{{ ea_url()
                                        .setController('App\\Controller\\Admin\\DocumentCrudController')
-                                       .setAction('relate')
-                                       .setRoute('admin_document_relate', {document:document.id, statement:statement.id})
+                                       .setAction('unrelate')
+                                       .setRoute('admin_document_unrelate', {document:document.id})
                                        .setEntityId(document.id) }}"
-                                   class=""><i class="fa fa-link"></i></a>
+                                   ><i class="fa fa-unlink"></i></a>
                             {% endif %}
+
                         </td>
                     </tr>
                 {% endfor %}
             </table>
         {% else %}
-            <div class="alert alert-info">No attachments found.</div>
+            -
         {% endif %}
 
     {% endblock %}

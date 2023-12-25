@@ -75,7 +75,12 @@
                                 {% set textColor = data['source']|length > 1 ? 'text-danger' : (data['target'] is empty ? 'text-warning' : (is_identical ? 'text-muted' : 'text-default')) %}
                                 {% for file in data['source'] %}
                                     <div id="{{ sourceContainerId }}" class="{{ textColor }}">
-                                        <a href="{{ path('admin_accountingFiles_download', {financialMonth:financialMonth.id, location:'source', filename:file.name}) }}"><i
+                                        <a href="{{ path('admin_accountingFiles_download', {
+                                            financialMonth:financialMonth.id,
+                                            location:'source',
+                                            filename:file.name,
+                                            isAttachment: (subFolder is not empty)
+                                        }) }}"><i
                                                     class="fa fa-file"></i></a>
                                         {{ file.name }}
                                         {% if data['source']|length > 1 %}
