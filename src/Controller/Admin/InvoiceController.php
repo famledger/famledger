@@ -5,13 +5,13 @@ namespace App\Controller\Admin;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 use App\Entity\Invoice;
 use App\Repository\CustomerRepository;
 use App\Repository\InvoiceRepository;
 use App\Repository\SeriesRepository;
+use App\Service\Helper\ResponseHelper;
 use App\Service\InvoiceFileManager;
 
 #[Route('/admin/invoice')]
@@ -38,20 +38,8 @@ class InvoiceController extends AbstractController
     public function download(Invoice $invoice, InvoiceFileManager $invoiceFileManager): Response
     {
         $filePath = $invoiceFileManager->getPdfPath($invoice);
-        $response = new StreamedResponse(function () use ($filePath) {
-            $fileStream   = fopen($filePath, 'rb');
-            $outputStream = fopen('php://output', 'wb');
-            stream_copy_to_stream($fileStream, $outputStream);
-            fclose($fileStream); // Don't forget to close the resource handle!
-        });
+        $filename = $invoiceFileManager->getPdfFilename($invoice);
 
-        // Set headers for showing the file in browser
-        $response->headers->set('Content-Type', 'application/pdf');
-        $response->headers->set(
-            'Content-Disposition',
-            'inline; filename="' . $invoiceFileManager->getPdfFilename($invoice) . '"'
-        );
-
-        return $response;
+        return ResponseHelper::createPdfResponse($filePath, $filename);
     }
 }

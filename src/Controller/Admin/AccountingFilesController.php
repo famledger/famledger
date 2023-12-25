@@ -8,7 +8,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Throwable;
 
@@ -16,6 +15,7 @@ use App\Entity\FinancialMonth;
 use App\Service\Accounting\AccountingDocumentService;
 use App\Service\Accounting\AccountingFolderComparator;
 use App\Service\Accounting\AccountingFolderManager;
+use App\Service\Helper\ResponseHelper;
 
 class AccountingFilesController extends AbstractController
 {
@@ -51,37 +51,29 @@ class AccountingFilesController extends AbstractController
     }
 
 
-    #[Route('/admin/accountingFiles/{financialMonth}/{location}/{filename}', name: 'admin_accountingFiles_download', methods: ['GET'])]
+    #[Route('/admin/accountingFiles/{financialMonth}/{location}/{filename}/{isAttachment}',
+        name: 'admin_accountingFiles_download',
+        defaults: ['isAttachment' => false],
+        methods: ['GET']
+    )]
     public function download(
         FinancialMonth          $financialMonth,
         string                  $location,
         string                  $filename,
+        bool                    $isAttachment,
         AccountingFolderManager $accountingFolderManager
     ): Response {
 
         try {
-            // TODO: add support for attachments
             $folder   = ($location === 'source')
-                ? $accountingFolderManager->getAccountingFolderPath($financialMonth, false)
-                : $accountingFolderManager->getAccountantFolderPath($financialMonth, false);
+                ? $accountingFolderManager->getAccountingFolderPath($financialMonth, $isAttachment)
+                : $accountingFolderManager->getAccountantFolderPath($financialMonth, $isAttachment);
             $filePath = sprintf('%s/%s',
                 $folder,
                 $filename
             );
 
-            if (!file_exists($filePath)) {
-                throw $this->createNotFoundException('The file does not exist');
-            }
-            $response = new StreamedResponse(function () use ($filePath) {
-                $fileStream   = fopen($filePath, 'rb');
-                $outputStream = fopen('php://output', 'wb');
-                stream_copy_to_stream($fileStream, $outputStream);
-                fclose($fileStream); // Don't forget to close the resource handle!
-            });// Set headers for showing the file in browser
-            $response->headers->set('Content-Type', 'application/pdf');
-            $response->headers->set('Content-Disposition', 'inline; filename="' . $filename . '"');
-
-            return $response;
+            return ResponseHelper::createPdfResponse($filePath, $filename);
         } catch (Exception $e) {
         }
     }

@@ -5,10 +5,10 @@ namespace App\Controller\Admin;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Throwable;
 
+use App\Service\Helper\ResponseHelper;
 use App\Service\InboxFileManager;
 use App\Service\InboxHandler;
 
@@ -48,22 +48,8 @@ class InboxController extends AbstractController
             $inboxFileManager->getInboxFolderPath(),
             $filename
         );
-        if (!file_exists($filePath)) {
-            throw $this->createNotFoundException('The file does not exist');
-        }
 
-        $response = new StreamedResponse(function () use ($filePath) {
-            $fileStream   = fopen($filePath, 'rb');
-            $outputStream = fopen('php://output', 'wb');
-            stream_copy_to_stream($fileStream, $outputStream);
-            fclose($fileStream); // Don't forget to close the resource handle!
-        });
-
-        // Set headers for showing the file in browser
-        $response->headers->set('Content-Type', 'application/pdf');
-        $response->headers->set('Content-Disposition', 'inline; filename="' . $filename . '"');
-
-        return $response;
+        return ResponseHelper::createPdfResponse($filePath, $filename);
     }
 
     #[Route('/admin/inbox/{filename}/delete', name: 'admin_inbox_delete')]
