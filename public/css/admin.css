@@ -172,3 +172,18 @@ ul.invoice-uids-list li {
     font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
     font-size: 13px;
 }
+
+th[data-column="amount"],
+th[data-column="balanceDiff"],
+th[data-column="startingBalance"],
+th[data-column="endingBalance"]
+{
+    text-align: right;
+}
+td[data-column="amount"],
+td[data-column="balanceDiff"],
+td[data-column="startingBalance"],
+td[data-column="endingBalance"]
+{
+    text-align: right;
+}
