@@ -57,6 +57,9 @@
             "fixtures/.gitignore"
         ]
     },
+    "lelyfoto/twig-instanceof": {
+        "version": "v1.1"
+    },
     "nelmio/alice": {
         "version": "3.12",
         "recipe": {
