@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
@@ -9,6 +10,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,6 +22,7 @@ use App\Entity\Address;
 use App\Entity\Customer;
 use App\Entity\Document;
 use App\Entity\EDoc;
+use App\Entity\FamilyMember;
 use App\Entity\Invoice;
 use App\Entity\InvoiceSchedule;
 use App\Entity\InvoiceTask;
@@ -41,11 +44,13 @@ use App\Service\LiveModeContext;
 class DashboardController extends AbstractDashboardController
 {
     public function __construct(
-        private readonly InvoiceRepository     $invoiceRepository,
-        private readonly InvoiceTaskRepository $invoiceTaskRepository,
-        private readonly LiveModeContext       $liveModeContext,
-        private readonly RequestStack          $requestStack,
-        private readonly AccountRepository     $accountRepository,
+        private readonly InvoiceRepository      $invoiceRepository,
+        private readonly InvoiceTaskRepository  $invoiceTaskRepository,
+        private readonly LiveModeContext        $liveModeContext,
+        private readonly RequestStack           $requestStack,
+        private readonly AccountRepository      $accountRepository,
+        private readonly AdminUrlGenerator      $adminUrlGenerator,
+        private readonly EntityManagerInterface $em,
     ) {
     }
 
@@ -107,13 +112,18 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToUrl('Outbox', 'fas fa-sign-out',
             'folderopener:///Volumes/KC3000-2TB/DataStorage/FamLedger/outbox');
         yield MenuItem::section('Invoicing');
-        yield MenuItem::linkToRoute('Invoice History', 'fas fa-history', 'admin_invoice_history', ['year' => date('Y')]);
+        yield MenuItem::linkToRoute('Invoice History', 'fas fa-history', 'admin_invoice_history',
+            ['year' => date('Y')]);
         yield MenuItem::linkToCrud('Invoice Schedules', 'fa fa-calendar', InvoiceSchedule::class);
         yield MenuItem::linkToCrud('Invoice Tasks', 'fas fa-tasks', InvoiceTask::class);
         yield MenuItem::linkToCrud('Receipt Tasks', 'fas fa-tasks', ReceiptTask::class);
         yield MenuItem::section('Accounting');
+        yield MenuItem::linkToRoute('Inbox', 'fas fa-inbox', 'admin_inbox');
+        yield MenuItem::linkToUrl('Outbox', 'fas fa-sign-out',
+            'folderopener:///Volumes/KC3000-2TB/DataStorage/FamLedger/outbox');
         yield MenuItem::linkToCrud('Statements', 'fas fa-balance-scale', Statement::class);
-        yield MenuItem::linkToRoute('Payment History', 'fas fa-history', 'admin_payment_history', ['year' => date('Y')]);
+        yield MenuItem::linkToRoute('Payment History', 'fas fa-history', 'admin_payment_history',
+            ['year' => date('Y')]);
         yield MenuItem::linkToCrud('Tax Payments', 'fas fa-cash-register', TaxNotice::class);
         yield MenuItem::linkToRoute('Yearly Expenses', 'fas fa-credit-card', 'admin_expense', ['year' => date('Y')]);
 //        yield MenuItem::linkToCrud('Financial Months', 'fas fa-calendar', FinancialMonth::class);
@@ -126,7 +136,21 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToCrud('Properties', 'fas fa-building', Property::class);
         yield MenuItem::linkToCrud('Customers', 'fas fa-user', Customer::class);
         yield MenuItem::linkToCrud('Addresses', 'fas fa-address-card', Address::class);
-        yield MenuItem::linkToCrud('Family', 'fas fa-people-arrows', Address::class);
+        $members = $this->em->getRepository(FamilyMember::class)->findAll();
+        yield MenuItem::section('Family', 'fas fa-people-arrows');
+        if (1 < count($members)) {
+            foreach ($members as $member) {
+                yield MenuItem::linkToUrl(
+                    $member->getFirstname(),
+                    'demo-icon icon-' . strtolower($member->getSlug()),
+                    $this->adminUrlGenerator
+                        ->setController(FamilyMemberCrudController::class)
+                        ->setAction(Action::DETAIL)
+                        ->setEntityId($member->getId())
+                        ->generateUrl()
+                );
+            }
+        }
         yield MenuItem::section('Miscellaneous');
         yield MenuItem::linkToRoute('Information', 'fas fa-info-circle', 'admin_info');
         yield MenuItem::linkToCrud('Vehicles', 'fas fa-car', Vehicle::class);
