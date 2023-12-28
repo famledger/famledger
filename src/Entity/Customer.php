@@ -62,6 +62,9 @@ class Customer implements TenantAwareInterface, FileOwnerInterface
     #[ORM\OneToMany(mappedBy: 'customer', targetEntity: Account::class, cascade: ['persist'])]
     private Collection $accounts;
 
+    #[ORM\Column(nullable: true)]
+    private ?bool $isActive = null;
+
     public function getOwnerKey(): ?string
     {
         return $this->rfc;
@@ -317,6 +320,18 @@ class Customer implements TenantAwareInterface, FileOwnerInterface
                 $account->setCustomer(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getIsActive(): ?bool
+    {
+        return (bool)$this->isActive;
+    }
+
+    public function setIsActive(?bool $isActive): static
+    {
+        $this->isActive = (bool)$isActive;
 
         return $this;
     }

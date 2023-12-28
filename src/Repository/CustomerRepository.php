@@ -25,17 +25,31 @@ class CustomerRepository extends ServiceEntityRepository
     public function getOptions(): array
     {
         $rawOptions = $this->createQueryBuilder('c')
-            ->select('c.rfc', 'c.name')
+            ->select('c.rfc', 'c.name', 'c.isActive')
             ->getQuery()
             ->getArrayResult();
 
-        $options = [];
+        $options         = [];
+        $inactiveOptions = [];
+
         foreach ($rawOptions as $row) {
-            $rfc           = $row['rfc'];
-            $caption       = $rfc . '-' . $row['name'];
-            $options[$rfc] = $caption;
+            $rfc     = $row['rfc'];
+            $caption = $rfc . '-' . $row['name'];
+
+            if ($row['isActive']) {
+                $options[$rfc] = $caption;
+            } else {
+                $inactiveOptions[$rfc] = $caption;
+            }
         }
+
         ksort($options);
+        ksort($inactiveOptions);
+
+        // Merge inactive options as a subgroup
+        if (!empty($inactiveOptions)) {
+            $options['Inactive'] = $inactiveOptions;
+        }
 
         return $options;
     }

@@ -52,7 +52,15 @@
         <select id="customer-selector">
             <option value="">- not restricted -</option>
             {% for rfc, value in customers %}
-                <option value="{{ rfc }}">{{ value }}</option>
+                {% if value is iterable %}
+                    <optgroup label="{{ rfc }}">
+                        {% for subRfc, subValue in value %}
+                            <option value="{{ subRfc }}">{{ subValue }}</option>
+                        {% endfor %}
+                    </optgroup>
+                {% else %}
+                    <option value="{{ rfc }}">{{ value }}</option>
+                {% endif %}
             {% endfor %}
         </select>
         <a href="javascript:void(0)" class=""><i class="fas fa-times clear-icon" id="clear-customer-selector"></i></a>

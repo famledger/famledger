@@ -14,6 +14,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Exception\ForbiddenActionException;
 use EasyCorp\Bundle\EasyAdminBundle\Exception\InsufficientEntityPermissionException;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ColorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
@@ -105,6 +106,7 @@ class CustomerCrudController extends AbstractCrudController
         yield ColorField::new('color');
         yield AssociationField::new('defaultAddress');
         yield TextareaField::new('comment');
+        yield BooleanField::new('isActive')->setLabel('active');
 
         yield FormField::addPanel('Accounts')->collapsible()->setIcon('fa fa-bank');
         yield CollectionField::new('accounts')
