@@ -113,7 +113,7 @@ class Transaction
         return $this->type;
     }
 
-    public function setType(DocumentType $type): static
+    public function setType(?DocumentType $type): static
     {
         $this->type = $type;
         if ($type === DocumentType::ACCOUNT_STATEMENT) {
@@ -283,10 +283,12 @@ class Transaction
         $firstDocument = $supportingDocuments->first();
 
         if (!$hasDocuments) {
-            $this->setStatus(0 === count($this->documents)
-                ? self::STATUS_PENDING
-                : self::STATUS_AMOUNT_MISMATCH
-            );
+            $this
+                ->setStatus(0 === count($this->documents)
+                    ? self::STATUS_PENDING
+                    : self::STATUS_AMOUNT_MISMATCH
+                )
+                ->setType(null);
         } else {
             // income can be backed up by multiple documents
             if ($this->getAmount() > 0) {
@@ -296,10 +298,12 @@ class Transaction
                     fn($sum, $doc) => $sum + $doc->getAmount(),
                     0
                 );
-                $this->setStatus($documentAmountSum !== $this->getAmount()
-                    ? self::STATUS_AMOUNT_MISMATCH
-                    : self::STATUS_CONSOLIDATED
-                );
+                $this
+                    ->setStatus($documentAmountSum !== $this->getAmount()
+                        ? self::STATUS_AMOUNT_MISMATCH
+                        : self::STATUS_CONSOLIDATED
+                    )
+                    ->setType(DocumentType::INCOME);
             } else {
                 // get first and only document
                 if (null === $amount = $firstDocument->getAmount()) {
@@ -310,6 +314,15 @@ class Transaction
                         ? self::STATUS_CONSOLIDATED
                         : self::STATUS_AMOUNT_MISMATCH
                     );
+                }
+                foreach ($supportingDocuments as $document) {
+                    if ($document->getType() === DocumentType::TAX) {
+                        $this->setType(DocumentType::TAX);
+                        break;
+                    }
+                }
+                if(count($supportingDocuments) === 1 and $firstDocument->getType() === DocumentType::EXPENSE) {
+                    $this->setType(DocumentType::EXPENSE);
                 }
             }
         }
