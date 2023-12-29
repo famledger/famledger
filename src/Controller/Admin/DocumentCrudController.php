@@ -277,7 +277,7 @@ class DocumentCrudController extends AbstractCrudController
     {
         return $crud
             ->setDefaultSort(['created' => 'DESC'])
-            ->setSearchFields(['type', 'filename'])
+            ->setSearchFields(['type', 'filename', 'amount'])
             ->overrideTemplate('crud/detail', 'admin/Document/details.html.twig')
             ->showEntityActionsInlined();
     }

@@ -169,7 +169,7 @@ class StatementCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setSearchFields(['account.caption'])
+            ->setSearchFields(['account.caption', 'status', 'month', 'year'])
             ->showEntityActionsInlined()
             ->overrideTemplate('crud/detail', 'admin/Statement/details.html.twig')
             ->setDefaultSort(['year' => 'DESC', 'month' => 'DESC'])
