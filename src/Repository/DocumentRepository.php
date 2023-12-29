@@ -31,7 +31,7 @@ class DocumentRepository extends ServiceEntityRepository
     {
         $qb = $this->getStatementQueryBuilder($statement);
         $qb
-            ->andWhere($qb->expr()->neq('d.type', $qb->expr()->literal(DocumentType::ATTACHMENT->value)))
+            ->andWhere($qb->expr()->notIn('d.type', [DocumentType::ATTACHMENT->value, DocumentType::TAX_NOTICE->value]))
             ->andWhere($qb->expr()->isNull('d.transaction'))
             ->andWhere($qb->expr()->isNull('d.statement'));
 
