@@ -44,7 +44,8 @@
         {% endif %}
         <div class="field-group">
             <div class="caption">Comment</div>
-            <div class="value" {% if document.comment is not empty %}style="background-color: #fff9db; padding: 2px 4px"{% endif %}>{{ document.comment|default('-') }}</div>
+            <div class="value"
+                 {% if document.comment is not empty %}style="background-color: #fff9db; padding: 2px 4px"{% endif %}>{{ document.comment|default('-')|raw }}</div>
         </div>
         <div class="field-group">
             <div class="caption">Consolidated</div>
