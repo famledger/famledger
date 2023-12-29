@@ -1,0 +1,19 @@
+{% set taxNotice = field.value %}
+{% set taxPayment = taxNotice.taxPayment|default(null) %}
+{% if taxPayment is null and taxNotice.amount == 0 %}
+    <span{% if taxNotice.month == 13 %} class="text-success" style="font-weight: bold"{% endif %}>
+        Declaración{% if taxNotice.month == 13 %} anual{% endif %} en zeros
+        {% if taxNotice.month == 13 %} {{ taxNotice.year }}
+        {% else %}
+            {{ taxNotice.year }}-{{ '%02d'|format(taxNotice.month) }}
+        {% endif %}
+    </span>
+{% elseif taxPayment is not  null %}
+    <a href="{{ ea_url()
+        .setController('App\\Controller\\Admin\\DocumentCrudController')
+        .setAction('detail')
+        .setEntityId(taxPayment.id) }}"
+            {% if taxNotice.month == 13 %} class="text-success" style="font-weight: bold"{% endif %}
+    >{{ taxPayment.filename }}
+    </a>
+{% endif %}

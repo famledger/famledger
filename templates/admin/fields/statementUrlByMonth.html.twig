@@ -1,5 +1,0 @@
-{% if field.value is not empty %}
-    {% set statement = field.value.statement %}
-    <a href="{{ statement_url(statement.year, statement.month) }}"><i
-                class="fa fa-balance-scale"></i> {{ statement.year }}-{{ statement.month|month_name }}</a>&middot;{{ field.value.sequenceNo }}
-{% endif %}

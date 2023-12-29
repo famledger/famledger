@@ -114,7 +114,8 @@ class DocumentCrudController extends AbstractCrudController
         if (null === $error) {
             $document
                 ->setIsRelated(true)
-                ->setStatement($statement);
+                ->setStatement($statement)
+                ->setFinancialMonth($statement->getFinancialMonth());
             $em->flush();
 
             $request->getSession()->getFlashBag()->add('success', 'Document related successfully');
@@ -142,9 +143,6 @@ class DocumentCrudController extends AbstractCrudController
         try {
             if (false === $document->getIsRelated() or null === $statement) {
                 throw new Exception('Document is not related to the statement');
-            }
-            if (null === $document->getFinancialMonth()) {
-                throw new Exception('Document has no financial month');
             }
             $document->setIsRelated(false);
             $document->setStatement(null);

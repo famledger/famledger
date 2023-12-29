@@ -10,6 +10,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\ArrayField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 use App\Admin\Field\CentAmountField;
@@ -63,12 +64,14 @@ class TaxNoticeCrudController extends AbstractCrudController
         return [
             IntegerField::new('year'),
             IntegerField::new('month')->setTemplatePath('admin/fields/monthAsString.html.twig'),
-            AssociationField::new('transaction')->hideOnForm()->setTemplatePath('admin/fields/statementUrlByMonth.html.twig'),
+            TextField::new('taxPaymentFromSelf', 'Tax payment')->setTemplatePath('admin/fields/taxPayment.html.twig'),
+            TextField::new('statementFromSelf',
+                'Statement')->hideOnForm()->setTemplatePath('admin/fields/taxNoticeStatement.html.twig'),
             AssociationField::new('financialMonth'),
             AssociationField::new('statement')->hideOnIndex(),
-            AssociationField::new('taxPayment'),
             CentAmountField::new('amount'),
             TextField::new('checksum')->onlyOnDetail(),
+            TextAreaField::new('comment')->hideOnIndex(),
             DateField::new('created')->hideOnForm()->hideOnIndex(),
             ArrayField::new('specs')->hideOnIndex()->hideOnForm()
                 ->setTemplatePath('admin/fields/array.html.twig'),
@@ -79,8 +82,11 @@ class TaxNoticeCrudController extends AbstractCrudController
     {
         return $crud
             ->setDefaultSort(['year' => 'DESC', 'month' => 'DESC'])
-            ->setSearchFields(['filename'])
+            ->setPageTitle(Crud::PAGE_INDEX, 'Tax Notices/Payments')
+            ->setPaginatorPageSize(25)
+            ->setSearchFields(['filename', 'month', 'year'])
             ->overrideTemplate('crud/detail', 'admin/Document/details.html.twig')
+            ->overrideTemplate('crud/index', 'admin/TaxPayment/index.html.twig')
             ->showEntityActionsInlined();
     }
 }

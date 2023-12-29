@@ -37,6 +37,16 @@ class TaxNotice extends Attachment
         return $this->captureLine;
     }
 
+    public function getStatementFromSelf(): ?static
+    {
+        return $this;
+    }
+
+    public function getTaxPaymentFromSelf(): ?static
+    {
+        return $this;
+    }
+
     public function getTaxPayment(): ?TaxPayment
     {
         return $this->taxPayment;
