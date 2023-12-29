@@ -187,3 +187,48 @@ td[data-column="endingBalance"]
 {
     text-align: right;
 }
+
+span.sequence {
+    padding: 1px 5px;
+}
+span.income {
+    color: #0e5e42; ;
+    background-color: #dcfce7; ;
+}
+
+span.expense {
+    color: #ab3760; ;
+    background-color: #fee5e5; ;
+}
+
+span.tax{
+    color: #9f4c2a; ;
+    background-color: #fefac9; ;
+}
+
+span.info {
+    color: #29699d; ;
+    background-color: #dfecfd; ;
+}
+
+
+
+span.tx-row-none {
+    border-left: 2px solid #999999; ;
+}
+
+tr.tx-row-income {
+    border-left: 2px solid #41b083; ;
+}
+
+tr.tx-row-expense {
+    border-left: 2px solid #d56683; ;
+}
+
+tr.tx-row-tax {
+    border-left: 2px solid #dd8638; ;
+}
+
+tr.tx-row-none {
+    border-left: 2px solid #999999; ;
+}

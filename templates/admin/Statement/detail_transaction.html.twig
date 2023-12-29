@@ -11,16 +11,23 @@
 
 <tr
         {% set consolidatedClass = transaction.isConsolidated ? 'consolidated ' : '' %}
+        {% if transaction.type is not empty %}
+            {% set transactionType = transaction.type.value %}
+        {% else %}
+            {% set transactionType = 'none' %}
+        {% endif %}
         {% if isConsolidated %}
             {% if transaction.isConsolidated %}
-                class="{{ consolidatedClass }}"
+                class="{{ transactionType }} {{ consolidatedClass }}"
             {% endif %}
         {% else %}
-            class="{{ consolidatedClass }}droppable {{ droppableClasses }}" data-dropzone-id="{{ transaction.id }}"
+            class="{{ transactionType }} {{ consolidatedClass }}droppable {{ droppableClasses }}" data-dropzone-id="{{ transaction.id }}"
         {% endif %}
         data-transaction-id="{{ transaction.id }}"
 >
-    <td title="{{ transaction.id }}">{{ transaction.sequenceNo }}</td>
+    <td title="{{ transaction.id }}{% if transaction.type is not null %} {{ transaction.type.value }}{% endif %}">
+        <span class="sequence {{ transactionType }}">{{ transaction.sequenceNo }}</span>
+    </td>
     <td title="{{ transaction.bookingDate|format_date('long') }}">{{ transaction.bookingDate|date('d M') }}</td>
     <td>
         {{ include('admin/Statement/_descriptionContainer.html.twig') }}
