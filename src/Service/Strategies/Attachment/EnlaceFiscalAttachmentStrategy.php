@@ -23,7 +23,7 @@ class EnlaceFiscalAttachmentStrategy implements StrategyInterface
 
         // Total:     $3,400.01
         $value  = StrategyHelper::extractValue(
-            '/Total:\s\$\s+([0-9,.]+)\s+/i',
+            '/ Total:\s\$\s+([0-9,.]+)\s+/i',
             $reducedContent,
             $filePath,
             'Total:'

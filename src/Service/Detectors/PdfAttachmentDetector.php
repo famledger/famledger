@@ -6,6 +6,7 @@ use App\Constant\DocumentType;
 use App\Service\Strategies\Attachment\AcuseDeclaracionStrategy;
 use App\Service\Strategies\Attachment\BTMAttachmentStrategy;
 use App\Service\Strategies\Attachment\CAPAttachmentStrategy;
+use App\Service\Strategies\Attachment\DeclaracionAnualStrategy;
 use App\Service\Strategies\Attachment\DeclaracionProvisionalStrategy;
 use App\Service\Strategies\Attachment\EnlaceFiscalAttachmentStrategy;
 use App\Service\Strategies\Attachment\IASAttachmentStrategy;
@@ -24,6 +25,7 @@ class PdfAttachmentDetector extends BaseDetector
             new PABAttachmentStrategy(),
             new EnlaceFiscalAttachmentStrategy(),
             new DeclaracionProvisionalStrategy(),
+            new DeclaracionAnualStrategy(),
             new TulumExpenseAttachmentStrategy(),
         ];
     }
