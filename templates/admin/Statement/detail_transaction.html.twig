@@ -24,6 +24,7 @@
             class="{{ transactionType }} {{ consolidatedClass }}droppable {{ droppableClasses }}" data-dropzone-id="{{ transaction.id }}"
         {% endif %}
         data-transaction-id="{{ transaction.id }}"
+        id="position_{{ transaction.sequenceNo }}"
 >
     <td title="{{ transaction.id }}{% if transaction.type is not null %} {{ transaction.type.value }}{% endif %}">
         <span class="sequence {{ transactionType }}">{{ transaction.sequenceNo }}</span>

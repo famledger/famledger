@@ -3,7 +3,7 @@
 {% set taxPayment = taxNotice.taxPayment|default(null) %}
 {% if transaction is not empty %}
     {% set statement = transaction.statement %}
-    <a href="{{ statement_url(statement.year, statement.month) }}"><i
+    <a href="{{ statement_url(statement.year, statement.month) }}#position_{{ transaction.sequenceNo }}"><i
                 class="fa fa-balance-scale"></i> {{ statement.year }}-{{ statement.month|month_name }}
     </a>&middot;{{ transaction.sequenceNo }}
 {% else %}
