@@ -15,7 +15,7 @@
                             class="detail-row invoice draggable{% if invoice.unpaid %} unpaid{% endif %}"
                             title="{{ loop.index }}"
                         >
-                            <td class="drag-handle" title="Drag to move"><i class="fa fa-arrows-alt"></i></td>
+                            <td class="drag-handle" title="Drag to move"><i class="fa fa-arrows-alt"></i> {{ loop.index }}</td>
                             <td class="nowrap">
                                 {% if invoice.year is not null %}
                                     {{ invoice.year }}-{{ "%02d"|format(invoice.month) }}
@@ -28,7 +28,7 @@
                             <td>{{ invoice.recipientName }}</td>
                             <td>
                                 {% if invoice.invoices is defined %}
-                                    {% for series, numbers in invoice.invoices %}
+                                    {% for series, numbers in invoice.invoicesList %}
                                         <div>{{ series }}:
                                             {% for invoiceId, number in numbers %}
                                                 {% if loop.index > 1 %}&middot; {% endif %}
