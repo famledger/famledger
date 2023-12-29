@@ -21,8 +21,17 @@ class TenantSwitchController extends AbstractController
     ): RedirectResponse {
         $tenant = $em->getRepository(Tenant::class)->find($request->get('tenant'));
         $context->setTenant($tenant);
-        $redirectUrl = urldecode($request->get('redirectUrl'));
 
-        return new RedirectResponse($redirectUrl);
+        $referer = $request->headers->get('referer');
+        if (!empty($referer)) {
+            $queryString = parse_url($referer, PHP_URL_QUERY);
+            parse_str($queryString, $queryParams);
+            // cannot redirect to an entity details page
+            if (!empty($queryParams['entityId'] ?? '')) {
+                return new RedirectResponse('/admin');
+            }
+        }
+
+        return new RedirectResponse($referer);
     }
 }
