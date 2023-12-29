@@ -48,7 +48,7 @@ class AccountingFolderManager
             throw new Exception("The path $destinationPath is a directory");
         }
         if (is_file($destinationPath) and false === $overwriteExisting) {
-            throw new ExistingFileException("The file $destinationPath already exists");
+            throw new ExistingFileException($destinationPath);
         }
         $this->filesystem->copy($sourcePath, $destinationPath);
         $this->logger->info("Created accounting file: $destinationPath");
@@ -66,7 +66,7 @@ class AccountingFolderManager
             throw new Exception("The path $destinationPath is a directory");
         }
         if (is_file($destinationPath)) {
-            throw new Exception("The file $destinationPath already exists");
+            throw new ExistingFileException($destinationPath);
         }
         // create an empty file with the given name
         $this->filesystem->touch($destinationPath);

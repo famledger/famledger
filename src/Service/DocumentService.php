@@ -41,41 +41,38 @@ class DocumentService
      * If the document is an attachment and is not linked to a transaction, it is not stored in the accounting folder.
      * In order to determine the path, we must use the AttachmentFolderManager instead of the AccountingFolderManager.
      */
-    public function getAccountingFilepath(Document $document, ?bool $absolute = true): ?string
-    {
-        // TODO: understand and document this case
+    public function getAccountingFilepath(
+        Document $document,
+        ?bool    $absolute = true,
+        ?bool    $searchMode = false
+    ): ?string {
         if (null === $document->getFilename()) {
             return null;
         }
 
-        // all documents are stored in the accounting folder
-        // all attachments are stored in the attachment folder
-        // attachments for invoices only exists when they have been associated with a transaction,
-        // so we don't have to consider them here
+        $financialMonth = $document->getFinancialMonth();
+        $isAttachment   = $document->isAttachment();
+        // only attachments ,ay not be associated with a financial month
+        if (false === $isAttachment and null === $financialMonth) {
+            throw new Exception('Document is not an attachment and has no financial month');
+        }
 
-        // handle legacy case where an attachment without a transaction, could potentially be located in the accounting folder
-        if ($document->isAttachment() and null === $document->getTransaction() and null !== $document->getFinancialMonth()) {
-            $filepath = $this->accountingFolderManager->getAccountingFolderPath(
-                    $document->getFinancialMonth(),
-                    $document->isAttachment(),
-                    $absolute) . '/' . $document->getFilename();
-            if (is_file($filepath)) {
-                return $filepath;
+        if ($isAttachment) {
+            // attachments might be stored in the attachment folder even when they have been associated with a financial month
+            $attachmentPath = $this->attachmentFolderManager->getAttachmentFolderPath(
+                    $document->getAccount(),
+                    $absolute
+                ) . '/' . $document->getFilename();
+            if (($searchMode and is_file($attachmentPath)) or (null === $financialMonth)) {
+                return $attachmentPath;
             }
         }
 
-        $folderPath = ($document->isAttachment() and null == $document->getTransaction())
-            ? $this->attachmentFolderManager->getAttachmentFolderPath(
-                $document->getAccount(),
-                $absolute
-            )
-            : $this->accountingFolderManager->getAccountingFolderPath(
+        return $this->accountingFolderManager->getAccountingFolderPath(
                 $document->getFinancialMonth(),
                 $document->isAttachment(),
                 $absolute
-            );
-
-        return $folderPath . '/' . AccountingDocumentService::composeFilename($document);
+            ) . '/' . AccountingDocumentService::composeFilename($document);
     }
 
     /**

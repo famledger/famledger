@@ -29,14 +29,14 @@ class DocumentPathExtension extends AbstractExtension
         ];
     }
 
-    public function getDocumentPath(?int $documentId = null): string
+    public function getDocumentPath(?int $documentId = null, ?bool $absolute = false): string
     {
         try {
             if (null === $documentId) {
                 throw new Exception('Document not found');
             }
             if (null !== $document = $this->em->getRepository(Document::class)->find($documentId)) {
-                return $this->documentService->getAccountingFilepath($document, false);
+                return $this->documentService->getAccountingFilepath($document, $absolute, true);
             }
             throw new Exception('Document not found: ' . $documentId);
         } catch (Exception $e) {

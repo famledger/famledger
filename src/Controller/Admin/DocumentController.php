@@ -2,9 +2,6 @@
 
 namespace App\Controller\Admin;
 
-use App\Service\DocumentFactory;
-use Doctrine\ORM\EntityManagerInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -80,7 +77,7 @@ class DocumentController extends AbstractController
     #[Route('/download/{document}', name: 'admin_document_download')]
     public function download(Document $document, DocumentService $documentService): Response
     {
-        $filePath = $documentService->getAccountingFilepath($document);
+        $filePath = $documentService->getAccountingFilepath($document, true, true);
         $mime     = mime_content_type($filePath); // Get the MIME type of the file
 
         $response = new StreamedResponse(function () use ($filePath) {

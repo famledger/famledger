@@ -27,6 +27,15 @@
             <div class="caption">Filename</div>
             <div class="value">{{ document.filename }}</div>
         </div>
+        <div class="field-group">
+            <div class="caption">Filepath</div>
+            <div class="value">
+                <span style="font-family: monospace" id="filepath">{{ document.id|document_path(true) }}</span>
+                <a class="copy-to-clipboard" data-target="#filepath">
+                    <i class="fa fa-clipboard"></i>
+                </a>
+            </div>
+        </div>
         {% if isAttachment %}
             <div class="field-group">
                 <div class="caption">Display filename</div>

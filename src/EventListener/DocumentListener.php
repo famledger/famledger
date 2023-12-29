@@ -67,6 +67,7 @@ class DocumentListener
      *
      * @throws MissingDocumentFileException
      * @throws DuplicateFileException
+     * @throws Exception
      */
     private function processNewDocument(Document $document): void
     {
@@ -109,6 +110,7 @@ class DocumentListener
      * @throws DuplicateFileException
      * @throws MissingDocumentFileException
      * @throws FileRenameException
+     * @throws Exception
      */
     private function processUpdatedDocument(Document $oldDocument, Document $document): void
     {
@@ -143,14 +145,15 @@ class DocumentListener
     /**
      * @throws MissingDocumentFileException
      * @throws FileRenameException
+     * @throws Exception
      */
     private function handleFileOperations(Document $oldDocument, Document $document): ?string
     {
-        $sourceFile = $this->documentService->getAccountingFilepath($oldDocument);
+        $sourceFile = $this->documentService->getAccountingFilepath($oldDocument, true, true);
         $targetFile = $this->documentService->getAccountingFilepath($document);
 
         if (!is_file($sourceFile)) {
-            // throw new MissingDocumentFileException($oldDocument);
+            throw new MissingDocumentFileException($oldDocument);
         }
 
         if ($sourceFile !== $targetFile) {
@@ -158,7 +161,8 @@ class DocumentListener
                 return $sourceFile;
             } else {
                 $errorDetails = error_get_last();
-                throw new FileRenameException($sourceFile, $targetFile, $errorDetails['message']);            }
+                throw new FileRenameException($sourceFile, $targetFile, $errorDetails['message']);
+            }
         }
 
         return null;
@@ -184,6 +188,7 @@ class DocumentListener
      * If the file does not exist, a MissingDocumentFileException is thrown.
      *
      * @throws MissingDocumentFileException
+     * @throws Exception
      */
     private function getChecksum(Document $document): string
     {
@@ -199,6 +204,7 @@ class DocumentListener
 
     /**
      * @throws DuplicateFileException
+     * @throws Exception
      */
     private function checkForExistingChecksum(string $checksum, Document $document): void
     {
@@ -214,6 +220,9 @@ class DocumentListener
         }
     }
 
+    /**
+     * @throws Exception
+     */
     private function hasEmptyFile(Document $document): bool
     {
         return 0 === filesize($this->documentService->getAccountingFilepath($document));

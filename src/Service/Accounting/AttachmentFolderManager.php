@@ -7,6 +7,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
 use App\Entity\Account;
+use App\Exception\ExistingFileException;
 
 /**
  * AttachmentFolderManager is responsible for managing the files related to attachments.
@@ -39,7 +40,7 @@ class AttachmentFolderManager
             throw new Exception("The path $destinationPath is a directory");
         }
         if (is_file($destinationPath) and false === $overwriteExisting) {
-            throw new Exception("The file $destinationPath already exists");
+            throw new ExistingFileException($destinationPath);
         }
         $this->filesystem->copy($sourcePath, $destinationPath);
         $this->logger->info("Created accounting file: $destinationPath");
