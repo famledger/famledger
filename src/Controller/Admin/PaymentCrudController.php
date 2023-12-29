@@ -68,8 +68,7 @@ class PaymentCrudController extends AbstractCrudController
                     ->setIcon('fa fa-eye')->setLabel('');
             })
             ->add(Crud::PAGE_INDEX, $statementDetailAction)
-            ->remove(Crud::PAGE_INDEX, Action::NEW)
-            ->disable(Action::BATCH_DELETE);
+            ->remove(Crud::PAGE_INDEX, Action::NEW);
     }
 
     public function configureFields(string $pageName): iterable

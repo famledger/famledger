@@ -3,6 +3,8 @@
 namespace App\Controller\Admin;
 
 use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -196,5 +198,11 @@ HTML
 //        }
 
         return $menu;
+    }
+
+    public function configureActions(): Actions
+    {
+        return parent::configureActions()
+            ->disable(Action::BATCH_DELETE);
     }
 }

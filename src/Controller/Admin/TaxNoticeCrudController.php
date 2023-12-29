@@ -40,6 +40,7 @@ class TaxNoticeCrudController extends AbstractCrudController
             });
 
         return $actions
+            ->remove(Crud::PAGE_INDEX, Action::NEW)
             ->add(Crud::PAGE_DETAIL, $rebuildDocument)
             ->add(Crud::PAGE_DETAIL, $downloadDocument)
             ->add(Crud::PAGE_INDEX, $downloadDocument)
@@ -54,8 +55,7 @@ class TaxNoticeCrudController extends AbstractCrudController
                 return $action->setIcon('fa fa-trash')->setLabel('');
             })
             //->remove(Crud::PAGE_INDEX, Action::NEW)
-            ->reorder(Crud::PAGE_INDEX, ['downloadDocument', Action::DETAIL, Action::EDIT, Action::DELETE])
-            ->disable(Action::BATCH_DELETE);
+            ->reorder(Crud::PAGE_INDEX, ['downloadDocument', Action::DETAIL, Action::EDIT, Action::DELETE]);
     }
 
     public function configureFields(string $pageName): iterable
