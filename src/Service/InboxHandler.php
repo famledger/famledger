@@ -70,7 +70,7 @@ class InboxHandler
             // when the attachment is linked to a transaction (via the StatementController -> StatementService::linkDocument).
             if ($document instanceof Attachment) {
                 $document->setAccount($account);
-                $this->attachmentFolderManager->createAttachmentFile(
+                $this->attachmentFolderManager->createFile(
                     $account,
                     $filePath,
                     $filename ?? $document->getFilename(),
@@ -92,7 +92,7 @@ class InboxHandler
                 // Tax notices, and potentially other documents, have to be moved to the accounting folder
                 // where the 'parent document' is stored.
                 foreach ($event->getRelatedDocuments() as $relatedDocument) {
-                    $relatedFilePath = $this->documentService->getAccountingFilepath($relatedDocument);
+                    $relatedFilePath = $this->documentService->getFilepath($relatedDocument);
                     $this->accountingDocumentService->addDocument(
                         $relatedDocument,
                         $financialMonth,

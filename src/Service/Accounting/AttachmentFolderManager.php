@@ -29,7 +29,7 @@ class AttachmentFolderManager
     /**
      * @throws Exception
      */
-    public function createAttachmentFile(
+    public function createFile(
         Account $account,
         string  $sourcePath,
         string  $filename,

@@ -77,7 +77,7 @@ class DocumentController extends AbstractController
     #[Route('/download/{document}', name: 'admin_document_download')]
     public function download(Document $document, DocumentService $documentService): Response
     {
-        $filePath = $documentService->getAccountingFilepath($document, true, true);
+        $filePath = $documentService->getFilepath($document, true, true);
         $mime     = mime_content_type($filePath); // Get the MIME type of the file
 
         $response = new StreamedResponse(function () use ($filePath) {

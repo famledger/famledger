@@ -70,7 +70,7 @@ class DocumentCrudController extends AbstractCrudController
         AdminUrlGenerator        $adminUrlGenerator
     ): Response {
 
-        $filepath = $documentService->getAccountingFilepath($document);
+        $filepath = $documentService->getFilepath($document);
         if (file_exists($filepath)) {
             try {
                 $documentSpecs = $documentLoader->load(

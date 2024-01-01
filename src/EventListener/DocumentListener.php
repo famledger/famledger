@@ -124,7 +124,7 @@ class DocumentListener
             $this->checkForExistingChecksum($checksum, $document);
         } catch (Exception $e) {
             if ($renameBackup) {
-                @rename($this->documentService->getAccountingFilepath($document), $renameBackup);
+                @rename($this->documentService->getFilepath($document), $renameBackup);
             }
             throw $e;
         }
@@ -149,8 +149,8 @@ class DocumentListener
      */
     private function handleFileOperations(Document $oldDocument, Document $document): ?string
     {
-        $sourceFile = $this->documentService->getAccountingFilepath($oldDocument, true, true);
-        $targetFile = $this->documentService->getAccountingFilepath($document);
+        $sourceFile = $this->documentService->getFilepath($oldDocument, true, true);
+        $targetFile = $this->documentService->getFilepath($document);
 
         if (!is_file($sourceFile)) {
             throw new MissingDocumentFileException($oldDocument);
@@ -192,7 +192,7 @@ class DocumentListener
      */
     private function getChecksum(Document $document): string
     {
-        $filepath = $this->documentService->getAccountingFilepath($document);
+        $filepath = $this->documentService->getFilepath($document);
         if (!is_file($filepath)) {
             throw new MissingDocumentFileException($document);
         }
@@ -209,7 +209,7 @@ class DocumentListener
     private function checkForExistingChecksum(string $checksum, Document $document): void
     {
         // do not check for duplicate checksums on empty files
-        if (0 === filesize($this->documentService->getAccountingFilepath($document))) {
+        if (0 === filesize($this->documentService->getFilepath($document))) {
             return;
         }
 
@@ -225,6 +225,6 @@ class DocumentListener
      */
     private function hasEmptyFile(Document $document): bool
     {
-        return 0 === filesize($this->documentService->getAccountingFilepath($document));
+        return 0 === filesize($this->documentService->getFilepath($document));
     }
 }
