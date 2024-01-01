@@ -8,13 +8,13 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Throwable;
 
-use App\Constant\DocumentType;
 use App\Entity\Document;
 use App\Entity\Invoice;
 use App\Entity\Statement;
@@ -53,15 +53,24 @@ class StatementController extends AbstractController
         EntityManagerInterface $em
     ): Response {
         try {
-            $filename  = $request->request->get('filename');
-            $amount    = $request->request->get('amount');
             $csrfToken = $request->request->get('_csrf_token');
             if (!$this->isCsrfTokenValid('add-annotation-document-' . $statement->getId(), $csrfToken)) {
                 throw new Exception('Invalid CSRF token');
             }
 
-            $filename = str_ends_with($filename, '.txt') ? $filename : ($filename . '.txt');
-            $document = $documentService->createAnnotationDocument($statement, $filename, $amount);
+            // Check if a file is uploaded
+            $file = $request->files->get('file');
+            if ($file) {
+                /** @var UploadedFile $file */
+                $document = $documentService->createAnnexDocument($file, $statement->getAccount());
+            } else {
+                // Handle form data
+                $filename = $request->request->get('filename');
+                $amount   = $request->request->get('amount');
+
+                $filename = str_ends_with($filename, '.txt') ? $filename : ($filename . '.txt');
+                $document = $documentService->createAnnotationDocument($statement, $filename, $amount);
+            }
 
             $em->persist($document);
             $em->flush();
@@ -74,6 +83,7 @@ class StatementController extends AbstractController
 
         return $this->redirectToDetailsPage($adminUrlGenerator, $statement);
     }
+
 
     #[Route('/admin/statement/{statement}/link', name: 'admin_statement_link', methods: ['POST'])]
     public function link(

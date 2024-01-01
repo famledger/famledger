@@ -176,6 +176,11 @@ class StatementService
                 $taxNotice = $document->getTaxNotice();
                 $transaction->removeDocument($taxNotice);
             }
+
+            // Annex documents are not linked to a financial month until they are associated with a transaction
+            if (DocumentType::ANNEX === $document->getType()) {
+                $document->setFinancialMonth(null);
+            }
         }
     }
 }

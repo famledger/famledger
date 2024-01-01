@@ -5,6 +5,7 @@ namespace App\Constant;
 enum DocumentType: string
 {
     case ACCOUNT_STATEMENT = 'account-statement';
+    case ANNEX = 'annex';
     case ATTACHMENT = 'attachment';
     case EXPENSE = 'expense';
     case INCOME = 'income';
@@ -31,6 +32,7 @@ enum DocumentType: string
     {
         return [
             self::ACCOUNT_STATEMENT->value => self::ACCOUNT_STATEMENT->value,
+            self::ANNEX->value             => self::ANNEX->value,
             self::ATTACHMENT->value        => self::ATTACHMENT->value,
             self::EXPENSE->value           => self::EXPENSE->value,
             self::INCOME->value            => self::INCOME->value,

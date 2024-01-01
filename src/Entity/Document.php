@@ -285,6 +285,16 @@ class Document implements TenantAwareInterface
         return $this;
     }
 
+    public function isAnnex(): bool
+    {
+        return (DocumentType::ANNEX === $this->getType());
+    }
+
+    public function isAnnotation(): bool
+    {
+        return (DocumentType::ANNOTATION === $this->getType());
+    }
+
     public function isAttachment(): bool
     {
         return ($this instanceof Attachment);

@@ -207,6 +207,25 @@ class DocumentService
     }
 
     /**
+     * Annex documents are Document entities representing any file that provides additional information.
+     * As any other Document, they can be linked to a transaction. They are not created for a specific
+     * financial month and therefore appear in all statements until they are linked to a transaction.
+     * Annex documents are always stored in the accounting folder.
+     *
+     * @throws Exception
+     */
+    public function createAnnexDocument(UploadedFile $file, Account $account): Document
+    {
+        $filename = $file->getClientOriginalName();
+        $this->attachmentFolderManager->createFile($account, $file->getRealPath(), $filename);
+
+        // create the corresponding document entity
+        return DocumentFactory::create(DocumentType::ANNEX)
+            ->setFilename($filename)
+            ->setAccount($account);
+    }
+
+    /**
      * This method must be called after the invoice has been updated with the latest data from the EF API.
      * If the status has changed, the filename will change too and must be updated.
      * The renaming of the corresponding physical file is the responsibility of the caller.

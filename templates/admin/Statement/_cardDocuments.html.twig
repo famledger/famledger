@@ -38,6 +38,13 @@
                 </div>
             </form>
         </div>
+        <div class="card-body">
+            <form action="{{ path('admin_statement_addAnnotationDocument', { statement:statement.id }) }}"
+                  class="e-doc dropzone">
+                <input type="hidden" name="_csrf_token"
+                       value="{{ csrf_token('add-annotation-document-' ~ statement.id) }}">
+            </form>
+        </div>
 
         {% if documents|length %}
             <table class="table table-hover">
@@ -63,7 +70,8 @@
                                     {% endif %}
                                     <a target="download" href="{{ document|ea_url('detail', 'Document') }}"><i
                                                 class="fa fa-eye"></i></a>
-                                    <a target="download" href="{{ path('admin_document_download', {document:document.id}) }}"><i
+                                    <a target="download"
+                                       href="{{ path('admin_document_download', {document:document.id}) }}"><i
                                                 class="text-muted {{ file_icon(document.filename) }}"></i></a>
                                 </div>
                             </td>
