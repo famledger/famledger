@@ -1,9 +1,9 @@
 {% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-code', title: 'Specs', width:12 } %}
     {% block card_body %}
-        <div data-level="0" class="render-json">
-            {% if document.specs|default(null) is not null %}
+        {% if document.specs|default(null) is not null %}
+            <div data-level="0" class="render-json">
                 {{ document.specs|json_encode|raw }}
-            {% endif %}
-        </div>
+            </div>
+        {% endif %}
     {% endblock %}
 {% endembed %}
