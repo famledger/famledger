@@ -1,27 +1,27 @@
 {% extends '@EasyAdmin/crud/detail.html.twig' %}
 {% set Document = entity.instance %}
 
-{#{% block content_header %}#}
-{#    <div class="content-header-title">#}
-{#        <div class="d-flex align-items-center">#}
-{#            <h1 class="title">#}
-{#                Document {{ Document.series }}-{{ Document.number }}#}
-{#            </h1>#}
-{#            <span class="text-white badge ms-3 {{ Document.status|lower == 'vigente' ? 'bg-success' : 'bg-danger' }}">#}
-{#                {{ Document.status | capitalize }}#}
-{#            </span>#}
-{#            {% if Document.cancellationStatus is not empty %}#}
-{#                <span class="ms-3">Cancellation</span> <span class="text-white badge ms-1 bg-warning }}">#}
-{#                {{ Document.cancellationStatus }}#}
-{#            </span>#}
-{#            {% endif %}#}
-{#        </div>#}
-{#    </div>#}
+{# {% block content_header %} #}
+{#    <div class="content-header-title"> #}
+{#        <div class="d-flex align-items-center"> #}
+{#            <h1 class="title"> #}
+{#                Document {{ Document.series }}-{{ Document.number }} #}
+{#            </h1> #}
+{#            <span class="text-white badge ms-3 {{ Document.status|lower == 'vigente' ? 'bg-success' : 'bg-danger' }}"> #}
+{#                {{ Document.status | capitalize }} #}
+{#            </span> #}
+{#            {% if Document.cancellationStatus is not empty %} #}
+{#                <span class="ms-3">Cancellation</span> <span class="text-white badge ms-1 bg-warning }}"> #}
+{#                {{ Document.cancellationStatus }} #}
+{#            </span> #}
+{#            {% endif %} #}
+{#        </div> #}
+{#    </div> #}
 
-{#    {% block page_actions_wrapper %}#}
-{#        {{ parent() }}#}
-{#    {% endblock %}#}
-{#{% endblock %}#}
+{#    {% block page_actions_wrapper %} #}
+{#        {{ parent() }} #}
+{#    {% endblock %} #}
+{# {% endblock %} #}
 
 {% block main %}
     {% set document = entity.instance %}
@@ -42,5 +42,9 @@
     <div class="col-md-12 mt-3">
         {{ include('admin/Document/_cardSpecs.html.twig') }}
     </div>
+
+    {% block delete_form %}
+        {{ include('@EasyAdmin/crud/includes/_delete_form.html.twig', { entity_id: entity.primaryKeyValue }, with_context = false) }}
+    {% endblock delete_form %}
 
 {% endblock %}
