@@ -164,7 +164,7 @@ class AccountingFilesController extends AbstractController
                     switch($operation) {
                         // files in the target folder can be manipulated directly by the AccountingFolderManager
                         case 'delete':
-                            $accountingFolderManager->deleteAccountantFile($financialMonth, $filename, false);
+                            $accountingFolderManager->deleteAccountantFile($financialMonth, $filename, $isAttachment);
                             $successMessage = 'The document has been deleted: ' . $fileIdentifier;
                             break;
                         default:
