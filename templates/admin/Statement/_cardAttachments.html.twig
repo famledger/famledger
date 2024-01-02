@@ -1,6 +1,7 @@
 {% embed 'admin/_common/collapsible_card.twig' with {
     icon:'fa fa-paperclip',
     title: 'Attachments',
+    collapsed: attachments|length == 0
 } %}
     {% block card_body %}
 
@@ -40,7 +41,7 @@
                 {% endfor %}
             </table>
         {% else %}
-            <div class="alert alert-info">No attachments found.</div>
+            - none -
         {% endif %}
 
     {% endblock %}
