@@ -111,20 +111,19 @@ HTML
         yield MenuItem::linkToCrud('Invoice Schedules', 'fa fa-calendar', InvoiceSchedule::class);
         yield MenuItem::linkToCrud('Invoice Tasks', 'fas fa-tasks', InvoiceTask::class);
         yield MenuItem::linkToCrud('Receipt Tasks', 'fas fa-tasks', ReceiptTask::class);
-        yield MenuItem::linkToRoute('Invoice History', 'fas fa-history', 'admin_invoice_history');
-        yield MenuItem::linkToRoute('Payment History', 'fas fa-history', 'admin_payment_history');
-        yield MenuItem::linkToCrud('Invoices', 'fas fa-file-invoice', Invoice::class);
-        yield MenuItem::linkToCrud('Receipts', 'fas fa-file-invoice', Receipt::class);
-        yield MenuItem::linkToRoute($liveModeLabel, $liveModeToggleIcon, 'liveModeSwitch',
-            ['redirectUrl' => $redirectUrl])->setCssClass($liveModeCss);
         yield MenuItem::section('Accounting');
-        yield MenuItem::linkToCrud('Tax Payments', 'fas fa-cash-register', TaxNotice::class);
         yield MenuItem::linkToRoute('Inbox', 'fas fa-inbox', 'admin_inbox');
         yield MenuItem::linkToCrud('Statements', 'fas fa-balance-scale', Statement::class);
-        yield MenuItem::linkToCrud('Bank Accounts', 'fas fa-bank', Account::class);
-        yield MenuItem::linkToCrud('Financial Months', 'fas fa-calendar', FinancialMonth::class);
+        yield MenuItem::linkToRoute('Invoice History', 'fas fa-history', 'admin_invoice_history');
+        yield MenuItem::linkToRoute('Payment History', 'fas fa-history', 'admin_payment_history');
+        yield MenuItem::linkToCrud('Tax Payments', 'fas fa-cash-register', TaxNotice::class);
+//        yield MenuItem::linkToCrud('Financial Months', 'fas fa-calendar', FinancialMonth::class);
+        yield MenuItem::section('Lookup');
         yield MenuItem::linkToCrud('Documents', 'fas fa-file', Document::class);
+        yield MenuItem::linkToCrud('Invoices', 'fas fa-file-invoice', Invoice::class);
+        yield MenuItem::linkToCrud('Receipts', 'fas fa-file-invoice', Receipt::class);
         yield MenuItem::section('Admin');
+        yield MenuItem::linkToCrud('Bank Accounts', 'fas fa-bank', Account::class);
         yield MenuItem::linkToCrud('Properties', 'fas fa-building', Property::class);
         yield MenuItem::linkToCrud('Customers', 'fas fa-user', Customer::class);
         yield MenuItem::linkToCrud('Addresses', 'fas fa-address-card', Address::class);
@@ -139,6 +138,8 @@ HTML
         yield MenuItem::section('System');
         yield MenuItem::linkToRoute('Document Detector', 'fas fa-search', 'admin_document_detect');
         yield MenuItem::linkToRoute('Statement inconsistencies', 'fas fa-block', 'admin_statement_inconsistencies');
+        yield MenuItem::linkToRoute($liveModeLabel, $liveModeToggleIcon, 'liveModeSwitch',
+            ['redirectUrl' => $redirectUrl])->setCssClass($liveModeCss);
     }
 
     public function configureUserMenu(UserInterface $user): UserMenu
