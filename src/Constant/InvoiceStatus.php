@@ -6,6 +6,7 @@ class InvoiceStatus
 {
     const VIGENTE   = 'vigente';
     const CANCELADO = 'cancelado';
+    const ANULADO   = 'Anulado';
 
     static public function getOptions(): array
     {

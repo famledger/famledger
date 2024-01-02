@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Exception;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -113,6 +114,9 @@ class InvoiceRepository extends ServiceEntityRepository
         return $invoices;
     }
 
+    /**
+     * @throws Exception
+     */
     public function findInvoicesWithoutDocuments(array $series): array
     {
         // Step 1: Retrieve all invoices that are not associated with a document.
@@ -126,6 +130,7 @@ class InvoiceRepository extends ServiceEntityRepository
                 //->add($qb->expr()->notIn('i.customer', [5, 7]))
                 ->add($qb->expr()->isNull('d.id'))
                 ->add($qb->expr()->in('i.series', $series))
+                ->add($qb->expr()->neq('i.status', $qb->expr()->literal(InvoiceStatus::ANULADO)))
                 ->add($qb->expr()->orX()
                     //->add($qb->expr()->eq('i.status', $qb->expr()->literal(InvoiceStatus::VIGENTE)))
                     ->add($qb->expr()->gte('i.issueDate', $qb->expr()->literal('2022-09-01')))
