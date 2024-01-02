@@ -97,9 +97,9 @@ class DocumentService
 
         // search for the document's checksum in both accounting and attachment folder
         // in search mode we always return the absolute path
-        $registry = new ChecksumRegistry($this->accountingFolder);
+        $registry = (new ChecksumRegistry($this->accountingFolder))->load();
         if (null === $filepath = $registry->get($document->getChecksum())) {
-            $registry = new ChecksumRegistry($this->attachmentsRootFolder);
+            $registry = (new ChecksumRegistry($this->attachmentsRootFolder))->load();
             if (null === $filepath = $registry->get($document->getChecksum())) {
                 return null;
             }
@@ -139,7 +139,7 @@ class DocumentService
      *
      * @throws DocumentCreationException
      */
-    public function createDocumentFromInvoice(Transaction $transaction, Invoice $invoice): Document
+    public function createDocumentFromInvoice(Statement $statement, Invoice $invoice): Document
     {
         try {
             $type = $invoice instanceof Receipt ? DocumentType::PAYMENT : DocumentType::INCOME;
@@ -150,7 +150,7 @@ class DocumentService
                 ->setFilename(InvoiceFileNamer::buildDocumentName($invoice));
 
             // create a copy of the invoice PDF file in the accounting folder
-            $this->createDocumentFile($invoiceDocument, $transaction, $this->getSourceFilePath($invoice, 'pdf'));
+            $this->createDocumentFile($invoiceDocument, $statement, $this->getSourceFilePath($invoice, 'pdf'));
 
             return $invoiceDocument;
         } catch (Throwable $e) {
@@ -161,7 +161,7 @@ class DocumentService
     /**
      * @throws Exception
      */
-    public function createAttachmentFromInvoice(Transaction $transaction, Invoice $invoice): ?Attachment
+    public function createAttachmentFromInvoice(Statement $statement, Invoice $invoice): ?Attachment
     {
         try {
             // determine the path of the invoice XML file
@@ -172,10 +172,12 @@ class DocumentService
             $attachmentDocument = DocumentFactory::createFromDocumentSpecs($attachmentSpecs);
             $attachmentDocument
                 ->setInvoice($invoice)
-                ->setDescription($attachmentSpecs->getDescription());
+                ->setDescription($attachmentSpecs->getDescription())
+                ->setAccount($statement->getAccount())
+                ->setFinancialMonth($statement->getFinancialMonth());
 
             // create a copy of the invoice XML file in the accounting folder
-            $this->createDocumentFile($attachmentDocument, $transaction, $this->getSourceFilePath($invoice, 'xml'));
+            $this->createDocumentFile($attachmentDocument, $statement, $this->getSourceFilePath($invoice, 'xml'));
 
             return $attachmentDocument;
         } catch (Throwable $e) {
@@ -189,11 +191,10 @@ class DocumentService
      * @throws StatementCreationException
      * @throws Throwable
      */
-    private function createDocumentFile(Document $document, Transaction $transaction, string $sourceFilePath): void
+    private function createDocumentFile(Document $document, Statement $statement, string $sourceFilePath): void
     {
         // this will set the sequence number of the document
-        $transaction->addDocument($document);
-        $financialMonth = $transaction->getStatement()->getFinancialMonth();
+        $financialMonth = $statement->getFinancialMonth();
         $this->accountingDocumentService->addDocument($document, $financialMonth, $sourceFilePath);
     }
 

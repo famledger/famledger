@@ -45,13 +45,23 @@
                             </td>
                             <td class="text-right">{{ invoice.amount|cent_amount }}</td>
                             <td class="text-right">{{ invoice.status|invoice_status }}</td>
-                            <td class="text-right"><a target="download" class="text-danger"
+                            <td class="text-right" style="white-space: nowrap"><a target="download" class="text-danger"
                                                       href="{{ path('admin_invoice_download', {invoice:invoice.id}) }}"><i
                                             class="fa fa-file-pdf"></i></a>
                                 <a href="{{ ea_url()
                                     .setController('App\\Controller\\Admin\\InvoiceCrudController')
                                     .setAction('detail')
                                     .setEntityId(invoice.id) }}"><i class="fa fa-eye"></i></a>
+                                {% if invoice.status == constant('App\\Constant\\InvoiceStatus::CANCELADO')%}
+                                    <a title="link to statement"
+                                       href="{{ ea_url()
+                                           .setController('App\\Controller\\Admin\\DocumentCrudController')
+                                           .setAction('relateInvoice')
+                                           .setRoute('admin_invoice_relate', {invoice:invoice.id, statement:statement.id})
+                                           .setEntityId(invoice.id) }}"
+                                       class=""><i class="fa fa-link"></i></a>
+                                {% endif %}
+
                             </td>
                         </tr>
                     {% endfor %}

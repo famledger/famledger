@@ -19,14 +19,17 @@ class ChecksumRegistry
     /**
      * @throws Exception
      */
-    public function loadFolder(string $folder): void
+    public function load(?string $subFolder = null): self
     {
-        if (!str_starts_with($folder, $this->rootFolder)) {
-            throw new Exception(sprintf('Folder %s is not in root folder %s', $folder, $this->rootFolder));
+        $subFolder ??= $this->rootFolder;
+        if (!str_starts_with($subFolder, $this->rootFolder)) {
+            throw new Exception(sprintf('Folder %s is not in root folder %s', $subFolder, $this->rootFolder));
         }
 
-        $finder = new Finder();
-        $finder->files()->in($folder);
+        $this->checksums  = [];
+        $this->duplicates = [];
+        $finder           = new Finder();
+        $finder->files()->in($subFolder);
         foreach ($finder as $file) {
             /** @var SplFileInfo $file */
             $filepath = $file->getPathname();
@@ -42,13 +45,15 @@ class ChecksumRegistry
                 $this->checksums[$checksum] = $filepath;
             }
         }
-        $loaded = 1;
+
+        return $this;
     }
 
     public function get(string $checksum): ?string
     {
         return $this->checksums[$checksum] ?? null;
     }
+
     public function getDuplicates(): array
     {
         return $this->duplicates;

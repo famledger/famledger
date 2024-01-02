@@ -61,7 +61,7 @@ class StatementService
                     }
                 }
                 if (count(array_unique($customerIds)) > 1) {
-                    throw new StatementValidationFailedException(sprintf('Transaction %d has invoice for multiple customers',
+                    throw new StatementValidationFailedException(sprintf('Transaction %d has invoices for multiple customers',
                         $transaction->getSequenceNo()
                     ));
                 }
@@ -105,6 +105,14 @@ class StatementService
         }
     }
 
+    /**
+     * @throws DocumentCreationException
+     */
+    public function relateInvoice(Statement $statement, Invoice $invoice): Document
+    {
+        return $this->createInvoiceDocuments($invoice, $statement);
+    }
+
     public function linkDocument(Transaction $transaction, ?Document $document): void
     {
         $transaction->addDocument($document);
@@ -129,48 +137,28 @@ class StatementService
      */
     public function linkInvoice(Transaction $transaction, Invoice $invoice): void
     {
-        if (null !== $invoice->getAttachment()) {
-            throw new DocumentCreationException(sprintf('Invoice %s already has an attachment.', $invoice));
-        }
-        if (null !== $invoice->getDocument()) {
-            throw new DocumentCreationException(sprintf('Invoice %s already has a document.', $invoice));
-        }
+        $statement         = $transaction->getStatement();
+        $invoiceDocument   = $this->createInvoiceDocuments($invoice, $statement);
+        $invoiceAttachment = $invoiceDocument->getAttachment();
 
-        $financialMonth = $transaction->getStatement()->getFinancialMonth();
-
-        // create an attachment for the invoice and link it to the transaction and financial month
-        $invoiceAttachment = $this->documentService->createAttachmentFromInvoice($transaction, $invoice)
-            ->setAccount($financialMonth->getAccount())
-            ->setFinancialMonth($financialMonth);
-
-        // create a document for the invoice and link it to the transaction and financial month
-        $invoiceDocument = $this->documentService->createDocumentFromInvoice($transaction, $invoice)
-            ->setFinancialMonth($financialMonth)
-            ->setAttachment($invoiceAttachment);
+        $transaction
+            ->addDocument($invoiceDocument)
+            ->addDocument($invoiceAttachment);
 
         // mark the invoice document as paid
-        $invoice->setPaymentDate($transaction->getBookingDate());// copy invoice files from the invoices folder to the accounting folder
-
-        // only persist if no exception has been thrown so far
-        $this->em->persist($invoiceAttachment);
-        $this->em->persist($invoiceDocument);
+        $invoice->setPaymentDate($transaction->getBookingDate());
     }
 
-    public function unLinkDocument(?Transaction $transaction, Document $document): void
+    public function unLinkDocument(Document $document): void
     {
         // invoice documents require that the corresponding accounting files are removed
         // non-invoice documents are just un-linked by removing the association to the transaction
         if (null !== $invoice = $document->getInvoice()) {
-
-            // remove invoice files from the accounting folder
-            if (null !== $attachment = $invoice->getAttachment()) {
-                $this->documentService->removeDocument($attachment);
-                $invoice->setAttachment(null);
-            }
-            $this->documentService->removeDocument($document);
+            $this->removeInvoiceDocuments($invoice);
 
             $invoice->setPaymentDate(null);
         } else {
+            $transaction = $document->getTransaction();
             $transaction->removeDocument($document);
             if ($document instanceof TaxPayment) {
                 $taxNotice = $document->getTaxNotice();
@@ -182,5 +170,41 @@ class StatementService
                 $document->setFinancialMonth(null);
             }
         }
+    }
+
+    private function removeInvoiceDocuments(Invoice $invoice): void
+    {
+        // remove invoice files from the accounting folder
+        if (null !== $attachment = $invoice->getAttachment()) {
+            $this->documentService->removeDocument($attachment);
+            $invoice->setAttachment(null);
+        }
+        $this->documentService->removeDocument($invoice->getDocument());
+    }
+
+    /**
+     * @throws DocumentCreationException
+     * @throws Exception
+     */
+    private function createInvoiceDocuments(Invoice $invoice, Statement $statement): Document
+    {
+        if (null !== $invoice->getAttachment()) {
+            throw new DocumentCreationException(sprintf('Invoice %s already has an attachment.', $invoice));
+        }
+        if (null !== $invoice->getDocument()) {
+            throw new DocumentCreationException(sprintf('Invoice %s already has a document.', $invoice));
+        }
+
+        // create an attachment for the invoice and link it to the transaction and financial month
+        $invoiceAttachment = $this->documentService->createAttachmentFromInvoice($statement, $invoice);
+        // create a document for the invoice and link it to the transaction and financial month
+        $invoiceDocument = $this->documentService->createDocumentFromInvoice($statement, $invoice)
+            ->setAttachment($invoiceAttachment);
+
+        // only persist if no exception has been thrown so far
+        $this->em->persist($invoiceAttachment);
+        $this->em->persist($invoiceDocument);
+
+        return $invoiceDocument;
     }
 }

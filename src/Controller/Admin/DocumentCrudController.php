@@ -2,7 +2,6 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Statement;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -38,12 +37,16 @@ use Throwable;
 use App\Admin\Field\CentAmountField;
 use App\Admin\Field\DocumentPathField;
 use App\Constant\DocumentType;
+use App\Constant\InvoiceStatus;
 use App\Entity\Document;
+use App\Entity\Invoice;
+use App\Entity\Statement;
 use App\Event\DocumentRebuildEvent;
 use App\Service\DocumentDetector\DocumentLoader;
 use App\Service\DocumentFactory;
 use App\Service\DocumentService;
 use App\Service\QueryHelper;
+use App\Service\StatementService;
 
 class DocumentCrudController extends AbstractCrudController
 {
@@ -97,8 +100,52 @@ class DocumentCrudController extends AbstractCrudController
         );
     }
 
+    #[Route('/relate/{invoice}/{statement}', name: 'admin_invoice_relate', methods: ['GET'])]
+    public function relateInvoice(
+        Invoice                $invoice,
+        Statement              $statement,
+        StatementService       $statementService,
+        EntityManagerInterface $em,
+        Request                $request,
+        AdminUrlGenerator      $adminUrlGenerator
+    ): Response {
+
+        try {
+            if (null !== $invoice->getDocument()) {
+                throw new Exception('Invoice is already associated with a Document');
+            }
+            if (InvoiceStatus::CANCELADO !== $invoice->getStatus()) {
+                throw new Exception('Only canceled invoices can be related to a statement');
+            }
+
+            $invoiceDocument   = $statementService->relateInvoice($statement, $invoice);
+            $invoiceAttachment = $invoiceDocument->getAttachment();
+
+            $invoiceDocument
+                ->setIsRelated(true)
+                ->setStatement($statement)
+                ->setFinancialMonth($statement->getFinancialMonth());
+            $invoiceAttachment
+                ->setIsRelated(true)
+                ->setStatement($statement)
+                ->setFinancialMonth($statement->getFinancialMonth());
+
+            $em->flush();
+            $request->getSession()->getFlashBag()->add('success', 'Invoice related successfully');
+        } catch (Exception $e) {
+            $request->getSession()->getFlashBag()->add('error', $e->getMessage());
+        }
+
+        return $this->redirect($adminUrlGenerator
+            ->setController(StatementCrudController::class)
+            ->setAction(Action::DETAIL)
+            ->setEntityId($statement->getId())
+            ->generateUrl()
+        );
+    }
+
     #[Route('/relate/{document}/{statement}', name: 'admin_document_relate', methods: ['GET'])]
-    public function relate(
+    public function relateDocument(
         Document               $document,
         Statement              $statement,
         EntityManagerInterface $em,
@@ -106,12 +153,11 @@ class DocumentCrudController extends AbstractCrudController
         AdminUrlGenerator      $adminUrlGenerator
     ): Response {
 
-        $error = null;
-        if ($document->getIsRelated()) {
-            $error = 'Document is already related to the statement';
-        }
+        try {
+            if ($document->getIsRelated()) {
+                throw new Exception('Document is already related to the statement');
+            }
 
-        if (null === $error) {
             $document
                 ->setIsRelated(true)
                 ->setStatement($statement)
@@ -119,8 +165,8 @@ class DocumentCrudController extends AbstractCrudController
             $em->flush();
 
             $request->getSession()->getFlashBag()->add('success', 'Document related successfully');
-        } else {
-            $request->getSession()->getFlashBag()->add('error', $error);
+        } catch (Exception $e) {
+            $request->getSession()->getFlashBag()->add('error', $e->getMessage());
         }
 
         return $this->redirect($adminUrlGenerator
@@ -135,6 +181,7 @@ class DocumentCrudController extends AbstractCrudController
     public function unrelate(
         Document               $document,
         Request                $request,
+        StatementService       $statementService,
         EntityManagerInterface $em,
         AdminUrlGenerator      $adminUrlGenerator
     ): Response {
@@ -144,8 +191,14 @@ class DocumentCrudController extends AbstractCrudController
             if (false === $document->getIsRelated() or null === $statement) {
                 throw new Exception('Document is not related to the statement');
             }
-            $document->setIsRelated(false);
-            $document->setStatement(null);
+
+            if (DocumentType::INCOME === $document->getType()) {
+                // invoice documents are simply removed and thus don't have to be unrelated
+                $statementService->unLinkDocument($document);
+            } else {
+                $document->setIsRelated(false);
+                $document->setStatement(null);
+            }
             $em->flush();
 
             $request->getSession()->getFlashBag()->add('success', 'Document unrelated successfully');
@@ -179,7 +232,6 @@ class DocumentCrudController extends AbstractCrudController
 
         $this->container->get(EntityFactory::class)
             ->processActions($context->getEntity(), $context->getCrud()->getActionsConfig());
-
 
         return $this->configureResponseParameters(KeyValueStore::new([
             'pageName'     => Crud::PAGE_DETAIL,

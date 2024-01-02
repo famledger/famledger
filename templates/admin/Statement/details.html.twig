@@ -122,6 +122,7 @@
             /* very light yellow background */
             background-color: #ffffe0;
         }
+
         tr.customer-row {
             cursor: pointer;
         }
@@ -135,8 +136,8 @@
         }
 
         .detail-row.unpaid {
-            border-left: 3px solid #f00;
-            background-color: #fdd;
+            border-left: 3px solid #cc7832;
+            background-color: #ffead1;
         }
 
         .btn-group-xs > .btn, .btn-xs {
@@ -162,6 +163,42 @@
 
         .drag-handle:hover {
             opacity: 1;
+        }
+
+        .transaction-documents-container {
+            position: relative;
+        }
+
+        .transaction-documents-container.collapsed .transaction-documents {
+            display: none;
+        }
+
+        .transaction-toggle-icon {
+            cursor: pointer;
+            position: absolute;
+            top: -8px;
+            left: -12px;
+        }
+
+        /* Style when the container is not collapsed (showing chevron down) */
+        .transaction-documents-container .transaction-toggle-icon i {
+            /* Your style for the default state */
+            /* Example: */
+            font-size: 14px;
+            color: #333;
+        }
+
+        /* Style when the container is collapsed (showing chevron up) */
+        .transaction-documents-container.collapsed .transaction-toggle-icon i {
+            /* Your style for the collapsed state */
+            /* Example: */
+            transform: rotate(-90deg); /* Flips the chevron icon */
+        }
+
+        .transaction-documents {
+            margin-top: 4px;
+            padding: 4px 12px;
+            border-top: 1px solid #999;
         }
 
         .description-container i.fa.fa-sticky-note {
@@ -322,6 +359,11 @@
 
       $(document).ready(function() {
         initializeDragAndDrop()
+
+        // toggle transaction documents
+        $(document).on('click', 'div.transaction-toggle-icon', function() {
+          $(this).parent().toggleClass('collapsed')
+        })
       })
     </script>
 {% endblock %}
