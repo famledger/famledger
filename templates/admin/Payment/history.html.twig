@@ -45,6 +45,34 @@
             padding-left: 4px;
             font-size: 1.2em;
         }
+
+        td.description-container {
+            position: relative
+        }
+
+        td.description-container ul {
+            margin-bottom: 0;
+        }
+
+        td.description-container.collapsed ul {
+            display: none;
+        }
+
+        /* do not show a bullet icon for the first item */
+        td.description-container ul li:first-child {
+            list-style-type: none;
+        }
+
+        i.description-toggle {
+            cursor: pointer;
+            position: absolute;
+            left: 10px
+        }
+
+        td.description-container.collapsed i.description-toggle {
+            transform: rotate(-90deg); /* Flips the chevron icon */
+        }
+
     </style>
 
     <div style="margin-bottom: 4px;" class="select-container">
@@ -87,8 +115,9 @@
                             </td>
                         </tr>
                         <tr class="header-row bg-light">
-                            <th>Issued</th>
+                            <th class="text-center">Paid</th>
                             <th>Customer</th>
+                            <th>Description</th>
                             <th>Receipt</th>
                             <th>Paid invoices</th>
                             <th class="text-right">TX-Amount</th>
@@ -111,6 +140,20 @@
                                 {% else %}
                                     <td>- missing -</td>
                                 {% endif %}
+                                <td class="description-container collapsed" style="">
+                                    <i class="description-toggle fa fa-caret-down"
+                                       onclick="$(this).parent().toggleClass('collapsed')"></i>
+                                    <ul>
+                                        {% for document in transaction.documents %}
+                                            {% if document.type == constant('App\\Constant\\DocumentType::INCOME') %}
+                                                {% set invoice = document.invoice %}
+                                                {% if invoice.status == constant('App\\Constant\\InvoiceStatus::VIGENTE') %}
+                                                    <li class="inline">{{ invoice.description }}</li>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </td>
                                 <td style="white-space: nowrap">
                                     {% set receipt = transaction.receipt %}
                                     {% if receipt is not null %}
