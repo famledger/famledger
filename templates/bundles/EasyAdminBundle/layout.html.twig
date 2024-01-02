@@ -66,6 +66,22 @@
 
 {% endblock %}
 
+{% block header_logo %}
+    <div class="app-logo-container" title="{{ ea.dashboardTitle|striptags }}">
+        {% if app.user %}
+            <div class="app-name">FamLedger</div>
+            <span class="tenant-caption">{{ tenant().name }} <i class="fa fa-{{ tenant().icon }}"></i></span>
+            {% for tenant in tenantOptions() %}
+                <div class="tenant-option">
+                    <a href="{{ path('admin', { routeName:'tenantSwitch', routeParams: {tenant: tenant.id} }) }}">
+                        <i class="fa fa-caret-right"></i>&nbsp;{{ tenant.name }} <i class="fa fa-{{ tenant.icon }}"></i>
+                    </a>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endblock header_logo %}
+
 {% block content_header_wrapper %}
     {{ parent() }}
     <div id="clipboard-popup">

@@ -39,12 +39,6 @@ a.highlight.menu-item-contents i.menu-icon {
     white-space: nowrap;
 }
 
-span.tenant-caption {
-    color: #b46b05;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: bold;
-}
-
 form.e-doc.dropzone {
     border: 1px solid rgba(0, 0, 0, .8);
     border-radius: 5px;
@@ -67,11 +61,32 @@ button.delete-eDoc {
     background: none;
 }
 
-.main-header #header-logo a {
+.main-header div.app-logo-container {
     padding: 8px 0;
     margin: 15px 0;
     border-top: 1px solid #999;
     border-bottom: 1px solid #999;
+    color: var(--sidebar-logo-color);
+    display: block;
+    font-size: var(--font-size-lg);
+    font-weight: 500;
+    line-height: 24px;
+}
+
+div.app-logo-container .tenant-option {
+    display: none;
+}
+
+.tenant-option a {
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    color: #888 !important;
+    font-size: .8em !important;
+}
+
+#header-logo:hover .tenant-option {
+    display: block;
 }
 
 div.data-row.substitute-invoice dt {
@@ -85,6 +100,12 @@ td.substitute-invoice a {
 
 div.app-name {
     color: #666;
+}
+
+span.tenant-caption {
+    color: #b46b05;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
 }
 
 .content-header-title .title {

@@ -2,7 +2,6 @@
 
 namespace App\Controller\Admin;
 
-use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
@@ -22,7 +21,6 @@ use App\Entity\Address;
 use App\Entity\Customer;
 use App\Entity\Document;
 use App\Entity\EDoc;
-use App\Entity\FinancialMonth;
 use App\Entity\Invoice;
 use App\Entity\InvoiceSchedule;
 use App\Entity\InvoiceTask;
@@ -36,17 +34,14 @@ use App\Entity\Tenant;
 use App\Entity\User;
 use App\Entity\Vehicle;
 use App\Service\LiveModeContext;
-use App\Service\TenantContext;
 
 #[IsGranted('ROLE_ADMIN')]
 class DashboardController extends AbstractDashboardController
 {
     public function __construct(
-        private readonly AdminUrlGenerator      $adminUrlGenerator,
-        private readonly EntityManagerInterface $em,
-        private readonly LiveModeContext        $liveModeContext,
-        private readonly RequestStack           $requestStack,
-        private readonly TenantContext          $tenantContext,
+        private readonly AdminUrlGenerator $adminUrlGenerator,
+        private readonly LiveModeContext   $liveModeContext,
+        private readonly RequestStack      $requestStack,
     ) {
     }
 
@@ -73,17 +68,25 @@ class DashboardController extends AbstractDashboardController
 
     public function configureDashboard(): Dashboard
     {
-        $tenant     = $this->tenantContext->getTenant();
-        $tenantName = $tenant->getName();
-        $icon       = $tenant->getIcon() ?? 'building';
-
         return Dashboard::new()
-            ->renderContentMaximized()
-            ->setTitle(<<<HTML
-<div class="app-name">FamLedger</div>
-<span class="tenant-caption">$tenantName <i class="fa fa-$icon"></i></span> 
-HTML
-            );
+            ->renderContentMaximized();
+    }
+
+    public function configureUserMenu(UserInterface $user): UserMenu
+    {
+        // Usually it's better to call the parent method because that gives you a
+        // user menu with some menu items already created ("sign out", "exit impersonation", etc.)
+        // if you prefer to create the user menu from scratch, use: return UserMenu::new()->...
+        return parent::configureUserMenu($user)
+            ->setName($user->getUserIdentifier())
+            ->displayUserName()
+//            ->setAvatarUrl('https://avatars1.githubusercontent.com/u/1295390?s=60&v=4')
+//            //->setAvatarUrl($user->getProfileImageUrl())
+//            // use this method if you don't want to display the user image
+//            ->displayUserAvatar(false)
+            // you can also pass an email address to use gravatar's service
+            //->setGravatarEmail($user->getMainEmailAddress())
+            ;
     }
 
     public function configureAssets(): Assets
@@ -140,65 +143,6 @@ HTML
         yield MenuItem::linkToRoute('Statement inconsistencies', 'fas fa-block', 'admin_statement_inconsistencies');
         yield MenuItem::linkToRoute($liveModeLabel, $liveModeToggleIcon, 'liveModeSwitch',
             ['redirectUrl' => $redirectUrl])->setCssClass($liveModeCss);
-    }
-
-    public function configureUserMenu(UserInterface $user): UserMenu
-    {
-        // Usually it's better to call the parent method because that gives you a
-        // user menu with some menu items already created ("sign out", "exit impersonation", etc.)
-        // if you prefer to create the user menu from scratch, use: return UserMenu::new()->...
-        $menu          = parent::configureUserMenu($user)
-//            // use the given $user object to get the username
-            ->setName($user->getUserIdentifier())
-//            // use this method if you don't want to display the name of the user
-            ->displayUserName()
-//
-//            // you can return a URL with the avatar image
-//            ->setAvatarUrl('https://avatars1.githubusercontent.com/u/1295390?s=60&v=4')
-//            //->setAvatarUrl($user->getProfileImageUrl())
-//            // use this method if you don't want to display the user image
-//            ->displayUserAvatar(false)
-            // you can also pass an email address to use gravatar's service
-            //->setGravatarEmail($user->getMainEmailAddress())
-
-            // you can use any type of menu item, except submenus
-//            ->addMenuItems([
-//                MenuItem::section('Switch country'),
-//                MenuItem::linkToRoute('Germany', 'fa fa-flag', 'list', ['country' => 'DE']),
-//                MenuItem::linkToRoute('USA', 'fa fa-flag', 'list', ['country' => 'US']),
-//                MenuItem::section('----------'),
-//            ]);
-        ;
-        $currentTenant = $this->tenantContext->getTenant();
-        $tenants       = $this->em->getRepository(Tenant::class)->findAll();
-        $menuItems     = [MenuItem::section('Tenants')];
-        foreach ($tenants as $tenant) {
-            $marker      = $tenant === $currentTenant ? 'fa fa-check text-success' : 'fa fa-circle text-muted';
-            $redirectUrl = urlencode($this->requestStack->getCurrentRequest()->getUri());
-
-            $menuItems[] = MenuItem::linkToRoute(
-                $tenant->getName(),
-                $marker,
-                'tenantSwitch',
-                // set the redirectUrl to the current URL
-                ['tenant' => $tenant->getId(), 'redirectUrl' => $redirectUrl]
-            )->setCssClass('text-muted');
-        }
-        $menu->addMenuItems($menuItems);
-
-//        $countries = $user->getCountries();
-//        if (1 < count($countries)) {
-//            $menuItems = [MenuItem::section('Switch country')];
-//            foreach ($countries as $country) {
-//                if ($country === $this->countryContext->getCurrentCountry()) {
-//                    continue;
-//                }
-//                $menuItems[] = MenuItem::linkToRoute($country, 'fa fa-flag', 'countrySwitch', ['country' => $country]);
-//            }
-//            $menu->addMenuItems($menuItems);
-//        }
-
-        return $menu;
     }
 
     public function configureActions(): Actions
