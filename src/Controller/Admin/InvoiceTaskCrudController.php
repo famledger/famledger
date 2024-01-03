@@ -226,6 +226,7 @@ class InvoiceTaskCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
+            ->setDefaultSort(['year' => 'DESC', 'month' => 'DESC'])
             ->setEntityLabelInSingular(
                 fn(?InvoiceTask $invoiceTask, ?string $pageName) => $invoiceTask
                     ? 'Invoice Task #' . $invoiceTask->getId() . ' - ' . $invoiceTask->getConcept()
