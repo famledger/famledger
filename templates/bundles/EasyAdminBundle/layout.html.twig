@@ -1,13 +1,19 @@
+{# Overwritten layout to achieve the following  #}
+{#  - add additional fonts #}
+{#  - include webpack encore assets #}
+{#  - include jQuery #}
+{#  - include renderjson library #}
+{#  - highlight DOM element if it's referenced in the URL hash #}
+{#  - removal of datagrid index button labels and setting them as title of the icon #}
+{#  - render hidden clipboard copy message #}
+{#  - render apllication logo section with current tenant and tenant swithc #}
+{#  - render hidden clipboard copy message #}
+
 {% extends '@!EasyAdmin/layout.html.twig' %}
 
 {% block head_stylesheets %}
     {{ parent() }}
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
-    {#    <link href="https://font.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet"> #}
-    {#    <link href="https://font.googleapis.com/css2?family=Lato:wght@300&display=swap" rel="stylesheet"> #}
-    {#    <link href="https://font.googleapis.com/css2?family=Raleway:wght@300&display=swap" rel="stylesheet"> #}
-    {#    <link href="https://font.googleapis.com/css2?family=Roboto+Slab:wght@300&display=swap" rel="stylesheet"> #}
-    {#    <link href="https://font.googleapis.com/css2?family=Ubuntu:wght@300&display=swap" rel="stylesheet"> #}
     {{ encore_entry_link_tags('app') }}
     {{ encore_entry_link_tags('dropzone') }}
 {% endblock %}
@@ -17,8 +23,9 @@
     {{ parent() }}
     {{ encore_entry_script_tags('app') }}
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+    <script src="{{ asset('js/jquery-3.6.0.min.js') }}"></script>
+    <script src="{{ asset('js/jquery-ui.js') }}"></script>
+    <script src="{{ asset('js/renderjson.js') }}"></script>
 
     <script>
       // replace label text with icon title
@@ -31,10 +38,37 @@
       })
     </script>
 
-    <script src="/js/renderjson.js"></script>
+{% endblock %}
+
+{% block header_logo %}
+
+    <div class="app-logo-container" title="{{ ea.dashboardTitle|striptags }}">
+        {% if app.user %}
+            <div class="app-name">FamLedger</div>
+            <span class="tenant-caption">{{ tenant().name }} <i class="fa fa-{{ tenant().icon }}"></i></span>
+            {% for tenant in tenantOptions() %}
+                <div class="tenant-option">
+                    <a href="{{ path('admin', { routeName:'tenantSwitch', routeParams: {tenant: tenant.id} }) }}">
+                        <i class="fa fa-caret-right"></i>&nbsp;{{ tenant.name }} <i class="fa fa-{{ tenant.icon }}"></i>
+                    </a>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+{% endblock header_logo %}
+
+{% block content_header_wrapper %}
+
+    {{ parent() }}
+    <div id="clipboard-popup">
+        The text has been copied to your clipboard !
+    </div>
+
 {% endblock %}
 
 {% block body_javascript %}
+
     <script>
         {{ parent() }}
         $(document).ready(function() {
@@ -65,28 +99,3 @@
     </script>
 
 {% endblock %}
-
-{% block header_logo %}
-    <div class="app-logo-container" title="{{ ea.dashboardTitle|striptags }}">
-        {% if app.user %}
-            <div class="app-name">FamLedger</div>
-            <span class="tenant-caption">{{ tenant().name }} <i class="fa fa-{{ tenant().icon }}"></i></span>
-            {% for tenant in tenantOptions() %}
-                <div class="tenant-option">
-                    <a href="{{ path('admin', { routeName:'tenantSwitch', routeParams: {tenant: tenant.id} }) }}">
-                        <i class="fa fa-caret-right"></i>&nbsp;{{ tenant.name }} <i class="fa fa-{{ tenant.icon }}"></i>
-                    </a>
-                </div>
-            {% endfor %}
-        {% endif %}
-    </div>
-{% endblock header_logo %}
-
-{% block content_header_wrapper %}
-    {{ parent() }}
-    <div id="clipboard-popup">
-        The text has been copied to your clipboard !
-    </div>
-{% endblock %}
-
-
