@@ -84,9 +84,6 @@ class StatementCrudController extends AbstractCrudController
     public function configureActions(Actions $actions): Actions
     {
         $actions         = $this->addEntityHistoryAction($actions);
-        $createStatement = Action::new('uploadStatement', 'Upload Statement', 'fa fa-upload')
-            ->linkToRoute('admin_statement_create')
-            ->createAsGlobalAction();
 
         $consolidateStatement = Action::new('consolidateStatement', 'close', 'fa fa-lock-open')
             ->linkToRoute('admin_statement_consolidate', function (Statement $statement): array {
@@ -103,7 +100,6 @@ class StatementCrudController extends AbstractCrudController
             ->setHtmlAttributes(['title' => 'click to un-consolidate the statement']);
 
         return $actions
-            ->add(Crud::PAGE_INDEX, $createStatement)
             ->add(Crud::PAGE_DETAIL, $consolidateStatement)
             ->add(Crud::PAGE_DETAIL, $unConsolidateStatement)
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
