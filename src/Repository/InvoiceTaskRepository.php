@@ -21,4 +21,15 @@ class InvoiceTaskRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, InvoiceTask::class);
     }
+
+    public function findPending(): array
+    {
+        // find all pending invoice tasks
+        $qb = $this->createQueryBuilder('it');
+
+        $qb->andWhere($qb->expr()->eq('it.status', $qb->expr()->literal(InvoiceTask::STATUS_PENDING)));
+
+        return $qb->getQuery()->getResult();
+
+    }
 }

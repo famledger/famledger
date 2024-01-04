@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\QueryBuilder;
@@ -72,7 +73,7 @@ class InvoiceRepository extends ServiceEntityRepository
             ->addOrderBy('i.number', 'desc');
 
         if (null === $year) {
-            $startDate = (new \DateTime())->setDate($currentYear - 10, 1, 1);
+            $startDate = (new DateTime())->setDate($currentYear - 10, 1, 1);
             $qb->andWhere(
                 $qb->expr()->orX(
                     $qb->expr()->isNotNull('i.year'),
@@ -83,8 +84,8 @@ class InvoiceRepository extends ServiceEntityRepository
                 )
             )->setParameter('startDate', $startDate);
         } else {
-            $startOfYear = (new \DateTime())->setDate($year, 1, 1);
-            $endOfYear   = (new \DateTime())->setDate($year, 12, 31);
+            $startOfYear = (new DateTime())->setDate($year, 1, 1);
+            $endOfYear   = (new DateTime())->setDate($year, 12, 31);
             $qb->andWhere(
                 $qb->expr()->orX(
                     $qb->expr()->eq('i.year', $qb->expr()->literal($year)),
@@ -234,6 +235,24 @@ EOT;
             ->orderBy('i.id', 'ASC');
 
 
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findLatest(): array
+    {
+        $firstDayOfCurrentMonth  = new DateTime('first day of this month');
+        $firstDayOfPreviousMonth = new DateTime('first day of last month');
+
+        $qb = $this->createQueryBuilder('i');
+
+        // Build the query to get all invoices from the current and the previous month
+        $qb->andWhere($qb->expr()->gte('i.issueDate', ':start'))
+            ->setParameter('start', $firstDayOfPreviousMonth)
+            ->andWhere($qb->expr()->lt('i.issueDate', ':end'))
+            ->setParameter('end', $firstDayOfCurrentMonth)
+            ->orderBy('i.issueDate', 'DESC');
+
+        // Execute the query and return the result
         return $qb->getQuery()->getResult();
     }
 }

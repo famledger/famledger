@@ -269,7 +269,8 @@ class DocumentService
      * Annex documents are Document entities representing any file that provides additional information.
      * As any other Document, they can be linked to a transaction. They are not created for a specific
      * financial month and therefore appear in all statements until they are linked to a transaction.
-     * Annex documents are always stored in the accounting folder.
+     * Annex documents are always stored in the attachment folder and moved to the accounting folder when
+     * they are linked to a transaction.
      *
      * @throws Exception
      */

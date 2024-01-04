@@ -418,7 +418,9 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface, FileOwner
 
     public function getDescription(): ?string
     {
-        return $this->description;
+        return ('XEXX010101000' === $this->customer->getRfc())
+            ? $this->description . ' - ' . MonthConverter::fromNumericMonth($this->getMonth()) . ' ' . $this->getYear()
+            : $this->description;
     }
 
     public function setDescription(?string $description): static

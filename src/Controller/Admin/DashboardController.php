@@ -9,7 +9,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -33,37 +32,32 @@ use App\Entity\TaxNotice;
 use App\Entity\Tenant;
 use App\Entity\User;
 use App\Entity\Vehicle;
+use App\Repository\InvoiceRepository;
+use App\Repository\InvoiceTaskRepository;
+use App\Repository\StatementRepository;
 use App\Service\LiveModeContext;
 
 #[IsGranted('ROLE_ADMIN')]
 class DashboardController extends AbstractDashboardController
 {
     public function __construct(
-        private readonly AdminUrlGenerator $adminUrlGenerator,
-        private readonly LiveModeContext   $liveModeContext,
-        private readonly RequestStack      $requestStack,
+        private readonly InvoiceRepository     $invoiceRepository,
+        private readonly InvoiceTaskRepository $invoiceTaskRepository,
+        private readonly LiveModeContext       $liveModeContext,
+        private readonly RequestStack          $requestStack,
+        private readonly StatementRepository   $statementRepository,
     ) {
     }
 
     #[Route('/admin', name: 'admin')]
     public function index(): Response
     {
-        //return parent::index();
 
-        // Option 1. You can make your dashboard redirect to some common page of your backend
-        //
-        return $this->redirect($this->adminUrlGenerator->setController(TenantCrudController::class)->generateUrl());
-
-        // Option 2. You can make your dashboard redirect to different pages depending on the user
-        //
-        // if ('jane' === $this->getUser()->getUsername()) {
-        //     return $this->redirect('...');
-        // }
-
-        // Option 3. You can render some custom template to display a proper dashboard with widgets, etc.
-        // (tip: it's easier if your template extends from @EasyAdmin/page/content.html.twig)
-        //
-        // return $this->render('some/path/my-dashboard.html.twig');
+        return $this->render('admin/index.html.twig', [
+            'invoices'     => $this->invoiceRepository->findLatest(),
+            'invoiceTasks' => $this->invoiceTaskRepository->findPending(),
+            'statements'   => $this->statementRepository->findLatest(3),
+        ]);
     }
 
     public function configureDashboard(): Dashboard

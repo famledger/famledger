@@ -1,0 +1,99 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title %}
+    Dashboard {{ tenant().name }} <i class="fa fa-{{ tenant().icon }}"></i>
+{% endblock %}
+
+{% block main %}
+    <div class="row">
+        <div class="col-6">
+            {% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-cash-register', title: 'Tax Payment Status' } %}
+                {% block card_body %}
+                    {{ tax_payment_warning() }}
+                {% endblock %}
+            {% endembed %}
+        </div>
+        <div class="col-6">
+            {% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-balance-scale', title: 'Statements' } %}
+                {% block card_body %}
+                    <table class="table table-condensed table-hover">
+                        {% for statement in statements %}
+                            <tr>
+                                <td>
+                                    <a title="view document" class="text-info"
+                                       href="{{ path('admin_document_download', {document:statement.document.id}) }}"><i
+                                                class="fa fa-file-pdf"></i></a>
+                                    <a href="{{ ea_url()
+                                        .setController('App\\Controller\\Admin\\StatementCrudController')
+                                        .setAction('detail')
+                                        .setEntityId(statement.id) }}">{{ statement.month|month_name }} {{ statement.year }}</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endblock %}
+            {% endembed %}
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            {% embed 'admin/_common/collapsible_card.twig' with { icon:'fa-fw fas fa-tasks', title: 'Invoice Tasks' } %}
+                {% block card_body %}
+                    <table class="table table-condensed table-hover">
+                        <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Month</th>
+                            <th>Concept</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        {% for invoiceTask in invoiceTasks %}
+                            <tr>
+                                <td>{{ invoiceTask.customer }}</td>
+                                <td>{{ invoiceTask.year }} {{ invoiceTask.month|month_name }}</td>
+                                <td>{{ invoiceTask.concept }}</td>
+                                <td><a href="{{ ea_url()
+                                        .setController('App\\Controller\\Admin\\InvoiceTaskCrudController')
+                                        .setAction('detail')
+                                        .setEntityId(invoiceTask.id) }}"><i class="fa fa-external-link"></i></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endblock %}
+            {% endembed %}
+        </div>
+        <div class="col-6">
+            {% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-file-invoice', title: 'Invoices' } %}
+                {% block card_body %}
+                    <table class="table table-condensed table-hover">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>Customer</th>
+                            <th>Issue Date</th>
+                            <th>Payment Date</th>
+                            <th>Amount</th>
+                            <th></th>
+                        {% for invoice in invoices %}
+                            <tr>
+                                <td>{{ invoice }}</td>
+                                <td>{{ invoice.customer }}</td>
+                                <td>{{ invoice.issueDate|format_date() }}</td>
+                                <td>{% if invoice.paymentDate %}{{ invoice.paymentDate|format_date }}{% endif %}</td>
+                                <td>{{ invoice.amount|cent_amount(true) }}</td>
+                                <td><a href="{{ ea_url()
+                                        .setController('App\\Controller\\Admin\\InvoiceCrudController')
+                                        .setAction('detail')
+                                        .setEntityId(invoice.id) }}"><i class="fa fa-external-link"></i></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endblock %}
+            {% endembed %}
+        </div>
+    </div>
+{% endblock %}
