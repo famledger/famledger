@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
@@ -230,5 +231,14 @@ class Account implements TenantAwareInterface
         $this->bankName = $bankName;
 
         return $this;
+    }
+
+    public function getLatestStatements(int $limit): array
+    {
+        $criteria = Criteria::create()
+            ->orderBy(['year' => Criteria::DESC, 'month' => Criteria::DESC])
+            ->setMaxResults($limit);
+
+        return $this->statements->matching($criteria)->toArray();
     }
 }

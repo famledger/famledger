@@ -31,9 +31,9 @@ class AccountRepository extends ServiceEntityRepository
 
         $query = $qb->getQuery();
 
-        $result   = [];
+        $result = [];
         foreach ($query->getResult() as $account) {
-            $result[$account->getNumber()]   = $account;
+            $result[$account->getNumber()] = $account;
         }
         if ($sorted) {
             uasort($result, function ($a, $b) {
@@ -42,5 +42,11 @@ class AccountRepository extends ServiceEntityRepository
         }
 
         return $result;
+    }
+
+    public function findActive(): array
+    {
+        // TODO: implement active/inactive accounts
+        return $this->findBy([], ['caption' => 'ASC']);
     }
 }

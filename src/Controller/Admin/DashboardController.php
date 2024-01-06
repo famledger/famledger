@@ -32,9 +32,9 @@ use App\Entity\TaxNotice;
 use App\Entity\Tenant;
 use App\Entity\User;
 use App\Entity\Vehicle;
+use App\Repository\AccountRepository;
 use App\Repository\InvoiceRepository;
 use App\Repository\InvoiceTaskRepository;
-use App\Repository\StatementRepository;
 use App\Service\LiveModeContext;
 
 #[IsGranted('ROLE_ADMIN')]
@@ -45,18 +45,17 @@ class DashboardController extends AbstractDashboardController
         private readonly InvoiceTaskRepository $invoiceTaskRepository,
         private readonly LiveModeContext       $liveModeContext,
         private readonly RequestStack          $requestStack,
-        private readonly StatementRepository   $statementRepository,
+        private readonly AccountRepository     $accountRepository,
     ) {
     }
 
     #[Route('/admin', name: 'admin')]
     public function index(): Response
     {
-
         return $this->render('admin/index.html.twig', [
             'invoices'     => $this->invoiceRepository->findLatest(),
             'invoiceTasks' => $this->invoiceTaskRepository->findPending(),
-            'statements'   => $this->statementRepository->findLatest(3),
+            'accounts'     => $this->accountRepository->findActive(),
         ]);
     }
 

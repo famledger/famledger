@@ -2,6 +2,7 @@
 
 {% block page_title %}
     Dashboard {{ tenant().name }} <i class="fa fa-{{ tenant().icon }}"></i>
+    <div style="color: #666; font-size: .5em;">{{ 'now'|date('l, F j, Y') }} &middot; {{ 'now'|date('H:i') }}</div>
 {% endblock %}
 
 {% block main %}
@@ -14,31 +15,53 @@
             {% endembed %}
         </div>
         <div class="col-6">
-            {% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-balance-scale', title: 'Statements' } %}
+            {% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-balance-scale', title: 'Statements by Account' } %}
                 {% block card_body %}
-                    <table class="table table-condensed table-hover">
-                        {% for statement in statements %}
-                            <tr>
-                                <td>
-                                    <a title="view document" class="text-info"
-                                       href="{{ path('admin_document_download', {document:statement.document.id}) }}"><i
-                                                class="fa fa-file-pdf"></i></a>
-                                    <a href="{{ ea_url()
-                                        .setController('App\\Controller\\Admin\\StatementCrudController')
-                                        .setAction('detail')
-                                        .setEntityId(statement.id) }}">{{ statement.month|month_name }} {{ statement.year }}</a>
-                                </td>
-                            </tr>
+                    <!-- Tab Headers -->
+                    <ul class="nav nav-tabs" id="accountTabs" role="tablist" data-section-name="accounts">
+                        {% for account in accounts %}
+                            <li class="nav-item">
+                                <a class="nav-link{{ loop.first ? ' active' : '' }}" id="account-tab-{{ account.id }}"
+                                   data-bs-toggle="tab" href="#account{{ account.id }}" role="tab"
+                                   aria-controls="account{{ account.id }}"
+                                   aria-selected="{{ loop.first ? 'true' : 'false' }}">{{ account.caption }}</a>
+                            </li>
                         {% endfor %}
-                    </table>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="accountTabsContent">
+                        {% for account in accounts %}
+                            <div class="tab-pane fade{{ loop.first ? ' show active' : '' }}"
+                                 id="account{{ account.id }}" role="tabpanel"
+                                 aria-labelledby="account-tab-{{ account.id }}">
+                                {% set statements = account.latestStatements(3) %}
+                                <table class="table table-condensed table-hover">
+                                    {% for statement in statements %}
+                                        <tr>
+                                            <td>
+                                                <a title="view document" class="text-info"
+                                                   href="{{ path('admin_document_download', {document:statement.document.id}) }}">
+                                                    <i class="fa fa-file-pdf"></i>
+                                                </a>
+                                                <a href="{{ ea_url()
+                                                    .setController('App\\Controller\\Admin\\StatementCrudController')
+                                                    .setAction('detail')
+                                                    .setEntityId(statement.id) }}">{{ statement.month|month_name }} {{ statement.year }}</a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                        {% endfor %}
+                    </div>
                 {% endblock %}
             {% endembed %}
-
         </div>
     </div>
     <div class="row">
         <div class="col-6">
-            {% embed 'admin/_common/collapsible_card.twig' with { icon:'fa-fw fas fa-tasks', title: 'Invoice Tasks' } %}
+            {% embed 'admin/_common/collapsible_card.twig' with { icon:'fa-fw fas fa-tasks', title: 'Invoice Tasks (pending)' } %}
                 {% block card_body %}
                     <table class="table table-condensed table-hover">
                         <thead>
@@ -66,7 +89,7 @@
             {% endembed %}
         </div>
         <div class="col-6">
-            {% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-file-invoice', title: 'Invoices' } %}
+            {% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-file-invoice', title: 'Invoices(issued this and last month and not assigned)' } %}
                 {% block card_body %}
                     <table class="table table-condensed table-hover">
                         <thead>
@@ -77,23 +100,63 @@
                             <th>Payment Date</th>
                             <th>Amount</th>
                             <th></th>
-                        {% for invoice in invoices %}
-                            <tr>
-                                <td>{{ invoice }}</td>
-                                <td>{{ invoice.customer }}</td>
-                                <td>{{ invoice.issueDate|format_date() }}</td>
-                                <td>{% if invoice.paymentDate %}{{ invoice.paymentDate|format_date }}{% endif %}</td>
-                                <td>{{ invoice.amount|cent_amount(true) }}</td>
-                                <td><a href="{{ ea_url()
-                                        .setController('App\\Controller\\Admin\\InvoiceCrudController')
-                                        .setAction('detail')
-                                        .setEntityId(invoice.id) }}"><i class="fa fa-external-link"></i></a>
-                                </td>
-                            </tr>
+                            {% for invoice in invoices %}
+                        <tr>
+                            <td>{{ invoice }}</td>
+                            <td>{{ invoice.customer }}</td>
+                            <td>{{ invoice.issueDate|format_date() }}</td>
+                            <td>{% if invoice.paymentDate %}{{ invoice.paymentDate|format_date }}{% endif %}</td>
+                            <td>{{ invoice.amount|cent_amount(true) }}</td>
+                            <td><a href="{{ ea_url()
+                                    .setController('App\\Controller\\Admin\\InvoiceCrudController')
+                                    .setAction('detail')
+                                    .setEntityId(invoice.id) }}"><i class="fa fa-external-link"></i></a>
+                            </td>
+                        </tr>
                         {% endfor %}
                     </table>
                 {% endblock %}
             {% endembed %}
         </div>
     </div>
+{% endblock %}
+
+{% block body_javascript %}
+    {{ parent() }}
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('.nav-tabs[data-section-name]').forEach(tabSection => {
+          let sectionName = tabSection.getAttribute('data-section-name')
+          let activeTab = localStorage.getItem('activeTab_' + sectionName)
+
+          if (activeTab) {
+            activateTab(activeTab)
+          }
+
+          tabSection.querySelectorAll('a[data-bs-toggle="tab"]').forEach(tab => {
+            tab.addEventListener('click', function() {
+              localStorage.setItem('activeTab_' + sectionName, this.getAttribute('href'))
+            })
+          })
+        })
+      })
+
+      function activateTab(tabId) {
+        let tab = document.querySelector(`a[href="${tabId}"]`)
+        if (tab) {
+          new bootstrap.Tab(tab).show() // If you are using Bootstrap's JS
+        }
+      }
+    </script>
+{% endblock %}
+
+{% block head_stylesheets %}
+    {{ parent() }}
+    <style>
+        .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+            background-color: var(--bs-nav-tabs-link-active-bg);
+            border-color: var(--bs-nav-tabs-link-active-border-color);
+            color: #cc7300;
+        }
+    </style>
 {% endblock %}

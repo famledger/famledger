@@ -65,15 +65,4 @@ class StatementRepository extends ServiceEntityRepository
 
         return $qb->andWhere($condition)->getQuery()->getResult();
     }
-
-    public function findLatest(int $limit): array
-    {
-        // get the last $limit statements
-        return $this->createQueryBuilder('s')
-            ->orderBy('s.year', 'DESC')
-            ->addOrderBy('s.month', 'DESC')
-            ->setMaxResults($limit)
-            ->getQuery()
-            ->getResult();
-    }
 }
