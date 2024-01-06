@@ -3,6 +3,7 @@
 namespace App\Service\Detectors;
 
 use App\Constant\DocumentType;
+use App\Service\Strategies\Statement\BBVACreditCardStrategy;
 use App\Service\Strategies\Statement\BBVAStatementStrategy;
 
 class StatementDetector extends BaseDetector
@@ -10,6 +11,7 @@ class StatementDetector extends BaseDetector
     public function getStrategies(): array
     {
         return [
+            new BBVACreditCardStrategy(),
             new BBVAStatementStrategy(),
         ];
     }

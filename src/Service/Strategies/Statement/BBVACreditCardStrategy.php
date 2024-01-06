@@ -10,15 +10,15 @@ use App\Entity\Statement;
 use App\Entity\Transaction;
 use App\Service\DocumentSpecs\BaseDocumentSpecs;
 use App\Service\DocumentSpecs\StatementSpecs;
+use App\Service\Strategies\StrategyHelper;
 use App\Service\Strategies\StrategyInterface;
 
-class BBVAStatementStrategy implements StrategyInterface
+class BBVACreditCardStrategy implements StrategyInterface
 {
     public function matches(string $content, ?string $filePath = null): bool
     {
-        return str_contains($content, 'Estado de Cuenta')
-               and str_contains($content, 'No. de Cliente')
-                   and !strchr($content, 'No. de Tarjeta'); // estado de cuenta tarjeta de crédito
+        return str_contains($content, 'No. de Tarjeta')
+               and str_contains($content, '4772 1430 1938 6206');
     }
 
     public function suggestFilename(BaseDocumentSpecs $documentSpecs, ?string $filePath = null): string
@@ -71,25 +71,28 @@ class BBVAStatementStrategy implements StrategyInterface
     {
         $statement = new Statement();
 
-        preg_match('/Periodo\s+DEL\s+(\d{2}\/\d{2}\/\d{4})\s+AL\s+(\d{2}\/\d{2}\/\d{4})/', $content, $matches);
+        $cellContent = StrategyHelper::extractBlock('/ {5}Periodo/', $content, 40, 4);
+
+        preg_match('/Periodo\s+Del\s+(\d{2}\/\d{2}\/\d{2})\s+al\s+(\d{2}\/\d{2}\/\d{2})/i', $cellContent, $matches);
         $startDate = $matches[1];
         // $endDate   = $matches[2];
         [, $month, $year] = explode('/', $startDate);
+        $year = strlen($year) === 2 ? 2000 + (int)$year : (int)$year;
         $statement
             ->setMonth($month)
             ->setYear($year);
 
-        // Extracting additional fields
-        preg_match('/No. de Cuenta\s+(\d+)/', $content, $matches);
+        // Cuenta CLABE                                                   012975474576269367
+        preg_match('/Cuenta CLABE\s+(\d+)/', $content, $matches);
         $statement->setAccountNumber($matches[1]);
+
+        //Saldo Inicial del Periodo            -$            31,034.85
         preg_match('/Saldo Anterior\s+([\d,.]+)/', $content, $matches);
         $statement->setStartingBalance($this->convertToIntegerAmount($matches[1]));
-        preg_match('/Saldo Final\s+([\d,.]+)/', $content, $matches);
+
+        // Saldo al Corte                       $             44,623.74
+        preg_match('/Saldo Nuevo\s+([\d,.]+)/', $content, $matches);
         $statement->setEndingBalance($this->convertToIntegerAmount($matches[1]));
-        preg_match('/Depósitos \/ Abonos \(\+\)\s+(\d+)/', $content, $matches);
-        $statement->setNoDeposits((int)$matches[1]);
-        preg_match('/Retiros \/ Cargos \(-\)\s+(\d+)/', $content, $matches);
-        $statement->setNoWithdrawals((int)$matches[1]);
 
         return $statement;
     }
@@ -98,50 +101,61 @@ class BBVAStatementStrategy implements StrategyInterface
     {
         $lines = explode("\n", $pdfText); // Assuming the PDF text is in $pdfText
 
-        $status             = 'idle';
-        $transactions       = [];
-        $currentTransaction = [];
+        $status                = 'idle';
+        $transactions          = [];
+        $currentTransaction    = [];
+        $isMainTransactionLine = false;
 
         foreach ($lines as $line) {
             $trimmed = trim($line);
 
-            if ($status === 'idle' && preg_match('/OPER\s+LIQ\s+DESCRIPCION/', $trimmed)) {
+            if ($status === 'idle' && preg_match('/Movimientos Efectuados/', $trimmed)) {
                 $status = 'started';
                 continue;
             }
 
-            if ($status === 'started' && str_contains($trimmed, 'Total de Movimientos')) {
+            if ($status === 'started' && str_contains($trimmed, 'Resumen Informativo de Beneficios')) {
                 $status = 'stopped';
                 break;
             }
 
             if ($status === 'started' && $trimmed) {
-                if (preg_match('/(\d{2}\/\w{3})\s+(\d{2}\/\w{3})/', $line,
-                    $matches)) { // match: e.g.  05/DIC       05/DIC
-                    $bookingDate = $this->convertToDateTime($matches[1], $year);
-                    $valueDate   = $this->convertToDateTime($matches[2], $year);
-                    // replace all characters in $line that correspond to $matches[0] with dots, so they are treated as a single
-                    // term when splitting by spaces
-                    $startPos = strpos($line, $matches[0]);
-                    $length   = strlen($matches[0]);
-                    $line     = substr_replace($line, str_repeat('.', $length), $startPos, $length);
-                    $parts    = $this->splitBySpaces($line);
-                    // parts[0] contains the the description, parts[1] contains the amount and parts[2] contains the balance
-                    // parts[2] may not be present in rare situations so we need to check whether parts[1] is a valid amount too
-                    if (!isset($parts[2]) and !$this->isValidAmount($parts[1])) {
+                $parts                 = $this->splitByColumns($line);
+                $isSecondLine          = ($isMainTransactionLine and !empty($parts[2]) and empty($parts[0]) and empty($parts[1]) and empty($parts[3]) and empty($parts[4]));
+                $isMainTransactionLine = (isset($parts[4]) and preg_match('/\*{5}[0-9]{4}/', $parts[4]));
+                if (!$isMainTransactionLine and !$isSecondLine) {
+                    continue;
+                }
+
+                if ($isMainTransactionLine) {
+                    $bookingDate = $this->convertToDateTime($parts[0], $year);
+                    $valueDate   = $this->convertToDateTime($parts[1], $year);
+                    // parts[2] contains the description, parts[5] contains the amount and parts[3] contains the RFC
+                    if (!isset($parts[2]) and !$this->isValidAmount($parts[5])) {
                         continue;
                     }
+                    $amount = empty($parts[5])
+                        ? -1 * $this->convertToIntegerAmount($parts[6])
+                        : $this->convertToIntegerAmount($parts[5]);
+
+                    $rfc                = str_replace(' ', '', $parts[3]);
                     $currentTransaction = [
                         'bookingDate' => $bookingDate,
                         'valueDate'   => $valueDate,
-                        'description' => trim($parts[1]),
-                        'amount'      => $this->extractAmount(trim($parts[2] ?? $parts[1]), $line),
+                        'description' => $parts[2] . (empty($rfc) ? '' : (' | ' . $rfc)),
+                        'rfc'         => $rfc,
+                        'amount'      => $amount,
                     ];
                     $transactions[]     = $currentTransaction;
-                } elseif (preg_match('/^\s{10,}/', $line)) {
+                } else {
                     // Likely a continuation line
-                    $additionalParts                        = $this->splitBySpaces($trimmed);
-                    $currentTransaction['description']      .= ' ' . implode(' ', $additionalParts);
+                    // split up the RFC added in main transaction line
+
+                    $currentTransaction['description']      = sprintf('%s %s | %s',
+                        preg_replace('/\|.+$/', '', $currentTransaction['description']),
+                        $parts[2],
+                        $currentTransaction['rfc']
+                    );
                     $transactions[count($transactions) - 1] = $currentTransaction;
                 }
             }
@@ -199,14 +213,16 @@ class BBVAStatementStrategy implements StrategyInterface
             return null; // Invalid date format
         }
 
-        $day      = intval($dateParts[0]);
-        $monthStr = strtoupper($dateParts[1]);
-
-        if (!isset($months[$monthStr])) {
-            return null; // Invalid month string
+        $day = intval($dateParts[0]);
+        if (strlen($dateParts[1]) === 3) {
+            $monthStr = strtoupper($dateParts[1]);
+            if (!isset($months[$monthStr])) {
+                return null;
+            }
+            $month = $months[$monthStr];
+        } else {
+            $month = intval($dateParts[1]);
         }
-
-        $month = $months[$monthStr];
 
         return DateTime::createFromFormat('Y-m-d', sprintf('%d-%02d-%02d', $year, $month, $day));
     }
@@ -216,5 +232,21 @@ class BBVAStatementStrategy implements StrategyInterface
         // re remove the thousands separator which is a comma and make sure the rest is numeric
         // e.g. 1,000.00 -> 1000.00
         return is_numeric(str_replace(',', '', $amount));
+    }
+
+    private function splitByColumns(string $line): array
+    {
+        $columnStartIndexes = [6, 27, 43, 96, 122, 136, 155];
+        $columnEndIndexes   = [13, 35, 94, 123, 133, 150, 170];
+        $columns            = [];
+        for ($i = 0; $i < count($columnStartIndexes); $i++) {
+            $start     = $columnStartIndexes[$i];
+            $length    = isset($columnEndIndexes[$i])
+                ? $columnEndIndexes[$i] - $start + 1
+                : strlen($line) - $start;
+            $columns[] = trim(substr($line, $start, $length));
+        }
+
+        return $columns;
     }
 }
