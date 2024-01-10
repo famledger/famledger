@@ -35,6 +35,38 @@
           $(this).prev('i').attr('title', labelText) // Set the text as the title of the <i> element
           $(this).hide() // Hide the span
         })
+
+        // handle outbox copy button
+        $('a.copy-to-outbox').on('click', function(event) {
+          event.preventDefault()
+
+          const url = this.getAttribute('href')
+
+          fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams(new FormData()) // Assuming you need to send form data
+          })
+            .then(response => {
+              if (response.ok) {
+                // Show the popup on success
+                const popup = document.getElementById('clipboard-popup')
+                popup.innerText = 'The file has been copied to the Outbox'
+                popup.style.display = 'block'
+
+                setTimeout(function() {
+                  popup.style.display = 'none'
+                }, 3000)
+              } else {
+                alert('Failed to copy the file')
+              }
+            })
+            .catch(error => {
+              alert('Network error occurred')
+            })
+        })
       })
     </script>
 

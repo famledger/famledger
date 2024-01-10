@@ -45,22 +45,22 @@
 
                     <tbody>
                     <tr>
-                        <td class="d-flex"><a class="copy-to-clipboard"
-                                              data-target="#accounting-folder-path-{{ subFolder }}">
-                                <i class="fa fa-clipboard"></i>
+                        {% set folderPath = accountingFolder ~ ((subFolder is not empty) ? ('/' ~  subFolder) : '') %}
+                        <td class="d-flex"><a href="folderopener://{{ folderPath }}">
+                                <i class="fa fa-folder"></i>
                             </a>&nbsp;
                             <pre id="accounting-folder-path-{{ subFolder }}"
-                                 style="font-size: .8em;white-space: pre-wrap">{{ accountingFolder }}{% if subFolder %}/{{ subFolder }}{% endif %}</pre>
+                                 style="font-size: .8em; white-space: pre-wrap">{{ folderPath }}</pre>
                         </td>
 
                         <td></td>
 
-                        <td class="d-flex"><a class="copy-to-clipboard"
-                                              data-target="#accountant-folder-path-{{ subFolder }}">
-                                <i class="fa fa-clipboard"></i>
+                        {% set folderPath = accountantFolder ~ ((subFolder is not empty) ? ('/' ~  subFolder) : '') %}
+                        <td class="d-flex"><a href="folderopener://{{ folderPath }}">
+                                <i class="fa fa-folder"></i>
                             </a>&nbsp;
-                            <pre id="accountant-folder-path-{{ subFolder }}"
-                                 style="font-size: .8em;white-space: pre-wrap">{{ accountantFolder }}{% if subFolder %}/{{ subFolder }}{% endif %}</pre>
+                            <pre id="accounting-folder-path-{{ subFolder }}"
+                                 style="font-size: .8em; white-space: pre-wrap">{{ folderPath }}</pre>
                         </td>
                     </tr>
 

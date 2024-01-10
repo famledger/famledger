@@ -109,6 +109,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToCrud('Receipt Tasks', 'fas fa-tasks', ReceiptTask::class);
         yield MenuItem::section('Accounting');
         yield MenuItem::linkToRoute('Inbox', 'fas fa-inbox', 'admin_inbox');
+        yield MenuItem::linkToUrl('Outbox', 'fas fa-sign-out', 'folderopener:///Volumes/KC3000-2TB/DataStorage/FamLedger/outbox');
         yield MenuItem::linkToCrud('Statements', 'fas fa-balance-scale', Statement::class);
         yield MenuItem::linkToRoute('Invoice History', 'fas fa-history', 'admin_invoice_history');
         yield MenuItem::linkToRoute('Payment History', 'fas fa-history', 'admin_payment_history');

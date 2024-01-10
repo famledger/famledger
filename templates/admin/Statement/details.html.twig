@@ -41,16 +41,7 @@
             } %}
 
                 {% block card_header %}
-                    <div class="card-header">
-                        <div style="float:right">
-                    <span style="font-family: monospace"
-                          id="financial-month-path">{{ entity.instance.financialMonth|financial_month_path }}</span>&nbsp;<a
-                                    class="copy-to-clipboard" data-target="#financial-month-path">
-                                <i class="fa fa-clipboard"></i>
-                            </a>
-                        </div>
-                        Transactions
-                    </div>
+                    <div class="card-header"> Transactions</div>
                 {% endblock %}
 
                 {% block card_body %}
@@ -61,7 +52,8 @@
                                 <td>#</td>
                                 <td>Date</td>
                                 <td>
-                                    Description <a href="#" onclick="$('.transaction-documents-container').toggleClass('collapsed')">toggle</a>
+                                    Description <a href="#"
+                                                   onclick="$('.transaction-documents-container').toggleClass('collapsed')">toggle</a>
                                 </td>
                                 <td>Amount</td>
                                 <td>Status</td>

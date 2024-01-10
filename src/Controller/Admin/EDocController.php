@@ -5,6 +5,8 @@ namespace App\Controller\Admin;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,6 +30,20 @@ class EDocController extends DashboardController
         return new BinaryFileResponse($filePath);
     }
 
+    #[Route('/admin/eDocs/{eDoc}/copyToOutbox', name: 'admin_eDoc_outbox', methods: ['POST'])]
+    public function copyToOutbox(EDoc $eDoc, EDocService $eDocService, string $outboxFolder): Response
+    {
+        $filePath = $eDocService->getEDocFilepath($eDoc);
+
+        if (!file_exists($filePath)) {
+            return new Response('File not found', Response::HTTP_NOT_FOUND);
+        }
+
+        copy($filePath, $outboxFolder . '/' . $eDoc->getFilename());
+
+        return new Response($filePath);
+    }
+
     #[Route('/admin/eDocs/{eDoc}', name: 'admin_eDoc_delete', methods: ['DELETE'])]
     public function delete(
         EDoc        $eDoc,
@@ -41,7 +57,7 @@ class EDocController extends DashboardController
         if ($this->isCsrfTokenValid('del-eDoc-' . $eDoc->getId(), $token)) {
             try {
                 $eDocService->deleteEDoc($eDoc);
-            } catch (Exception $e) {
+            } catch (Exception) {
             }
         }
 
@@ -65,7 +81,15 @@ class EDocController extends DashboardController
         EDocService            $eDocService
     ): Response {
         try {
-            $file        = $request->files->get('file');
+            $file = $request->files->get('file');
+
+            if (!$file instanceof UploadedFile) {
+                throw new Exception('File was not uploaded properly.');
+            }
+
+            if ($file->getError() !== UPLOAD_ERR_OK) {
+                throw new FileException($this->getUploadErrorMessage($file->getError()));
+            }
             $class       = "App\\Entity\\$ownerName";
             $ownerEntity = $em->getRepository($class)->find($ownerId);
 
@@ -83,5 +107,19 @@ class EDocController extends DashboardController
         } catch (Exception $e) {
             return new JsonResponse($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
+    }
+
+    private function getUploadErrorMessage($errorCode): string
+    {
+        return match ($errorCode) {
+            UPLOAD_ERR_INI_SIZE   => 'The file is too large (server limit).',
+            UPLOAD_ERR_FORM_SIZE  => 'The file is too large (form limit).',
+            UPLOAD_ERR_PARTIAL    => 'The file was only partially uploaded.',
+            UPLOAD_ERR_NO_FILE    => 'No file was uploaded.',
+            UPLOAD_ERR_NO_TMP_DIR => 'Missing a temporary folder.',
+            UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk.',
+            UPLOAD_ERR_EXTENSION  => 'File upload stopped by extension.',
+            default               => 'Unknown upload error.',
+        };
     }
 }

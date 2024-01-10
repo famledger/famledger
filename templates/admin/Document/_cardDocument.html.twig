@@ -34,6 +34,8 @@
                 <a class="copy-to-clipboard" data-target="#filepath">
                     <i class="fa fa-clipboard"></i>
                 </a>
+                <a class="copy-to-outbox" title="copy file to outbox" href="{{ path('admin_document_outbox', {document:document.id}) }}"><i
+                            class="fa fa-sign-out"></i></a>
             </div>
         </div>
         {% if isAttachment %}

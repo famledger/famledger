@@ -15,6 +15,16 @@
             <div class="value">+{{ statement.noDeposits }} deposits<br/> -{{ statement.noWithdrawals }} withdrawals
             </div>
         </div>
+        <div class="field-group">
+            <div class="caption">Folder</div>
+            <div class="value">
+                {% set folderPath = entity.instance.financialMonth|financial_month_path %}
+                <a href="folderopener://{{ folderPath }}">
+                    <i class="fa fa-folder"></i>
+                </a>&nbsp
+                <span style="font-family: monospace" id="financial-month-path">{{ folderPath }}</span>
+            </div>
+        </div>
 
     {% endblock %}
 {% endembed %}

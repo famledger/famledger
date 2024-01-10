@@ -30,6 +30,8 @@
                                 data-container-id="{{ containerId }}"
                         ><i class="fa fa-trash text-danger"></i>
                         </button>
+                        <a class="copy-to-outbox" title="copy file to outbox" href="{{ path('admin_eDoc_outbox', {eDoc:eDoc.id}) }}"><i
+                                    class="fa fa-sign-out"></i></a>
                     </td>
                 </tr>
             {% endfor %}

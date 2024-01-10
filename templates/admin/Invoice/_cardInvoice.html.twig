@@ -43,9 +43,23 @@
             <div class="caption">Month invoiced</div>
             <div class="value">{{ invoice.month|month_name }} {{ invoice.year }}</div>
         </div>
+        {% if invoice.property %}
+            {% set property = invoice.property %}
+            <div class="field-group">
+                <div class="caption">Property</div>
+                <div class="value"><a href="{{ ea_url()
+                        .setController('App\\Controller\\Admin\\PropertyCrudController')
+                        .setAction('detail')
+                        .setEntityId(property.id) }}">{{ property }}</a>
+            </div>
+        {% endif %}
         <div class="field-group">
             <div class="caption">Issue date</div>
             <div class="value">{{ invoice.issueDate|date }}</div>
+        </div>
+        <div class="field-group">
+            <div class="caption">Payment date</div>
+            <div class="value">{% if invoice.document and invoice.document.transaction %}{{ invoice.document.transaction.bookingDate|date }}{% else %}-{% endif %}</div>
         </div>
         <div class="field-group">
             <div class="caption">Description</div>

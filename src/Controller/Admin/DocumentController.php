@@ -93,6 +93,20 @@ class DocumentController extends AbstractController
         return $response;
     }
 
+    #[Route('/{document}/copyToOutbox', name: 'admin_document_outbox', methods: ['POST'])]
+    public function copyToOutbox(Document $document, DocumentService $documentService, string $outboxFolder): Response
+    {
+        $filePath = $documentService->getFilepath($document);
+
+        if (!file_exists($filePath)) {
+            return new Response('File not found', Response::HTTP_NOT_FOUND);
+        }
+
+        copy($filePath, $outboxFolder . '/' . $document->getFilename());
+
+        return new Response($filePath);
+    }
+
     /**
      * @throws Exception
      */
