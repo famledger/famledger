@@ -1,5 +1,5 @@
 {% extends '@EasyAdmin/crud/detail.html.twig' %}
-{% set Document = entity.instance %}
+{% set document = entity.instance %}
 
 {# {% block content_header %} #}
 {#    <div class="content-header-title"> #}
@@ -23,8 +23,15 @@
 {#    {% endblock %} #}
 {# {% endblock %} #}
 
+{% block page_actions_wrapper %}
+    <div class="page-actions">{% block page_actions %}{{ parent() }}{% endblock %}
+        <a class="copy-to-outbox btn btn-default" title="copy file to outbox"
+           href="{{ path('admin_document_outbox', {document:document.id}) }}">Outbox <i
+                    class="fa fa-sign-out"></i></a>
+    </div>
+{% endblock %}
+
 {% block main %}
-    {% set document = entity.instance %}
 
     <div class="row">
         <!-- Left column of cards -->

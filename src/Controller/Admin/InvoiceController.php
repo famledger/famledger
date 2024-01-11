@@ -42,4 +42,23 @@ class InvoiceController extends AbstractController
 
         return ResponseHelper::createPdfResponse($filePath, $filename);
     }
+
+    #[Route('/{invoice}/copyToOutbox', name: 'admin_invoice_outbox', methods: ['POST'])]
+    public function copyToOutbox(
+        Invoice            $invoice,
+        InvoiceFileManager $invoiceFileManager,
+        string             $outboxFolder
+    ): Response {
+        $filePath = $invoiceFileManager->getPdfPath($invoice);
+
+        if (!file_exists($filePath)) {
+            return new Response('File not found', Response::HTTP_NOT_FOUND);
+        }
+        $filePath = $invoiceFileManager->getPdfPath($invoice);
+        $filename = $invoiceFileManager->getPdfFilename($invoice);
+
+        copy($filePath, $outboxFolder . '/' . $filename);
+
+        return new Response($filePath);
+    }
 }

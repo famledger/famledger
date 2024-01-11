@@ -19,7 +19,11 @@
     </div>
 
     {% block page_actions_wrapper %}
-        {{ parent() }}
+        <div class="page-actions">{% block page_actions %}{{ parent() }}{% endblock %}
+            <a class="copy-to-outbox btn btn-default" title="copy file to outbox"
+               href="{{ path('admin_invoice_outbox', {invoice:invoice.id}) }}">Outbox <i
+                        class="fa fa-sign-out"></i></a>
+        </div>
     {% endblock %}
 {% endblock %}
 
