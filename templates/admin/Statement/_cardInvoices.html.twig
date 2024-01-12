@@ -44,7 +44,7 @@
                                 {% endif %}
                             </td>
                             <td class="text-right">{{ invoice.amount|cent_amount }}</td>
-                            <td class="text-right">{{ invoice.status|invoice_status }}</td>
+                            <td class="text-right">{{ invoice.displayStatus|invoice_status }}</td>
                             <td class="text-right" style="white-space: nowrap"><a target="download" class="text-danger"
                                                       href="{{ path('admin_invoice_download', {invoice:invoice.id}) }}"><i
                                             class="fa fa-file-pdf"></i></a>
