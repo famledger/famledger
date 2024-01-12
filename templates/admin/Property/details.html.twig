@@ -37,6 +37,14 @@
             icon: 'fa fa-wrench',
             width: 6
         }) }}
+        {{ include('admin/EDoc/eDocsCard.html.twig', {
+            eDocs: eDocsByType[constant('App\\Constant\\PropertyEDocType::MAINTENANCE')]|default([]),
+            type:constant('App\\Constant\\PropertyEDocType::MAINTENANCE'),
+            caption:'Maintenance',
+            owner: entity.instance,
+            icon: 'fa fa-wrench',
+            width: 6
+        }) }}
     </div>
     <div class="row gx-0 mt-3">
         {{ include('admin/EDoc/eDocsCard.html.twig', {
