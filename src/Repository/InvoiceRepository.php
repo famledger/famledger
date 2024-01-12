@@ -246,10 +246,13 @@ EOT;
         $qb = $this->createQueryBuilder('i');
 
         // Build the query to get all invoices from the current and the previous month
-        $qb->andWhere($qb->expr()->gte('i.issueDate', ':start'))
-            ->setParameter('start', $firstDayOfPreviousMonth)
-            ->andWhere($qb->expr()->lt('i.issueDate', ':end'))
-            ->setParameter('end', $firstDayOfCurrentMonth)
+        $qb
+            ->where($qb->expr()->andX()
+                ->add($qb->expr()->gte('i.issueDate', $qb->expr()->literal($firstDayOfPreviousMonth->format('Y-m-d'))))
+                ->add($qb->expr()->lt('i.issueDate', $qb->expr()->literal($firstDayOfCurrentMonth->format('Y-m-d'))))
+                ->add($qb->expr()->isNull('i.document'))
+
+            )
             ->orderBy('i.issueDate', 'DESC');
 
         // Execute the query and return the result

@@ -98,15 +98,18 @@
                             <th>Customer</th>
                             <th>Issue Date</th>
                             <th>Payment Date</th>
+                            <th>Status</th>
                             <th>Amount</th>
                             <th></th>
                             {% for invoice in invoices %}
                         <tr>
-                            <td>{{ invoice }}</td>
+                            <td style="white-space: nowrap">{{ invoice }}</td>
                             <td>{{ invoice.customer }}</td>
                             <td>{{ invoice.issueDate|format_date() }}</td>
                             <td>{% if invoice.paymentDate %}{{ invoice.paymentDate|format_date }}{% endif %}</td>
+                            <td class="text-right">{{ invoice.displayStatus|invoice_status }}</td>
                             <td>{{ invoice.amount|cent_amount(true) }}</td>
+                            <td><a href="#" data-bs-toggle="tooltip" data-bs-title="{{ invoice.description }}"><i class="fa fa-info-circle"></i></a></td>
                             <td><a href="{{ ea_url()
                                     .setController('App\\Controller\\Admin\\InvoiceCrudController')
                                     .setAction('detail')
