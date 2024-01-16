@@ -140,6 +140,7 @@ class StatementService
         $statement         = $transaction->getStatement();
         $invoiceDocument   = $this->createInvoiceDocuments($invoice, $statement);
         $invoiceAttachment = $invoiceDocument->getAttachment();
+        $this->em->flush();
 
         $transaction
             ->addDocument($invoiceDocument)
