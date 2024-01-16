@@ -333,6 +333,7 @@ class Document implements TenantAwareInterface
         if (null !== $specs) {
             $this->setYear($specs['year'] ?? null);
             $this->setMonth($specs['month'] ?? null);
+            $this->setSubType($specs['subType'] ?? null);
         }
 
         return $this;

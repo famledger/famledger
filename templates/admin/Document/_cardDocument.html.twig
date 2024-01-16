@@ -13,7 +13,7 @@
         {% endif %}
         <div class="field-group">
             <div class="caption">Type</div>
-            <div class="value">{{ document.type.value }}</div>
+            <div class="value">{{ document.type.value }}{% if document.subType is not empty %} [{{ document.subType }}]{% endif %}</div>
         </div>
         <div class="field-group">
             <div class="caption">Month&middot;Year</div>
