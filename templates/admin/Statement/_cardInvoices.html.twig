@@ -7,8 +7,9 @@
         {% if customerInvoices|length %}
             <table class="table table-hover">
                 {% for customer, invoices in customerInvoices %}
+                    {% set isActive = invoices[0].customer.isActive %}
                     <tr class="table-active customer-row">
-                        <th colspan="9"><i class="fas fa-caret-right"></i> {{ customer }}</th>
+                        <th colspan="9"{% if not isActive %} style="opacity:.4;"{% endif %}><i class="fas fa-caret-right"></i> {{ customer }}</th>
                     </tr>
                     {% for invoice in invoices %}
                         <tr data-droppable-id="{{ invoice.id }}" data-droppable-type="invoice"
