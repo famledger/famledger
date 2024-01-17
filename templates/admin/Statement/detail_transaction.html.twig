@@ -54,7 +54,7 @@
                                     {{ document.filename }}
                                     {% if document.invoice is not null %}
                                         {{ document.invoice|invoice_substitution_link }}
-                                    {% endi f %}
+                                    {% endif %}
                                 </td>
                                 <td style="white-space: nowrap; text-align: right">
                                     {% if not isConsolidated and not isInvoiceAttachment %}

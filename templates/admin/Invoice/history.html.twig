@@ -139,6 +139,8 @@
                                                     <span class="{{ diffClass }}">{{ transaction.valueDate|date('d-M-y') }}</span>
                                                 {% endif %}
                                             {% endif %}
+                                        {% elseif invoice.status == 'vigente' %}
+                                            <span class="badge badge-warning">pending</span>
                                         {% endif %}
                                     </td>
                                     <td class="text-right">{{ invoice.amount|cent_amount }}</td>
