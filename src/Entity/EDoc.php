@@ -15,6 +15,7 @@ use App\Repository\EDocRepository;
 #[TenantDependent(tenantFieldName: 'tenant_id')]
 #[TenantFilterable(tenantFieldName: 'tenant_id')]
 #[Gedmo\Loggable]
+#[ORM\UniqueConstraint(name: 'edoc_checksum', columns: ['checksum'])]
 class EDoc implements TenantAwareInterface, FileOwnerInterface
 {
     use FileOwnerTrait, LoggableTrait;
