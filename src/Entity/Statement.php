@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Annotation\TenantFilterable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
@@ -10,12 +9,14 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 use App\Annotation\TenantDependent;
+use App\Annotation\TenantFilterable;
 use App\Repository\StatementRepository;
 
 #[ORM\Entity(repositoryClass: StatementRepository::class)]
 #[TenantDependent(tenantFieldName: 'tenant_id')]
 #[TenantFilterable(tenantFieldName: 'tenant_id')]
 #[Gedmo\Loggable]
+#[ORM\UniqueConstraint(name: 'statement_year_month', columns: ['account_id', 'year', 'month'])]
 class Statement implements TenantAwareInterface, FileOwnerInterface
 {
     public function getOwnerKey(): ?string
