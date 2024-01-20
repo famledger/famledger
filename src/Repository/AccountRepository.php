@@ -47,6 +47,11 @@ class AccountRepository extends ServiceEntityRepository
     public function findActive(): array
     {
         // TODO: implement active/inactive accounts
-        return $this->findBy([], ['caption' => 'ASC']);
+        // only return accounts that are not associated with a customer
+        $qb = $this->createQueryBuilder('a');
+        $qb->where($qb->expr()->isNull('a.customer'))
+            ->orderBy('a.caption', 'ASC');
+
+        return $qb->getQuery()->getResult();
     }
 }
