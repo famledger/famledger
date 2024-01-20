@@ -23,14 +23,13 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Security\Permission;
 
 use App\Entity\Customer;
-use App\Entity\EDoc;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
+use App\Service\EDocService;
 
 class CustomerCrudController extends AbstractCrudController
 {
     public function __construct(
-        private readonly EntityManagerInterface $em
+        private readonly EntityManagerInterface $em,
+        private readonly EDocService            $eDocService,
     ) {
     }
 
@@ -67,7 +66,7 @@ class CustomerCrudController extends AbstractCrudController
             'pageName'     => Crud::PAGE_DETAIL,
             'templateName' => 'crud/detail',
             'entity'       => $context->getEntity(),
-            'documents'    => $this->em->getRepository(EDoc::class)->findForEntity($customer),
+            'eDocsByType'  => $this->eDocService->getEDocsByType($customer),
         ]));
     }
 

@@ -1,17 +1,18 @@
 {% extends '@EasyAdmin/crud/detail.html.twig' %}
 
 {% block main %}
-
-    {{ parent() }}
-{#    <div class="card">#}
-{#        <div class="card-header">Details</div>#}
-{#    </div>#}
-    <div style="clear:both;"></div>
-
-    <div class="container mt-5">
-        <div class="row">
-            {{ entity.instance|upload_card(constant('App\\Constant\\CustomerEDocType::IFE'), 'IFEs', 6) }}
-        </div>
+    <div class="card">
+        <div class="card-header">Details</div>
+        <div class="card-body">{{ parent() }}</div>
     </div>
+
+    {{ include('admin/EDoc/eDocsCard.html.twig', {
+        eDocs: eDocsByType[constant('App\\Constant\\CustomerEDocType::IFE')]|default([]),
+        type:constant('App\\Constant\\CustomerEDocType::IFE'),
+        caption:'IFE, Constancia fiscal',
+        owner: entity.instance,
+        icon: 'fa fa-file-document',
+        width: 12
+    }) }}
 
 {% endblock %}
