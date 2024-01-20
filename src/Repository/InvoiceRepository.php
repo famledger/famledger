@@ -240,7 +240,7 @@ EOT;
 
     public function findLatest(): array
     {
-        $firstDayOfCurrentMonth  = new DateTime('first day of this month');
+        $firstDayOfCurrentMonth  = new DateTime('today +1 day');
         $firstDayOfPreviousMonth = new DateTime('first day of last month');
 
         $qb = $this->createQueryBuilder('i');
