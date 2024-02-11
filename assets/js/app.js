@@ -27,7 +27,7 @@ const initializeDropzones = (container) => {
     new Dropzone(form, {
       paramName: "file",
       maxFilesize: 100,
-      acceptedFiles: "image/*,application/pdf,.psd",
+      acceptedFiles: "image/*, application/pdf, .psd, .xml",
       addRemoveLinks: true,
       init: function() {
         this.on("success", function(file, responseText) {
