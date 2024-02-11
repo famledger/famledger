@@ -72,6 +72,28 @@ class BBVAStatementStrategy implements StrategyInterface
         $statement = new Statement();
 
         preg_match('/Periodo\s+DEL\s+(\d{2}\/\d{2}\/\d{4})\s+AL\s+(\d{2}\/\d{2}\/\d{4})/', $content, $matches);
+
+//      Alternative determination of mont/year based on which month overlaps more with the statement's period.
+//        $startDate = DateTime::createFromFormat('d/m/Y', $matches[1]);
+//        $endDate   = DateTime::createFromFormat('d/m/Y', $matches[2]);
+//
+//        if ($startDate->format('m/Y') === $endDate->format('m/Y')) {
+//            $month = $startDate->format('m');
+//            $year  = $startDate->format('Y');
+//        } else {
+//            $lastDayOfMonth    = new DateTime($startDate->format('Y-m-t'));
+//            $firstDayOfMonth   = new DateTime($endDate->format('Y-m-01'));
+//            $daysInFirstMonth  = $lastDayOfMonth->diff($startDate)->days + 1; // +1 to include the start date
+//            $daysInSecondMonth = $endDate->diff($firstDayOfMonth)->days + 1; // +1 to include the end
+//            if ($daysInFirstMonth > $daysInSecondMonth) {
+//                $month = $startDate->format('m');
+//                $year  = $startDate->format('Y');
+//            } else {
+//                $month = $endDate->format('m');
+//                $year  = $endDate->format('Y');
+//            }
+//        }
+
         $startDate = $matches[1];
         // $endDate   = $matches[2];
         [, $month, $year] = explode('/', $startDate);
