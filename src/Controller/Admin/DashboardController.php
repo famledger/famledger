@@ -126,6 +126,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToCrud('Addresses', 'fas fa-address-card', Address::class);
         yield MenuItem::linkToCrud('Family', 'fas fa-people-arrows', Address::class);
         yield MenuItem::section('Miscellaneous');
+        yield MenuItem::linkToRoute('Information', 'fas fa-info-circle', 'admin_info');
         yield MenuItem::linkToCrud('Vehicles', 'fas fa-car', Vehicle::class);
         yield MenuItem::linkToCrud('E-Docs', 'fas fa-file', EDoc::class);
         yield MenuItem::section('Setup');

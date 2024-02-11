@@ -1,0 +1,45 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}
+    Information
+{% endblock %}
+
+{% block page_content %}
+
+    <div class="container my-4">
+        <h3>Useful Links</h3>
+
+        {% for section, links in linkSections %}
+            <div class="card my-3">
+                <div class="card-header">
+                    {{ section }}
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for link in links %}
+                        <li class="list-group-item">
+                            <a href="{{ link.url }}" target="_blank">{{ link.caption }}</a> {{ link.extra|default('') }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+        <div class="card my-3">
+            <div class="card-header">Local files</div>
+            <ul class="list-group list-group-flush">
+                {% for index, localFile in localFiles %}
+                    <li class="list-group-item">
+                        <span style="display: none" id="local-file-{{ index }}">{{ localFile.path }}</span>&nbsp;
+                        <a title="copy path to clipboard" class="copy-to-clipboard" data-target="#local-file-{{ index }}"><i
+                                    class="fa fa-clipboard"></i></a>
+                        <a title="open folder" href="folderopener://{{ localFile.path }}">
+                            <i class="fa fa-folder"></i>
+                        </a>
+                        {{ localFile.caption }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+    </div>
+
+{% endblock %}
