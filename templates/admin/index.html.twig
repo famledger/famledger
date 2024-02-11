@@ -49,6 +49,7 @@
                                                     .setAction('detail')
                                                     .setEntityId(statement.id) }}">{{ statement.month|month_name }} {{ statement.year }}</a>
                                             </td>
+                                            <td>created: {{ statement.created|date }}</td>
                                         </tr>
                                     {% endfor %}
                                 </table>
