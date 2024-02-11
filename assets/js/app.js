@@ -70,8 +70,13 @@ const initializeDeleteButtons = (container) => {
 
 // Function to update a container by its ID with new HTML content
 const updateContainer = (containerId, updatedHTML) => {
+  if (updatedHTML.status && updatedHTML.status === 'error') {
+    alert(updatedHTML.message)
+    return
+  }
   const containerElement = document.getElementById(containerId)
-  console.log('containerElement: ' + containerElement)
+  // console.log('containerElement: ' + containerElement)
+  // console.log('updatedHTML: ', updatedHTML)
   if (containerElement) {
     const tempDiv = document.createElement('div')
     tempDiv.innerHTML = updatedHTML
