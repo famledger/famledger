@@ -11,8 +11,8 @@ class CAPExpenseStrategy extends BaseBBVAExpenseStrategy
 {
     protected function specificMatchLogic(array $properties, string $content): bool
     {
-        return in_array($properties['Cuenta destino'] ?? '', ['072691002207655677', '014691655074448956', '0154489144'])
-               or $properties['Beneficiario'] ?? '' == 'CORPORATIVO DE ASESORES PATRIMONIAL';
+        return in_array(($properties['Cuenta destino'] ?? ''), ['072691002207655677', '014691655074448956', '0154489144'])
+               or ($properties['Beneficiario'] ?? '') == 'CORPORATIVO DE ASESORES PATRIMONIAL';
     }
 
     /**
