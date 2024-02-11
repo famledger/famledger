@@ -4,6 +4,7 @@ namespace App\Service\Detectors;
 
 use App\Constant\DocumentType;
 use App\Service\Strategies\Expense\CAPExpenseStrategy;
+use App\Service\Strategies\Expense\DonationStrategy;
 use App\Service\Strategies\Expense\EnlaceFiscalExpenseStrategy;
 use App\Service\Strategies\Expense\GenericExpenseStrategy;
 use App\Service\Strategies\Expense\NafinsaExpenseStrategy;
@@ -20,6 +21,7 @@ class ExpenseDetector extends BaseDetector
             new NafinsaExpenseStrategy(),
             new PABExpenseStrategy(),
             new TulumExpenseStrategy(),
+            new DonationStrategy(),
 
             new GenericExpenseStrategy(), // keep this as the last item
         ];

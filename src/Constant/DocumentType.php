@@ -8,6 +8,7 @@ enum DocumentType: string
     case ANNEX = 'annex';
     case ATTACHMENT = 'attachment';
     case EXPENSE = 'expense';
+    case DONATION = 'donation';
     case INCOME = 'income';
     case PAYMENT = 'payment'; // used for "recibos de pago"
     case ANNOTATION = 'annotation';
@@ -24,6 +25,7 @@ enum DocumentType: string
             self::ATTACHMENT        => 5,
             self::INCOME            => 6,
             self::ANNOTATION        => 7,
+            self::DONATION          => 8,
             default                 => 99,
         };
     }
@@ -34,6 +36,7 @@ enum DocumentType: string
             self::ACCOUNT_STATEMENT->value => self::ACCOUNT_STATEMENT->value,
             self::ANNEX->value             => self::ANNEX->value,
             self::ATTACHMENT->value        => self::ATTACHMENT->value,
+            self::DONATION->value          => self::DONATION->value,
             self::EXPENSE->value           => self::EXPENSE->value,
             self::INCOME->value            => self::INCOME->value,
             self::ANNOTATION->value        => self::ANNOTATION->value,
