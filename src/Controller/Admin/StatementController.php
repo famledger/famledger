@@ -147,7 +147,7 @@ class StatementController extends AbstractController
             if ($transaction->getStatement()->getId() !== $statement->getId()) {
                 throw new Exception('Transaction does not belong to this statement');
             }
-            $statementService->unLinkDocument($transaction, $document);
+            $statementService->unLinkDocument($document);
             $em->flush();
 
             return $this->render('admin/Statement/detail_transaction.html.twig', [
