@@ -2,6 +2,10 @@
 
 namespace App\Service;
 
+use App\Constant\PropertyEDocType;
+use App\Entity\Property;
+use App\Service\DocumentSpecs\BaseDocumentSpecs;
+use App\Service\DocumentSpecs\ReceiptSpecs;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -20,10 +24,56 @@ class EDocService
     ) {
     }
 
+    public function createAndPersistFromDocumentSpecs(ReceiptSpecs $documentSpecs): ?EDoc
+    {
+        $propertySlug = $documentSpecs->getPropertySlug();
+        $property     = $this->em->getRepository(Property::class)->findOneBy(['slug' => $propertySlug]);
+        if (null === $property) {
+            return null;
+        }
+
+        $this->em->beginTransaction();
+        try {
+            $sourceFilepath = $documentSpecs->getFilePath();
+            $eDoc           = (new EDoc())
+                ->setOwnerId($property->getId())
+                ->setOwnerType('Property')
+                ->setOwnerKey($propertySlug)
+                ->setType(PropertyEDocType::ELECTRICITY)
+                ->setFilename($documentSpecs->getSuggestedFilename())
+                ->setFormat('pdf')
+                ->setTenant($this->tenantContext->getTenant())
+                ->setChecksum(hash('sha256', file_get_contents($sourceFilepath)))
+                ->setCreated(new DateTime());
+
+            $targetFilePath = $this->getEDocFilepath($eDoc);
+            if (file_exists($targetFilePath)) {
+                throw new Exception("File with the same name already exists at $targetFilePath");
+            }
+
+            $this->em->persist($eDoc);
+            $this->em->flush();
+
+            $targetFolder = $this->getEDocFolder($eDoc);
+            if (!is_dir($targetFolder)) {
+                mkdir($targetFolder, 0777, true);
+            }
+
+            rename($sourceFilepath, $targetFilePath);
+
+            $this->em->commit();
+
+            return $eDoc;
+        } catch (Exception $e) {
+            $this->em->rollback();
+            throw $e;
+        }
+    }
+
     /**
      * @throws Exception
      */
-    public function createAndPersistEDoc(
+    public function createAndPersistUploadedEDoc(
         FileOwnerInterface $owner,
         UploadedFile       $file,
         string             $type
@@ -116,7 +166,7 @@ class EDocService
             'type'      => $type
         ]);
 
-        return $this->em->getRepository(EDoc::class)->findBy($constraints);
+        return $this->em->getRepository(EDoc::class)->findBy($constraints,['filename' => 'DESC']);
     }
 
     public function getOwner(EDoc $eDoc): ?FileOwnerInterface

@@ -12,6 +12,7 @@ enum DocumentType: string
     case INCOME = 'income';
     case PAYMENT = 'payment'; // used for "recibos de pago"
     case ANNOTATION = 'annotation';
+    case RECEIPT = 'receipt';
     case TAX = 'tax';
     case TAX_NOTICE = 'tax-notice';
 
@@ -26,6 +27,7 @@ enum DocumentType: string
             self::INCOME            => 6,
             self::ANNOTATION        => 7,
             self::DONATION          => 8,
+            self::RECEIPT           => 9,
             default                 => 99,
         };
     }
@@ -40,6 +42,7 @@ enum DocumentType: string
             self::EXPENSE->value           => self::EXPENSE->value,
             self::INCOME->value            => self::INCOME->value,
             self::ANNOTATION->value        => self::ANNOTATION->value,
+            self::RECEIPT->value           => self::RECEIPT->value,
             self::TAX->value               => self::TAX->value,
             self::TAX_NOTICE->value        => self::TAX_NOTICE->value,
         ];

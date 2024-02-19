@@ -1,6 +1,7 @@
 {% extends '@EasyAdmin/crud/detail.html.twig' %}
 
 {% block main %}
+    <div>{{ property_navigation(entity.instance) }}</div>
 
     <div class="card">
         <div class="card-header">Details</div>
@@ -8,6 +9,24 @@
     </div>
 
     <div style="clear:both;"></div>
+
+    <div class="row gx-0 mt-3">
+        {{ include('admin/EDoc/eDocsCard.html.twig', {
+            eDocs: eDocsByType[constant('App\\Constant\\PropertyEDocType::DEED')]|default([]),
+            type:constant('App\\Constant\\PropertyEDocType::DEED'),
+            caption:'Deeds',
+            owner: entity.instance,
+            width: 6
+        }) }}
+        {{ include('admin/EDoc/eDocsCard.html.twig', {
+            eDocs: eDocsByType[constant('App\\Constant\\PropertyEDocType::ELECTRICITY')]|default([]),
+            type:constant('App\\Constant\\PropertyEDocType::ELECTRICITY'),
+            caption:'C.F.E.',
+            owner: entity.instance,
+            icon: 'fa fa-bolt',
+            width: 6
+        }) }}
+    </div>
 
     <div class="row gx-0 mt-3">
         {{ include('admin/EDoc/eDocsCard.html.twig', {
@@ -61,15 +80,6 @@
             caption:'Property Taxes',
             owner: entity.instance,
             icon: 'fa fa-calculator',
-            width: 6
-        }) }}
-    </div>
-    <div class="row gx-0 mt-3">
-        {{ include('admin/EDoc/eDocsCard.html.twig', {
-            eDocs: eDocsByType[constant('App\\Constant\\PropertyEDocType::DEED')]|default([]),
-            type:constant('App\\Constant\\PropertyEDocType::DEED'),
-            caption:'Deeds',
-            owner: entity.instance,
             width: 6
         }) }}
     </div>

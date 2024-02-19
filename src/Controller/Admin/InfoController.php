@@ -13,7 +13,7 @@ class InfoController extends AbstractController
     public function index(): Response
     {
         $linkSections = [
-            'S.A.T.' => [
+            'S.A.T.'       => [
                 [
                     'caption' => 'Constancia de Situacion Fiscal',
                     'url'     => 'https://login.siat.sat.gob.mx/nidp/idff/sso?id=fiel_Aviso&sid=0&option=credential&sid=0'
@@ -37,6 +37,16 @@ class InfoController extends AbstractController
                 [
                     'caption' => 'EnlaceFiscal Login',
                     'url'     => 'https://portal.enlacefiscal.com/comprobantes/factura'
+                ],
+            ],
+            'Recibos'      => [
+                [
+                    'caption' => 'Aguakan - jorgo@miridis.com / 8wHPcL6JC8ktWKsbxMqD',
+                    'url'     => 'https://www2.aguakan.com/iniciar-sesion/'
+                ],
+                [
+                    'caption' => 'C.F.E. - jmiridis / OnvECyKVb',
+                    'url'     => 'https://app.cfe.mx/Aplicaciones/CCFE/MiEspacio/Login.aspx'
                 ],
             ],
         ];

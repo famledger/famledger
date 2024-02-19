@@ -6,6 +6,7 @@ use Angle\CFDI\CFDIInterface;
 use Angle\CFDI\XmlLoader;
 use App\Service\DocumentSpecs\AttachmentSpecs;
 use App\Service\DocumentSpecs\BaseDocumentSpecs;
+use DateTime;
 use DateTimeInterface;
 
 use App\Exception\DocumentMatchException;
@@ -146,6 +147,29 @@ class StrategyHelper
             'NOVIEMBRE'  => 11,
             'DICIEMBRE'  => 12,
         };
+    }
+
+    public static function convertCFEDate(string $dateString): DateTimeInterface
+    {
+        $months = [
+            'ENE' => 'JAN',
+            'FEB' => 'FEB',
+            'MAR' => 'MAR',
+            'ABR' => 'APR',
+            'MAY' => 'MAY',
+            'JUN' => 'JUN',
+            'JUL' => 'JUL',
+            'AGO' => 'AUG',
+            'SEP' => 'SEP',
+            'OCT' => 'OCT',
+            'NOV' => 'NOV',
+            'DIC' => 'DEC'
+        ];
+
+        $englishDateString = str_replace(array_keys($months), array_values($months), $dateString);
+
+        return  DateTime::createFromFormat('d M y', $englishDateString);
+
     }
 
     public static function reduceSpaces(string $content): string

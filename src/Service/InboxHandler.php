@@ -2,18 +2,19 @@
 
 namespace App\Service;
 
+use App\Constant\PropertyEDocType;
+use App\Entity\EDoc;
+use App\Entity\Property;
 use App\Event\DocumentPreCreateEvent;
+use App\Service\DocumentSpecs\ReceiptSpecs;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Throwable;
 
-use App\Constant\DocumentType;
 use App\Entity\Account;
 use App\Entity\Attachment;
-use App\Entity\TaxNotice;
-use App\Entity\TaxPayment;
 use App\Event\DocumentCreatedEvent;
 use App\Exception\ProcessingException;
 use App\Service\Accounting\AccountingDocumentService;
@@ -28,6 +29,7 @@ class InboxHandler
         private readonly AttachmentFolderManager   $attachmentFolderManager,
         private readonly DocumentLoader            $documentLoader,
         private readonly DocumentService           $documentService,
+        private readonly EDocService               $eDocService,
         private readonly EntityManagerInterface    $em,
         private readonly EventDispatcherInterface  $dispatcher,
         private readonly FinancialMonthService     $financialMonthService,
@@ -58,8 +60,15 @@ class InboxHandler
     {
         try {
             $documentSpecs = $this->documentLoader->load($filePath);
-            $document      = DocumentFactory::createFromDocumentSpecs($documentSpecs);
+            if ($documentSpecs instanceof ReceiptSpecs) {
+                if(null === $eDoc = $this->eDocService->createAndPersistFromDocumentSpecs($documentSpecs)) {
+                    throw new ProcessingException('Failed to create eDoc');
+                }
 
+                return new ProcessingResponse(ProcessingResponse::TYPE_SUCCESS, $eDoc);
+            }
+
+            $document      = DocumentFactory::createFromDocumentSpecs($documentSpecs);
             $accountNumber = $documentSpecs->getAccountNumber();
             $account       = $this->em->getRepository(Account::class)->findOneBy(['number' => $accountNumber]);
             if (null === $account) {

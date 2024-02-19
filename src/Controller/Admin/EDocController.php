@@ -97,7 +97,7 @@ class EDocController extends DashboardController
                 return new JsonResponse('Invalid owner entity', Response::HTTP_BAD_REQUEST);
             }
 
-            $eDocService->createAndPersistEDoc($ownerEntity, $file, $type);
+            $eDocService->createAndPersistUploadedEDoc($ownerEntity, $file, $type);
 
             return $this->render('admin/EDoc/eDocsCardBody.html.twig', [
                 'eDocs' => $eDocService->getEDocs($ownerEntity, $type),
