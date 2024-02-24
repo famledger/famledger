@@ -258,4 +258,16 @@ EOT;
         // Execute the query and return the result
         return $qb->getQuery()->getResult();
     }
+
+    public function getInvoiceYears()
+    {
+        $qb = $this->createQueryBuilder('i');
+        $qb
+            ->select('distinct i.year')
+            ->orderBy('i.year', 'DESC');
+
+        return array_filter(array_map(function (array $record) {
+            return (int)$record['year'];
+        }, $qb->getQuery()->getResult()));
+    }
 }
