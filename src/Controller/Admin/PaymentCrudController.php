@@ -42,11 +42,15 @@ class PaymentCrudController extends AbstractCrudController
         $statementDetailAction = Action::new('statementDetail', 'View Statement')
             ->setIcon('fa fa-balance-scale')
             ->linkToUrl(function (Receipt $payment) {
+                $hash = (null == $transaction = $payment->getDocument()?->getTransaction())
+                    ? ''
+                    : '#position_' . $transaction->getSequenceNo();
+
                 return $this->adminUrlGenerator
-                    ->setController(StatementCrudController::class)
-                    ->setAction(Action::DETAIL)
-                    ->setEntityId($payment->getStatement()?->getId())
-                    ->generateUrl();
+                           ->setController(StatementCrudController::class)
+                           ->setAction(Action::DETAIL)
+                           ->setEntityId($payment->getStatement()?->getId())
+                           ->generateUrl() . $hash;
             })
             ->displayIf(function (Receipt $payment) {
                 return null !== $payment->getStatement()?->getId();

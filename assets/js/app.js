@@ -138,4 +138,31 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 
   console.log('initialized dropzones and delete buttons')
+
+  $(document).ready(function() {
+    // highlight DOM element if it's referenced in the URL hash
+    if (window.location.hash) {
+      var hashParts = window.location.hash.slice(1).split('_')
+      if (hashParts.length === 2) {
+        var prefix = hashParts[ 0 ]
+        var id = hashParts[ 1 ]
+        var selector = '#' + prefix + '_' + id
+        var element = $(selector)
+
+        console.log(selector, element)
+        if (element.length) {
+          console.log("B ", element)
+          element.addClass('hashed-element-hilite')
+          // Scroll the element into view
+          element[ 0 ].scrollIntoView({behavior: 'smooth', block: 'center'})
+
+          // If the element is focusable, set focus
+          if (element.is(':focusable')) {
+            element.focus()
+          }
+        }
+      }
+    }
+  })
+
 })

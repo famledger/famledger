@@ -4,8 +4,10 @@
         <div class="field-group">
             <div class="caption"><i class="fa fa-balance-scale"></i> Statement</div>
             <div class="value">
+                {% set hash = '' %}
                 {% if document.transaction is not null %}
                     {% set statement = document.transaction.statement %}
+                    {% set hash = '#position_' ~ document.transaction.sequenceNo %}
                 {% elseif document.statement is not null %}
                     {% set statement = document.statement %}
                 {% else %}
@@ -17,7 +19,7 @@
                     <a href="{{ ea_url()
                         .setController('App\\Controller\\Admin\\StatementCrudController')
                         .setAction('detail')
-                        .setEntityId(statement.id) }}">{{ statement }}</a>
+                        .setEntityId(statement.id) }}{{ hash }}">{{ statement }}</a>
                 {% endif %}
             </div>
         </div>

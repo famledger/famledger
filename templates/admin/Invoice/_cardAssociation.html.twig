@@ -20,7 +20,7 @@
                         <a href="{{ ea_url()
                             .setController('App\\Controller\\Admin\\StatementCrudController')
                             .setAction('detail')
-                            .setEntityId(statement.id) }}">{{ statement }}</a>
+                            .setEntityId(statement.id) }}#position_{{ document.transaction.sequenceNo }}">{{ statement }}</a>
                     </div>
                 </div>
             {% endif %}
