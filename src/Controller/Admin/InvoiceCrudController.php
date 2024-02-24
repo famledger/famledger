@@ -210,7 +210,7 @@ class InvoiceCrudController extends AbstractCrudController
             });
         $syncInvoice     = Action::new('sync', 'sync from EF', 'fa fa-refresh')
             ->linkToCrudAction('sync');
-        $fetchLatest     = Action::new('fetch', 'fetch latest from EF', 'fa fa-download')
+        $fetchLatest     = Action::new('fetch', 'sync latest from EF', 'fa fa-sync')
             ->linkToCrudAction('fetch')
             ->createAsGlobalAction();
 

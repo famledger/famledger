@@ -48,8 +48,12 @@
     </style>
     <div>{{ invoice_history_navigation(year) }}</div>
 
-    <div class="text-right"><a target="enlace-fiscal" href="https://portal.enlacefiscal.com/comprobantes/factura">
-            EnlaceFiscal <i class="fa fa-external-link"></i></a></div>
+    <div class="text-right">
+        <a href="{{ path('admin_invoice_fetch') }}">
+            <i class="fa fa-sync"></i> sync latest invoices</a> |
+        <a target="enlace-fiscal" href="https://portal.enlacefiscal.com/comprobantes/factura">
+            EnlaceFiscal <i class="fa fa-external-link"></i></a>
+    </div>
 
     <div style="margin-bottom: 4px;" class="select-container">
         Restrict to customer:

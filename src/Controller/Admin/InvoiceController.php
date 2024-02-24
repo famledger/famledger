@@ -2,23 +2,21 @@
 
 namespace App\Controller\Admin;
 
-use App\Exception\EfClientException;
-use App\Service\Invoice\InvoiceSynchronizer;
-use App\Service\TenantContext;
 use Doctrine\ORM\EntityManagerInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 use App\Entity\Invoice;
+use App\Exception\EfClientException;
 use App\Repository\CustomerRepository;
 use App\Repository\InvoiceRepository;
 use App\Repository\SeriesRepository;
 use App\Service\Helper\ResponseHelper;
 use App\Service\InvoiceFileManager;
+use App\Service\Invoice\InvoiceSynchronizer;
+use App\Service\TenantContext;
 
 #[Route('/admin/invoice')]
 class InvoiceController extends AbstractController
@@ -40,32 +38,29 @@ class InvoiceController extends AbstractController
             'customers'      => $customerRepository->getOptions()
         ]);
     }
-//    public function fetch(
-//        AdminUrlGenerator      $adminUrlGenerator,
-//        EntityManagerInterface $em,
-//        InvoiceSynchronizer    $invoiceSynchronizer,
-//        Request                $request,
-//        TenantContext          $tenantContext,
-//    ): Response {
-//        try {
-//            $report  = $invoiceSynchronizer->fetchActiveSeries($tenantContext->getTenant());
-//            $message = '';
-//            foreach ($report as $key => $countProcessed) {
-//                $message .= sprintf('%s: %d<br/>', $key, $countProcessed);
-//            }
-//            $em->flush();
-//
-//            $request->getSession()->getFlashBag()->add('success', $message);
-//        } catch (EfClientException $e) {
-//            $request->getSession()->getFlashBag()->add('error', $e->getMessage());
-//        }
-//
-//        return $this->redirect($adminUrlGenerator
-//            ->setController(InvoiceCrudController::class)
-//            ->setAction(Action::INDEX)
-//            ->generateUrl()
-//        );
-//    }
+
+    #[Route('/fetch', name: 'admin_invoice_fetch')]
+    public function fetch(
+        EntityManagerInterface $em,
+        InvoiceSynchronizer    $invoiceSynchronizer,
+        Request                $request,
+        TenantContext          $tenantContext,
+    ): Response {
+        try {
+            $report  = $invoiceSynchronizer->fetchActiveSeries($tenantContext->getTenant());
+            $message = '';
+            foreach ($report as $key => $countProcessed) {
+                $message .= sprintf('%s: %d<br/>', $key, $countProcessed);
+            }
+            $em->flush();
+
+            $request->getSession()->getFlashBag()->add('success', $message);
+        } catch (EfClientException $e) {
+            $request->getSession()->getFlashBag()->add('error', $e->getMessage());
+        }
+
+        return $this->redirect("/admin?routeName=admin_invoice_history");
+    }
 
     #[Route('/download/{invoice}', name: 'admin_invoice_download')]
     public function download(Invoice $invoice, InvoiceFileManager $invoiceFileManager): Response
