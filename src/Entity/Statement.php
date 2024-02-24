@@ -91,6 +91,9 @@ class Statement implements TenantAwareInterface, FileOwnerInterface
     #[Gedmo\Versioned]
     private ?string $status;
 
+    #[ORM\Column(length: 16)]
+    private ?string $type = null;
+
     public function __construct()
     {
         $this->transactions = new ArrayCollection();
@@ -261,6 +264,7 @@ class Statement implements TenantAwareInterface, FileOwnerInterface
     public function setAccount(?Account $account): static
     {
         $this->account = $account;
+        $this->setType($account->getType());
 
         return $this;
     }
@@ -314,5 +318,17 @@ class Statement implements TenantAwareInterface, FileOwnerInterface
     public function isConsolidated(): bool
     {
         return self::STATUS_CONSOLIDATED === $this->status;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): static
+    {
+        $this->type = $type;
+
+        return $this;
     }
 }

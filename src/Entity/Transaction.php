@@ -9,6 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
+use App\Constant\AccountType;
 use App\Constant\DocumentType;
 use App\Constant\InvoiceStatus;
 use App\Repository\TransactionRepository;
@@ -194,6 +195,13 @@ class Transaction
 
     public function addDocument(Document $document): static
     {
+        // the only documents added to a credit card statement are expense receipts
+        // so we just update the document's amount with the transaction's amount
+        $statementType = $this->getStatement()->getType();
+        if ($statementType === AccountType::CREDIT_CARD) {
+            $document->setAmount($this->getAmount());
+        }
+
         if ($document->getInvoice() !== null) {
             $invoiceCustomer = $document->getInvoice()->getCustomer();
 
@@ -249,7 +257,13 @@ class Transaction
 
     public function updateConsolidationStatus(): void
     {
-        $supportingDocuments = $this->documents->filter(function (Document $document) {
+        $statementType = $this->getStatement()->getType();
+        $isCreditCard  = $statementType === AccountType::CREDIT_CARD;
+
+        $supportingDocuments = $this->documents->filter(function (Document $document) use ($isCreditCard) {
+            if ($isCreditCard) {
+                return true;
+            }
             // Exclude if it's an Attachment
             if ($document instanceof Attachment) {
                 return false;
@@ -277,12 +291,12 @@ class Transaction
             return true;
         });
 
-        $hasDocuments = $supportingDocuments->count() > 0;
+        $hasSupportingDocuments = $supportingDocuments->count() > 0;
 
         /** @var Document $firstDocument */
         $firstDocument = $supportingDocuments->first();
 
-        if (!$hasDocuments) {
+        if (!$hasSupportingDocuments) {
             $this
                 ->setStatus(0 === count($this->documents)
                     ? self::STATUS_PENDING
@@ -290,39 +304,53 @@ class Transaction
                 )
                 ->setType(null);
         } else {
-            // income can be backed up by multiple documents
-            if ($this->getAmount() > 0) {
-                // Calculate the sum of all document amounts using array_reduce
-                $documentAmountSum = array_reduce(
-                    $supportingDocuments->toArray(),
-                    fn($sum, $doc) => $sum + $doc->getAmount(),
-                    0
-                );
-                $this
-                    ->setStatus($documentAmountSum !== $this->getAmount()
-                        ? self::STATUS_AMOUNT_MISMATCH
-                        : self::STATUS_CONSOLIDATED
-                    )
-                    ->setType(DocumentType::INCOME);
-            } else {
-                // get first and only document
-                if (null === $amount = $firstDocument->getAmount()) {
-                    $firstDocument->setAmount($this->getAmount());
-                    $this->setStatus(self::STATUS_CONSOLIDATED);
-                } else {
-                    $this->setStatus($amount === $this->getAmount()
-                        ? self::STATUS_CONSOLIDATED
-                        : self::STATUS_AMOUNT_MISMATCH
-                    );
-                }
-                foreach ($supportingDocuments as $document) {
-                    if ($document->getType() === DocumentType::TAX) {
-                        $this->setType(DocumentType::TAX);
-                        break;
+            if ($isCreditCard) {
+                if ($this->getAmount() > 0) {
+                    if ($supportingDocuments->count() > 0) {
+                        $this
+                            ->setStatus(self::STATUS_CONSOLIDATED)
+                            ->setType(DocumentType::EXPENSE);
+                    } else {
+                        $this
+                            ->setStatus(self::STATUS_PENDING)
+                            ->setType(null);
                     }
                 }
-                if(count($supportingDocuments) === 1 and $firstDocument->getType() === DocumentType::EXPENSE) {
-                    $this->setType(DocumentType::EXPENSE);
+            } else {
+                // income can be backed up by multiple documents
+                if ($this->getAmount() > 0) {
+                    // Calculate the sum of all document amounts using array_reduce
+                    $documentAmountSum = array_reduce(
+                        $supportingDocuments->toArray(),
+                        fn($sum, $doc) => $sum + $doc->getAmount(),
+                        0
+                    );
+                    $this
+                        ->setStatus($documentAmountSum !== $this->getAmount()
+                            ? self::STATUS_AMOUNT_MISMATCH
+                            : self::STATUS_CONSOLIDATED
+                        )
+                        ->setType(DocumentType::INCOME);
+                } else {
+                    // get first and only document
+                    if (null === $amount = $firstDocument->getAmount()) {
+                        $firstDocument->setAmount($this->getAmount());
+                        $this->setStatus(self::STATUS_CONSOLIDATED);
+                    } else {
+                        $this->setStatus($amount === $this->getAmount()
+                            ? self::STATUS_CONSOLIDATED
+                            : self::STATUS_AMOUNT_MISMATCH
+                        );
+                    }
+                    foreach ($supportingDocuments as $document) {
+                        if ($document->getType() === DocumentType::TAX) {
+                            $this->setType(DocumentType::TAX);
+                            break;
+                        }
+                    }
+                    if (count($supportingDocuments) === 1 and $firstDocument->getType() === DocumentType::EXPENSE) {
+                        $this->setType(DocumentType::EXPENSE);
+                    }
                 }
             }
         }

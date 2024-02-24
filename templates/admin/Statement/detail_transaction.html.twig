@@ -75,7 +75,7 @@
                                 </td>
                             </tr>
                         {% endfor %}
-                        {% if transaction.documents|length > 1 %}
+                        {% if transaction.documents|length > 1 and statement.type != constant('App\\Constant\\AccountType::CREDIT_CARD') %}
                             <tr style="border-top: 1px dotted #999;">
                                 <td>Total</td>
                                 {% if total != transaction.amount %}

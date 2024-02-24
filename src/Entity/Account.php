@@ -61,6 +61,12 @@ class Account implements TenantAwareInterface
     #[ORM\Column(length: 32)]
     private ?string $bankName = null;
 
+    #[ORM\Column(length: 16)]
+    private ?string $type = null;
+
+    #[ORM\Column]
+    private ?bool $isActive = null;
+
     public function __construct()
     {
         $this->statements      = new ArrayCollection();
@@ -240,5 +246,29 @@ class Account implements TenantAwareInterface
             ->setMaxResults($limit);
 
         return $this->statements->matching($criteria)->toArray();
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): static
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    public function isIsActive(): ?bool
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): static
+    {
+        $this->isActive = $isActive;
+
+        return $this;
     }
 }

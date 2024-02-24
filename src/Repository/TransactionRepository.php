@@ -2,10 +2,13 @@
 
 namespace App\Repository;
 
-use App\Entity\Invoice;
-use App\Entity\Transaction;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+
+use App\Constant\AccountType;
+use App\Constant\DocumentType;
+use App\Entity\Transaction;
 
 /**
  * @extends ServiceEntityRepository<Transaction>
@@ -41,12 +44,10 @@ class TransactionRepository extends ServiceEntityRepository
         if (null === $year) {
             $currentYear = (int)date('Y');
 
-            $qb->where($qb->expr()->gte('i.year', $qb->expr()->literal($currentYear - 1)));
+            $qb->andWhere($qb->expr()->gte('i.year', $qb->expr()->literal($currentYear - 1)));
         } else {
-            $qb->where($qb->expr()->eq('i.year', $qb->expr()->literal($year)));
+            $qb->andWhere($qb->expr()->eq('i.year', $qb->expr()->literal($year)));
         }
-
-        $query = $qb->getQuery()->getSQL();
 
         $transactions = [];
         foreach ($qb->getQuery()->getResult() as $transaction) {
@@ -55,6 +56,46 @@ class TransactionRepository extends ServiceEntityRepository
             $month = $transaction->getBookingDate()->format('m');
 
             $transactions[$year][$month][] = $transaction;
+        }
+
+        krsort($transactions);
+
+        return $transactions;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function getExpenseHistory(?int $year): array
+    {
+        $qb = $this->createQueryBuilder('t');
+        $qb
+            ->select('t, s, a')
+            ->innerJoin('t.statement', 's')
+            ->innerJoin('s.account', 'a')
+            ->orderBy('t.bookingDate', 'asc');
+
+        $andX = $qb->expr()->andX()
+            ->add($qb->expr()->eq('t.type', $qb->expr()->literal(DocumentType::EXPENSE->value)))
+            ->add($qb->expr()->eq('a.type', $qb->expr()->literal(AccountType::CREDIT_CARD)));
+
+        if (null === $year) {
+            $currentYear = (int)date('Y');
+            $startDate   = new DateTime($currentYear - 1 . '-01-01 00:00:00');
+            $andX->add($qb->expr()->gte('t.bookingDate', $qb->expr()->literal($startDate->format('Y-m-d H:i:s'))));
+        } else {
+            $startDate = new DateTime($year . '-01-01 00:00:00');
+            $endDate   = new DateTime($year . '-12-31 23:59:59');
+            $andX
+                ->add($qb->expr()->gte('t.bookingDate', $qb->expr()->literal($startDate->format('Y-m-d H:i:s'))))
+                ->add($qb->expr()->lte('t.bookingDate', $qb->expr()->literal($endDate->format('Y-m-d H:i:s'))));
+        }
+
+        $transactions = [];
+        foreach ($qb->where($andX)->getQuery()->getResult() as $transaction) {
+            /** @var Transaction $transaction */
+            $year                  = $transaction->getBookingDate()->format('Y');
+            $transactions[$year][] = $transaction;
         }
 
         krsort($transactions);

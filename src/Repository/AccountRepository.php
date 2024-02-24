@@ -22,6 +22,40 @@ class AccountRepository extends ServiceEntityRepository
         parent::__construct($registry, Account::class);
     }
 
+    public function getOptions(string $accountType): array
+    {
+        $qb         = $this->createQueryBuilder('a');
+        $rawOptions = $qb
+            ->select('a.number, a.caption, a.isActive')
+            ->where($qb->expr()->eq('a.type', $qb->expr()->literal($accountType)))
+            ->getQuery()
+            ->getArrayResult();
+
+        $options         = [];
+        $inactiveOptions = [];
+
+        foreach ($rawOptions as $row) {
+            $number  = $row['number'];
+            $caption = $number . '-' . $row['caption'];
+
+            if ($row['isActive']) {
+                $options[$number] = $caption;
+            } else {
+                $inactiveOptions[$number] = $caption;
+            }
+        }
+
+        ksort($options);
+        ksort($inactiveOptions);
+
+        // Merge inactive options as a subgroup
+        if (!empty($inactiveOptions)) {
+            $options['Inactive'] = $inactiveOptions;
+        }
+
+        return $options;
+    }
+
     public function getIndexedByNumber(?bool $sorted = true): array
     {
         $qb = $this->createQueryBuilder('a');
