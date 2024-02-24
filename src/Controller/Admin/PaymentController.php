@@ -23,6 +23,7 @@ class PaymentController extends AbstractController
         $year = $year ?? $request->query->get('year');
 
         return $this->render('admin/Payment/history.html.twig', [
+            'year'           => $year,
             'paymentsByYear' => $paymentRepo->getHistory($year ? (int)$year : null),
             'customers'      => $customerRepository->getOptions(),
         ]);

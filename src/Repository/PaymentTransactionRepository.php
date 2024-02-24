@@ -55,7 +55,6 @@ class PaymentTransactionRepository extends ServiceEntityRepository
             ->setParameter('start', $startDate)
             ->setParameter('end', $endDate);
 
-
         $transactions = [];
         foreach ($qb->getQuery()->getResult() as $transaction) {
             /** @var Transaction $transaction */
@@ -68,5 +67,16 @@ class PaymentTransactionRepository extends ServiceEntityRepository
         krsort($transactions);
 
         return $transactions;
+    }
+
+    public function getPaymentYears(): array
+    {
+        $qb = $this->createQueryBuilder('t');
+        $qb->select('t.bookingDate')
+            ->orderBy('t.bookingDate', 'DESC');
+
+        return array_unique(array_map(function ($record) {
+            return (int)$record['bookingDate']->format('Y');
+        }, $qb->getQuery()->getResult()));
     }
 }

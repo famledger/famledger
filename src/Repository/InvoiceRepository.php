@@ -30,17 +30,22 @@ class InvoiceRepository extends ServiceEntityRepository
         parent::__construct($registry, Invoice::class);
     }
 
-    public function findInvoicesForCustomer(Customer $customer)
+    public function findInvoicesForCustomer(Customer $customer, ?Invoice $invoice)
     {
-        $qb = $this->createQueryBuilder('i');
-        $qb
-            ->where($qb->expr()->andX()
-                ->add($qb->expr()->not($qb->expr()->isInstanceOf('i', Receipt::class)))
-                ->add($qb->expr()->eq('i.customer', $qb->expr()->literal($customer->getId())))
-            )
-            ->orderBy('i.issueDate', 'ASC');
+        $qb   = $this->createQueryBuilder('i');
+        $andX = $qb->expr()->andX()
+            ->add($qb->expr()->eq('i.customer', $qb->expr()->literal($customer->getId())));
 
-        return $qb->getQuery()->getResult();
+        if ($invoice instanceof Receipt) {
+            $andX->add($qb->expr()->isInstanceOf('i', Receipt::class));
+        } else {
+            $andX->add($qb->expr()->not($qb->expr()->isInstanceOf('i', Receipt::class)));
+        }
+
+        return $qb->where($andX)
+            ->orderBy('i.issueDate', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 
     public function getSubstitutionInvoices(Invoice $invoiceToCancel): QueryBuilder
@@ -259,7 +264,7 @@ EOT;
         return $qb->getQuery()->getResult();
     }
 
-    public function getInvoiceYears()
+    public function getInvoiceYears(): array
     {
         $qb = $this->createQueryBuilder('i');
         $qb

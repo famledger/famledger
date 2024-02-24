@@ -32,7 +32,7 @@ class InvoiceNavigationExtension extends AbstractExtension
      */
     public function invoiceNavigation(Invoice $invoice, ?int $range = 3): string
     {
-        $invoices     = $this->invoiceRepository->findInvoicesForCustomer($invoice->getCustomer());
+        $invoices     = $this->invoiceRepository->findInvoicesForCustomer($invoice->getCustomer(), $invoice);
         $currentIndex = array_search($invoice, $invoices);
         $startIndex   = max(0, $currentIndex - $range);
         $endIndex     = min(count($invoices) - 1, $currentIndex + $range);
