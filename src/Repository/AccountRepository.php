@@ -83,7 +83,7 @@ class AccountRepository extends ServiceEntityRepository
         // TODO: implement active/inactive accounts
         // only return accounts that are not associated with a customer
         $qb = $this->createQueryBuilder('a');
-        $qb->where($qb->expr()->isNull('a.customer'))
+        $qb->where($qb->expr()->in('a.type', ['bank-account', 'credit-card']))
             ->orderBy('a.caption', 'ASC');
 
         return $qb->getQuery()->getResult();
