@@ -27,6 +27,8 @@
         }
     </style>
 
+    <div style="margin-bottom: 8px;">{{ financial_month_navigation(financialMonth) }}</div>
+
     {{ include('admin/Accounting/_cardAssociation.html.twig') }}
 
     {{ render(controller('App\\Controller\\Admin\\AccountingFilesController::comparison', { financialMonth:financialMonth.id, header:'' })) }}
