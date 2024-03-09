@@ -25,6 +25,11 @@ class Receipt extends Invoice
         $this->invoices = new ArrayCollection();
     }
 
+    public function getInvoicePeriod(): string
+    {
+        return '';
+    }
+
     public function getPaymentDate(): ?DateTime
     {
         if (false === $invoice = $this->getInvoices()->first()) {
