@@ -102,4 +102,16 @@ class TransactionRepository extends ServiceEntityRepository
 
         return $transactions;
     }
+
+
+    public function getExpensesYears(): array
+    {
+        $qb = $this->createQueryBuilder('t');
+        $qb->select('t.bookingDate')
+            ->orderBy('t.bookingDate', 'DESC');
+
+        return array_unique(array_map(function ($record) {
+            return (int)$record['bookingDate']->format('Y');
+        }, $qb->getQuery()->getResult()));
+    }
 }
