@@ -82,14 +82,6 @@
                     {% for month, invoices in months %}
                         <tr class="month-caption">
                             <td colspan="9">
-                                {% set nextMonthDate = (year ~ '-' ~ month ~ '-01')|date_modify('first day of next month')|date_modify('+2 days') %}
-                                {% if  'now'|date('U') > nextMonthDate|date('U') %}
-                                    <a href="{{ statement_url(year, month) }}" style="float:right"><i
-                                                class="fa fa-balance-scale"></i> Statement</a>
-                                {% else %}
-                                    <a href="https://bbva.mx" target="bbva" style="float:right">BBVA <i
-                                                class="fa fa-external-link"></i></a>
-                                {% endif %}
                                 <strong>{{ date('2023-' ~ month ~ '-01')|date('F') }}</strong>
                             </td>
                         </tr>
@@ -106,6 +98,8 @@
                         </tr>
                         {% for invoiceNumber, invoice in invoices %}
                             {% set customer = invoice.customer %}
+                            {% set document = invoice.document %}
+                            {% set transaction = (document is not null and document.transaction is not null) ? document.transaction : null %}
                             {% if null == invoice %}
                                 <tr class="invoice-row" style="background-color: #ffe6e6">
                                     <td>{{ invoiceNumber }}</td>
@@ -131,11 +125,10 @@
                                     </td>
                                     <td class="nowrap">{{ invoice.issueDate|date('d-M-y') }}</td>
                                     <td class="nowrap">
-                                        {% if invoice.document is not null and invoice.document.transaction is not null %}
+                                        {% if transaction is not null %}
                                             {% if invoice.payment is not null %}
                                                 {{ invoice.payment.series }}-{{ invoice.payment.number }}
                                             {% else %}
-                                                {% set transaction = invoice.document.transaction %}
                                                 {% set paymentMonth = transaction.valueDate|date('m') %}
                                                 {% if paymentMonth == month %}
                                                     {{ transaction.valueDate|date('d-M-y') }}
@@ -167,6 +160,13 @@
                                             .setController('App\\Controller\\Admin\\InvoiceCrudController')
                                             .setAction('detail')
                                             .setEntityId(invoice.id) }}"><i class="fa fa-eye"></i></a>
+                                        {% if transaction is not null %}
+                                            <a href="{{ ea_url()
+                                                .setController('App\\Controller\\Admin\\StatementCrudController')
+                                                .setAction('detail')
+                                                .setEntityId(transaction.statement.id) }}#position_{{ transaction.sequenceNo }}"><i
+                                                        class="fa fa-balance-scale"></i></a>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endif %}

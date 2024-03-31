@@ -107,15 +107,30 @@ class InvoiceRepository extends ServiceEntityRepository
         foreach ($qb->getQuery()->getResult() as $invoice) {
             /** @var Invoice $invoice */
             $invoiceYear  = $invoice->getYear() ?? $invoice->getIssueDate()->format('Y');
-            $invoiceMonth = $invoice->getMonth() ?? $invoice->getIssueDate()->format('m');
+            $invoiceMonth = $invoice->getMonth() ?? (int)$invoice->getIssueDate()->format('m');
 
             // Add the current invoice to the array
             $invoiceKey                                         = $invoice->getSeries() . '-' . $invoice->getNumber();
             $invoices[$invoiceYear][$invoiceMonth][$invoiceKey] = $invoice;
         }
 
-        // Sort the array by keys (invoice numbers)
+        // sort the years in descending order
         krsort($invoices);
+
+        // iterate through each year
+        foreach ($invoices as &$months) {
+            // Sort the months in descending order for each year
+            krsort($months);
+
+            // Now, iterate through each month of the year
+            foreach ($months as &$invoiceKeys) {
+                // Sort the invoice keys in descending order for each month
+                // If you need them in ascending order, you can use ksort() instead of krsort()
+                krsort($invoiceKeys);
+            }
+        }
+        unset($months); // break the reference with the last element
+        unset($invoiceKeys); // break the reference with the last element
 
         return $invoices;
     }

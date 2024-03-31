@@ -105,14 +105,6 @@
                     {% for month, transactions in months %}
                         <tr class="month-caption">
                             <td colspan="9">
-                                {% set nextMonthDate = (year ~ '-' ~ month ~ '-01')|date_modify('first day of next month')|date_modify('+2 days') %}
-                                {% if  'now'|date('U') > nextMonthDate|date('U') %}
-                                    <a href="{{ statement_url(year, month) }}" style="float:right"><i
-                                                class="fa fa-balance-scale"></i> Statement</a>
-                                {% else %}
-                                    <a href="https://bbva.mx" target="bbva" style="float:right">BBVA <i
-                                                class="fa fa-external-link"></i></a>
-                                {% endif %}
                                 <strong>{{ date('2023-' ~ month ~ '-01')|date('F') }}</strong>
                             </td>
                         </tr>
@@ -124,6 +116,7 @@
                             <th>Paid invoices</th>
                             <th class="text-right">TX-Amount</th>
                             <th class="text-center">Status</th>
+                            <th class="text-right">Statement</th>
                         </tr>
                         {% for transaction in transactions %}
                             <tr class="transaction-row {{ transaction.status|lower }}"
@@ -235,6 +228,12 @@
                                 </td>
                                 <td class="text-right">{{ transaction.amount|cent_amount }}</td>
                                 <td class="text-center">{{ transaction.status|transaction_status }}</td>
+                                <td class="text-right nowrap">
+                                    <a href="{{ ea_url()
+                                        .setController('App\\Controller\\Admin\\StatementCrudController')
+                                        .setAction('detail')
+                                        .setEntityId(transaction.statement.id) }}#position_{{ transaction.sequenceNo }}"><i class="fa fa-balance-scale"></i></a>
+                                </td>
                             </tr>
                         {% endfor %}
                     {% endfor %}
