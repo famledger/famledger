@@ -121,6 +121,14 @@ class InvoiceRequestComposer
         return $this->setSection('Receptor', $receptor);
     }
 
+    public function setRegimeType(string $regimeType): self
+    {
+        $receptor                  = $this->getSection('Receptor');
+        $receptor['regimenFiscal'] = $regimeType;
+
+        return $this->setSection('Receptor', $receptor);
+    }
+
     public function setDescription(string $description): self
     {
         $partidas                   = $this->getSection('Partidas');

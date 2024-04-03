@@ -44,6 +44,7 @@ class InvoiceTaskListener
         $invoiceTask
             ->setSeries($schedule->getSeries())
             ->setTaxCategory($schedule->getTaxCategory())
+            ->setRegimeType($schedule->getRegimeType())
             ->setInvoiceUsage($schedule->getInvoiceUsage())
             ->setPaymentMethod($schedule->getPaymentMethod())
             ->setPaymentForm($schedule->getPaymentForm())

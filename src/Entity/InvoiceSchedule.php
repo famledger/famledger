@@ -93,6 +93,9 @@ class InvoiceSchedule implements TenantAwareInterface
     #[ORM\Column(length: 32, nullable: true)]
     private ?string $invoiceUsage = null;
 
+    #[ORM\Column(length: 16, nullable: true)]
+    private ?string $regimeType = null;
+
     public function __construct()
     {
         $this->invoiceTasks = new ArrayCollection();
@@ -331,6 +334,18 @@ class InvoiceSchedule implements TenantAwareInterface
     public function setInvoiceUsage(?string $invoiceUsage): static
     {
         $this->invoiceUsage = $invoiceUsage;
+
+        return $this;
+    }
+
+    public function getRegimeType(): ?string
+    {
+        return $this->regimeType;
+    }
+
+    public function setRegimeType(?string $regimeType): static
+    {
+        $this->regimeType = $regimeType;
 
         return $this;
     }

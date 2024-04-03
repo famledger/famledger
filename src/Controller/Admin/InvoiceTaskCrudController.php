@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use Angle\CFDI\Catalog\RegimeType;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -179,7 +180,12 @@ class InvoiceTaskCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        $series = $this->em->getRepository(Series::class)->getActiveSeries();
+        $series        = $this->em->getRepository(Series::class)->getActiveSeries();
+        $regimes       = RegimeType::listForFormBuilder();
+        $regimeChoices = [];
+        foreach ($regimes as $name => $id) {
+            $regimeChoices[sprintf('%s [%d]', $name, $id)] = $id;
+        }
 
         return [
             IdField::new('id')->hideOnForm(),
@@ -197,6 +203,7 @@ class InvoiceTaskCrudController extends AbstractCrudController
                 ]),
 
             AssociationField::new('customer'),
+            ChoiceField::new('regimeType')->setChoices($regimeChoices),
             AssociationField::new('invoiceSchedule')->hideOnForm(),
             AssociationField::new('series'),
             ChoiceField::new('taxCategory')->setChoices([

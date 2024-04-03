@@ -78,6 +78,7 @@ class InvoiceBuilder
             ->setTemplate(json_decode($invoiceTask->getInvoiceTemplate(), true))
             ->setFolio($this->getNextFolio($serie))
             ->setSerie($serie->getCode())
+            ->setRegimeType($invoiceTask->getRegimeType())
             ->setPaymentOptions($invoiceTask->getPaymentMethod(), $invoiceTask->getPaymentForm())
             ->setDescription($invoiceTask->getConcept())
             ->setUsoCfdi($invoiceTask->getInvoiceUsage())

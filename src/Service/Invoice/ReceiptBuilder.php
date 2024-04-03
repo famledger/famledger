@@ -78,6 +78,7 @@ class ReceiptBuilder
             ->setTemplate(json_decode($receiptTask->getInvoiceTemplate(), true))
             ->setFolio($this->getNextFolio($serie))
             ->setSerie($serie->getCode())
+            ->setRegimeType($receiptTask->getRegimeType())
             ->setPaymentOptions($receiptTask->getPaymentMethod(), $receiptTask->getPaymentForm())
             ->setDescription($receiptTask->getConcept())
             ->setUsoCfdi($receiptTask->getInvoiceUsage())

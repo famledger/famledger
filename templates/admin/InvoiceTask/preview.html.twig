@@ -5,12 +5,17 @@
 {% endblock %}
 
 {% block page_content %}
-    <div style="float: right">
+    <div style="float: right" class="btn-group">
         <a class="btn btn-default" href="{{ ea_url()
             .setController('App\\Controller\\Admin\\InvoiceTaskCrudController')
             .setAction('detail')
-            .setEntityId(invoiceTask.id) }}">Back to details</a>
+            .setEntityId(invoiceTask.id) }}"><i class="fa fa-arrow-left"></i> Back to details</a>
+        <a class="btn btn-default copy-to-clipboard text-info" data-target="#request-json">
+            <i class="fa fa-clipboard"></i> copy JSON
+        </a>
     </div>
+
+    <span id="request-json" style="display: none;">{{ request|json_encode|raw }}</span>
 
     <div data-level="10" class="render-json">{{ request|json_encode|raw }}</div>
 {% endblock %}

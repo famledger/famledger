@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use Angle\CFDI\Catalog\RegimeType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -80,9 +81,16 @@ class InvoiceScheduleCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
+        $regimes       = RegimeType::listForFormBuilder();
+        $regimeChoices = [];
+        foreach ($regimes as $name => $id) {
+            $regimeChoices[sprintf('%s [%d]', $name, $id)] = $id;
+        }
+
         return [
             AssociationField::new('property'),
             AssociationField::new('customer'),
+            ChoiceField::new('regimeType')->setChoices($regimeChoices),
             AssociationField::new('series'),
             IntegerField::new('amount')->setTemplatePath('admin/fields/centAmount.html.twig'),
             ChoiceField::new('taxCategory')->setChoices([

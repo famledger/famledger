@@ -122,6 +122,9 @@ class InvoiceTask implements LiveModeAwareInterface, TenantAwareInterface
     #[ORM\ManyToOne]
     private ?Invoice $substitutesInvoice = null;
 
+    #[ORM\Column(length: 16, nullable: true)]
+    private ?string $regimeType = null;
+
     public function __toString(): string
     {
         return $this->concept ?? '';
@@ -385,6 +388,18 @@ class InvoiceTask implements LiveModeAwareInterface, TenantAwareInterface
     public function setSubstitutesInvoice(?Invoice $substitutesInvoice): static
     {
         $this->substitutesInvoice = $substitutesInvoice;
+
+        return $this;
+    }
+
+    public function getRegimeType(): ?string
+    {
+        return $this->regimeType;
+    }
+
+    public function setRegimeType(?string $regimeType): static
+    {
+        $this->regimeType = $regimeType;
 
         return $this;
     }
