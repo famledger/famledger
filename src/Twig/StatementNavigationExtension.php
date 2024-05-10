@@ -53,8 +53,9 @@ class StatementNavigationExtension extends AbstractExtension
         $links = array_map(function ($stmt) use ($statement) {
             // Check if the current statement is the same as the provided statement
             if ($stmt->getId() === $statement->getId()) {
-                // Format as gray text without a hyperlink
-                return sprintf('<span style="color: gray; border-top: 1px solid gray;">%s</span>',
+                // Format as gray text without a hyperlink or orange if pending
+                return sprintf('<span class="%s" style="border-top: 1px solid gray;">%s</span>',
+                    Statement::STATUS_CONSOLIDATED == $statement->getStatus() ? 'text-muted' : 'text-warning',
                     MonthConverter::fromNumericMonth($stmt->getMonth(), true)
                 );
             } else {
@@ -74,8 +75,9 @@ class StatementNavigationExtension extends AbstractExtension
             ->setEntityId($statement->getId())
             ->generateUrl();
 
-        return sprintf('<a href="%s" title="%s">%s</a>',
+        return sprintf('<a href="%s" class="%s" title="%s">%s</a>',
             $url,
+            Statement::STATUS_CONSOLIDATED == $statement->getStatus() ? '' : 'text-warning',
             MonthConverter::fromNumericMonth($statement->getMonth(), false) . ' ' . $statement->getYear(),
             MonthConverter::fromNumericMonth($statement->getMonth(), true)
         );

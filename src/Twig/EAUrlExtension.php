@@ -50,7 +50,7 @@ class EAUrlExtension extends AbstractExtension
     public function eaUrl($entity, string $action, ?string $class = null): string
     {
         $shortClassName = $class ?? basename(str_replace('\\', '/', get_class($entity)));
-
+        $shortClassName = str_replace('Receipt', 'Invoice', $shortClassName);
         if (null === $this->urlGenerator->get('crudAction')) {
             return sprintf('/admin?crudAction=%s&crudControllerFqcn=App\Controller\Admin\%sCrudController&entityId=%d',
                 $action,

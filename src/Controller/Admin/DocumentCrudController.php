@@ -100,7 +100,7 @@ class DocumentCrudController extends AbstractCrudController
         );
     }
 
-    #[Route('/relate/{invoice}/{statement}', name: 'admin_invoice_relate', methods: ['GET'])]
+    #[Route('/relate/{invoice}/document/{statement}', name: 'admin_invoice_relate', methods: ['GET'])]
     public function relateInvoice(
         Invoice                $invoice,
         Statement              $statement,
@@ -144,7 +144,7 @@ class DocumentCrudController extends AbstractCrudController
         );
     }
 
-    #[Route('/relate/{document}/{statement}', name: 'admin_document_relate', methods: ['GET'])]
+    #[Route('/relate/{document}/invoice/{statement}', name: 'admin_document_relate', methods: ['GET'])]
     public function relateDocument(
         Document               $document,
         Statement              $statement,

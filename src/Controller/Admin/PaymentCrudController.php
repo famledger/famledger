@@ -79,6 +79,8 @@ class PaymentCrudController extends AbstractCrudController
     {
         yield TextField::new('series');
         yield NumberField::new('number');
+        yield TextField::new('status')
+            ->setTemplatePath('admin/fields/invoiceStatus.html.twig');;
         yield TextField::new('recipientRFC');
         yield TextField::new('recipientName');
         yield CollectionField::new('invoicesList')

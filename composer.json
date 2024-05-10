@@ -80,6 +80,7 @@
     },
     "require-dev": {
         "hautelook/alice-bundle": "^2.12",
-        "symfony/maker-bundle": "^1.51"
+        "symfony/maker-bundle": "^1.51",
+        "symfony/web-profiler-bundle": "6.3.*"
     }
 }
