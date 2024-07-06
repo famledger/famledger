@@ -112,9 +112,11 @@
                             <th class="text-center">Status</th>
                             <th class="text-center"></th>
                         </tr>
+                        {% set total = 0 %}
                         {% for transaction in transactions %}
                             {% set statement = transaction.statement %}
                             {% set account = statement.account %}
+                            {% set total = total + transaction.amount %}
                             <tr class="transaction-row {{ transaction.status|lower }}"
                                     {% if account is not empty %}
                                         data-account="{{ account.number }}"
@@ -157,6 +159,11 @@
                                 </td>
                             </tr>
                         {% endfor %}
+                        <tr class="header-row bg-light">
+                            <th colspan="3">&nbsp;</th>
+                            <th class="text-right">{{ total|cent_amount }}</th>
+                            <th colspan="2"></th>
+                        </tr>
                     </tbody>
                 </table>
             </div>
