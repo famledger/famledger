@@ -12,4 +12,5 @@ final class PropertyEDocType
     const MAINTENANCE  = 'maintenance';
     const PROPERTY_TAX = 'property-tax';
     const REPAIRS      = 'repairs';
+    const WATER        = 'water';
 }

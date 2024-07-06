@@ -12,18 +12,19 @@
 
     <div class="row gx-0 mt-3">
         {{ include('admin/EDoc/eDocsCard.html.twig', {
-            eDocs: eDocsByType[constant('App\\Constant\\PropertyEDocType::DEED')]|default([]),
-            type:constant('App\\Constant\\PropertyEDocType::DEED'),
-            caption:'Deeds',
-            owner: entity.instance,
-            width: 6
-        }) }}
-        {{ include('admin/EDoc/eDocsCard.html.twig', {
             eDocs: eDocsByType[constant('App\\Constant\\PropertyEDocType::ELECTRICITY')]|default([]),
             type:constant('App\\Constant\\PropertyEDocType::ELECTRICITY'),
             caption:'C.F.E.',
             owner: entity.instance,
             icon: 'fa fa-bolt',
+            width: 6
+        }) }}
+        {{ include('admin/EDoc/eDocsCard.html.twig', {
+            eDocs: eDocsByType[constant('App\\Constant\\PropertyEDocType::WATER')]|default([]),
+            type:constant('App\\Constant\\PropertyEDocType::WATER'),
+            caption:'Aguakan',
+            owner: entity.instance,
+            icon: 'fa fa-water',
             width: 6
         }) }}
     </div>
@@ -83,7 +84,15 @@
             width: 6
         }) }}
     </div>
-
+    <div class="row gx-0 mt-3">
+        {{ include('admin/EDoc/eDocsCard.html.twig', {
+            eDocs: eDocsByType[constant('App\\Constant\\PropertyEDocType::DEED')]|default([]),
+            type:constant('App\\Constant\\PropertyEDocType::DEED'),
+            caption:'Deeds',
+            owner: entity.instance,
+            width: 6
+        }) }}
+    </div>
 {% endblock %}
 
 {% block body_javascript %}
