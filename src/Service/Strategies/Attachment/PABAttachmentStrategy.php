@@ -31,24 +31,32 @@ class PABAttachmentStrategy implements StrategyInterface
 
         //$cellContent = StrategyHelper::extractBlock('/(?:Pago de )cuota de mantenimiento/i', $content, 53, 2);
         $cellContent = StrategyHelper::extractBlock('/Pago(?:\s+\w+)*\s*cuota\s*de\s*mantenimiento/i', $content, 70, 2);
-        // match 'CORRESPONDIENTE AL MES DE OCTUBRE 2023' and extract the month and year
-        [$month, $year] = StrategyHelper::extractValues(
-            '/(ENERO|FEBRERO|MARZO|ABRIL|MAYO|JUNIO|JULIO|AGOSTO|SEPTIEMBRE|SEPTIEMBRRE|OCTUBRE|NOVIEMBRE|DICIEMBRE)(?: de| d)? (\d{4})/i',
-            $cellContent ?? '',
-            $filePath,
-            'Pago ... cuota de mantenimiento ...'
-        );
-        // fix for invoice from september 2022
-        $month = strtolower($month) === 'septiembrre' ? 'septiembre' : $month;
-        $month = StrategyHelper::convertMonthToInt($month);
-        $year  = (int)$year;
+        if (!empty($cellContent)) {
+            // match 'CORRESPONDIENTE AL MES DE OCTUBRE 2023' and extract the month and year
+            [$month, $year] = StrategyHelper::extractValues(
+                '/(ENERO|FEBRERO|MARZO|ABRIL|MAYO|JUNIO|JULIO|AGOSTO|SEPTIEMBRE|SEPTIEMBRRE|OCTUBRE|NOVIEMBRE|DICIEMBRE)(?: de| d)? (\d{4})/i',
+                $cellContent ?? '',
+                $filePath,
+                'Pago ... cuota de mantenimiento ...'
+            );
+            // fix for invoice from september 2022
+            $month       = strtolower($month) === 'septiembrre' ? 'septiembre' : $month;
+            $month       = StrategyHelper::convertMonthToInt($month);
+            $year        = (int)$year;
+            $description = null;
+        } else {
+            $year        = null;
+            $month       = null;
+            $description = StrategyHelper::extractBlock('/Cuota/', $content, 70, 2);
+        }
 
         return (new AttachmentSpecs())
             ->setPropertyKey('PAB')
             ->setAmount($amount)
             ->setYear($year)
             ->setMonth($month)
-            ->setAccountNumber('1447391412');
+            ->setAccountNumber('1447391412')
+            ->setDescription($description);
     }
 
     public function suggestFilename(BaseDocumentSpecs $documentSpecs, ?string $filePath = null): string
