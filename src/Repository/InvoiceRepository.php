@@ -178,8 +178,10 @@ AND i.payment_date IS NOT NULL
 GROUP BY i.customer_id
 EOT;
         $highestPaidNumbers = [];
-        foreach ($this->getEntityManager()->getConnection()->executeQuery($query)->fetchAllAssociative() as $row) {
-            $highestPaidNumbers[$row['customer_id']] = $row['highestNumber'];
+        if (!empty($customerIds)) {
+            foreach ($this->getEntityManager()->getConnection()->executeQuery($query)->fetchAllAssociative() as $row) {
+                $highestPaidNumbers[$row['customer_id']] = $row['highestNumber'];
+            }
         }
 
         // Step 3: Mark unpaid invoices that have a lower number than the highest paid invoice number for the same customer.
