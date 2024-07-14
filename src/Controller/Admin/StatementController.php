@@ -4,10 +4,8 @@ namespace App\Controller\Admin;
 
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Exception;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,7 +22,7 @@ use App\Repository\DocumentRepository;
 use App\Service\DocumentService;
 use App\Service\StatementService;
 
-class StatementController extends AbstractController
+class StatementController extends DashboardController
 {
     #[Route('/admin/statement/{statement}/documents', name: 'admin_statement_documents', methods: ['GET'])]
     public function statementDocuments(Statement $statement, DocumentRepository $documentRepository): Response
@@ -212,11 +210,6 @@ class StatementController extends AbstractController
         $request->getSession()->getFlashBag()->add('success', 'The statement has been un-consolidated');
 
         return $this->redirectToDetailsPage($adminUrlGenerator, $statement);
-    }
-
-    public function configureCrud(Crud $crud): Crud
-    {
-        return $crud->showEntityActionsInlined();
     }
 
     private function redirectToDetailsPage(AdminUrlGenerator $adminUrlGenerator, Statement $statement): Response
