@@ -140,7 +140,7 @@ class BBVACreditCardStrategy implements StrategyInterface
 
                     $rfc                = str_replace(' ', '', $parts[3]);
                     $currentTransaction = [
-                        'bookingDate' => $bookingDate,
+                        'bookingDate' => $bookingDate ?? $valueDate,
                         'valueDate'   => $valueDate,
                         'description' => $parts[2] . (empty($rfc) ? '' : (' | ' . $rfc)),
                         'rfc'         => $rfc,
