@@ -126,6 +126,7 @@ class DashboardController extends AbstractDashboardController
             ['year' => date('Y')]);
         yield MenuItem::linkToCrud('Tax Payments', 'fas fa-cash-register', TaxNotice::class);
         yield MenuItem::linkToRoute('Yearly Expenses', 'fas fa-credit-card', 'admin_expense', ['year' => date('Y')]);
+        yield MenuItem::linkToRoute('Yearly Reports', 'fas fa-chart-bar', 'admin_yearlyReport', ['year' => date('Y')]);
 //        yield MenuItem::linkToCrud('Financial Months', 'fas fa-calendar', FinancialMonth::class);
         yield MenuItem::section('Lookup');
         yield MenuItem::linkToCrud('Documents', 'fas fa-file', Document::class);

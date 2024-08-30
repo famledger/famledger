@@ -5,6 +5,7 @@ namespace App\Repository;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Exception;
 
 use App\Constant\AccountType;
 use App\Constant\DocumentType;
@@ -64,7 +65,46 @@ class TransactionRepository extends ServiceEntityRepository
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
+     */
+    public function getYearlyReportData(?int $year): array
+    {
+        $qb = $this->createQueryBuilder('t');
+        $qb
+            ->select('t, s, a')
+            ->innerJoin('t.statement', 's')
+            ->innerJoin('s.account', 'a')
+            ->orderBy('t.bookingDate', 'asc');
+
+        $andX = $qb->expr()->andX()
+            ->add($qb->expr()->eq('a.type', $qb->expr()->literal(AccountType::BANK_ACCOUNT)));
+
+        if (null === $year) {
+            $currentYear = (int)date('Y');
+            $startDate   = new DateTime($currentYear - 1 . '-01-01 00:00:00');
+            $andX->add($qb->expr()->gte('t.bookingDate', $qb->expr()->literal($startDate->format('Y-m-d H:i:s'))));
+        } else {
+            $startDate = new DateTime($year . '-01-01 00:00:00');
+            $endDate   = new DateTime($year . '-12-31 23:59:59');
+            $andX
+                ->add($qb->expr()->gte('t.bookingDate', $qb->expr()->literal($startDate->format('Y-m-d H:i:s'))))
+                ->add($qb->expr()->lte('t.bookingDate', $qb->expr()->literal($endDate->format('Y-m-d H:i:s'))));
+        }
+
+        $transactions = [];
+        foreach ($qb->where($andX)->getQuery()->getResult() as $transaction) {
+            /** @var Transaction $transaction */
+            $year                  = $transaction->getBookingDate()->format('Y');
+            $transactions[$year][] = $transaction;
+        }
+
+        krsort($transactions);
+
+        return $transactions;
+    }
+
+    /**
+     * @throws Exception
      */
     public function getExpenseHistory(?int $year): array
     {
@@ -102,7 +142,6 @@ class TransactionRepository extends ServiceEntityRepository
 
         return $transactions;
     }
-
 
     public function getExpensesYears(): array
     {

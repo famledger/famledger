@@ -1,0 +1,228 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}
+    Yearly Report
+{% endblock %}
+
+{% block page_content %}
+    <style>
+        table tr.header-row {
+            font-size: .9em;
+            color: #666;
+            font-weight: normal;
+        }
+
+        table tr.header-row th {
+            padding: 2px 8px;
+        }
+
+        div.year-header {
+            background-color: #c5d6df;
+        }
+
+        tr.month-caption td {
+            background-color: #e6f7ff;
+            border-top: 2px solid #ccc;
+        }
+
+        tr.transaction-row.cancelado td {
+            text-decoration: line-through;
+            background-color: #EEE;
+            opacity: .6;
+        }
+
+        .nowrap {
+            white-space: nowrap;
+        }
+
+        /*.select-container {*/
+        /*    position: relative;*/
+        /*    display: inline-block;*/
+        /*}*/
+
+        .clear-icon {
+            cursor: pointer;
+            padding-left: 4px;
+            font-size: 1.2em;
+        }
+
+        td.description-container {
+            position: relative
+        }
+
+        td.description-container ul {
+            margin-bottom: 0;
+        }
+
+        td.description-container.collapsed ul {
+            display: none;
+        }
+
+        /* do not show a bullet icon for the first item */
+        td.description-container ul li:first-child {
+            list-style-type: none;
+        }
+
+        i.description-toggle {
+            cursor: pointer;
+            position: absolute;
+            left: 10px
+        }
+
+        td.description-container.collapsed i.description-toggle {
+            transform: rotate(-90deg); /* Flips the chevron icon */
+        }
+
+    </style>
+{#    <div>{{ payment_history_navigation(year) }}</div>#}
+
+    <div>{{ yearly_report_navigation(year) }}</div>
+
+    <div style="margin-bottom: 4px;" class="select-container">
+        Restrict to account:
+        <select id="account-selector">
+            <option value="">- not restricted -</option>
+            {% for rfc, value in accounts %}
+                {% if value is iterable %}
+                    <optgroup label="{{ rfc }}">
+                        {% for subRfc, subValue in value %}
+                            <option value="{{ subRfc }}">{{ subValue }}</option>
+                        {% endfor %}
+                    </optgroup>
+                {% else %}
+                    <option value="{{ rfc }}">{{ value }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+        <a href="javascript:void(0)" class=""><i class="fas fa-times clear-icon" id="clear-account-selector"></i></a>
+    </div>
+
+    {% for year, transactions in expensesByYear %}
+        <div class="card card-primary mb-3">
+            <div class="card-header year-header">{{ year }}</div>
+            <div class="card-body">
+                <table class="table table-hover transaction-history">
+                    <tbody>
+                        <tr class="header-row bg-light">
+                            <th class="text-center">Paid</th>
+                            <th>Account</th>
+                            <th>Description <a href="#"
+                                              onclick="$('.description-container').toggleClass('collapsed')">toggle</a></th>
+                            <th class="text-right">TX-Amount</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center"></th>
+                        </tr>
+                        {% set total = 0 %}
+                        {% for transaction in transactions %}
+                            {% set statement = transaction.statement %}
+                            {% set account = statement.account %}
+                            {% set total = total + transaction.amount %}
+                            <tr class="transaction-row {{ transaction.status|lower }}"
+                                    {% if account is not empty %}
+                                        data-account="{{ account.number }}"
+                                    {% endif %}
+                            >
+                                <td class="nowrap text-center">
+                                    <strong>{{ transaction.bookingDate|date('d') }}</strong>
+                                    {{ transaction.bookingDate|date('M') }}
+                                </td>
+                                {% if account is not empty %}
+                                    <td style="background-color: {{ account.id }}">
+                                        {{ account }}
+                                    </td>
+                                {% else %}
+                                    <td>- missing -</td>
+                                {% endif %}
+                                <td class="description-container collapsed">
+                                    <i class="description-toggle fa fa-caret-down"
+                                       onclick="$(this).parent().toggleClass('collapsed')"></i>
+                                    <div style="margin: -3px 0 0 15px">{{ transaction.description }}</div>
+                                    <ul>
+                                        {% for document in transaction.documents %}
+                                            <li class="inline" style="list-style-type: disc">{{ document.filename }}
+                                            <a target="download" title="view document" class="text-muted"
+                                               href="{{ path('admin_document_download', {document:document.id}) }}"><i
+                                                        style="width: 12px; text-align: left"
+                                                        class="{{ file_icon(document.filename) }}"></i> </a>
+                                            <a href="{{ document|ea_url('detail', 'Document') }}"><i class="fa fa-eye"></i></a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </td>
+                                <td class="text-right">{{ transaction.amount|cent_amount }}</td>
+                                <td class="text-center">{{ transaction.status|transaction_status }}</td>
+                                <td>
+                                    <a title="{{ statement.month|month_name }} {{ statement.year }}" href="{{ ea_url()
+                                        .setController('App\\Controller\\Admin\\StatementCrudController')
+                                        .setAction('detail')
+                                        .setEntityId(statement.id) }}"><i class="fa fa-balance-scale"></i></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        <tr class="header-row bg-light">
+                            <th colspan="3">&nbsp;</th>
+                            <th class="text-right">{{ total|cent_amount }}</th>
+                            <th colspan="2"></th>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div> <!-- End of card -->
+    {% endfor %}
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        const accountSelector = document.getElementById("account-selector")
+        const tenantKey = 'selectedAccount-' + '{{ tenant().id }}'
+
+        // Load the selected account from local storage on page load
+        const savedAccount = localStorage.getItem(tenantKey)
+        if (savedAccount) {
+          accountSelector.value = savedAccount
+          filterRows(savedAccount)
+        }
+
+        accountSelector.addEventListener("change", function() {
+          const selectedAccount = this.value
+
+          // Save the selected account to local storage
+          localStorage.setItem(tenantKey, selectedAccount)
+
+          filterRows(selectedAccount)
+        })
+
+        // Get the clear button element by its id
+        const clearButton = document.getElementById("clear-account-selector")
+
+        // Add click event listener to clear button
+        clearButton.addEventListener("click", function() {
+          // Check if the account selector has a selected account
+          if (accountSelector.selectedIndex !== 0) {
+            // Remove the selected account from local storage
+            localStorage.removeItem('selectedAccount')
+
+            // Clear the select element
+            accountSelector.selectedIndex = 0
+
+            // Reload the page
+            location.reload()
+          }
+        })
+
+        function filterRows(selectedAccount) {
+          console.log('selectedAccount', selectedAccount)
+          const transactionRows = document.querySelectorAll(".transaction-row")
+
+          transactionRows.forEach(function(row) {
+            const rowAccount = row.getAttribute("data-account")
+            if (selectedAccount === "" || rowAccount === selectedAccount) {
+              row.style.display = "" // Show the row
+            } else {
+              row.style.display = "none" // Hide the row
+            }
+          })
+        }
+      })
+
+    </script>
+{% endblock %}
