@@ -256,3 +256,10 @@ tr.tx-row-none {
 .hashed-element-hilite {
     background-color: #FFFAE6 !important;
 }
+
+span.title-on-hover {
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-decoration-color: #888888;
+    cursor: pointer;
+}

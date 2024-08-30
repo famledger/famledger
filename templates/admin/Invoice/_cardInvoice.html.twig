@@ -60,7 +60,17 @@
         </div>
         <div class="field-group">
             <div class="caption">Payment date</div>
-            <div class="value">{% if invoice.document and invoice.document.transaction %}{{ invoice.document.transaction.bookingDate|date }}{% else %}-{% endif %}</div>
+            <div class="value">
+
+                {% if invoice.document and invoice.document.transaction %}
+                    {{ invoice.document.transaction.bookingDate|date }}
+                {% elseif invoice.paymentDate is null %}
+                    - no payment date -
+                {% else %}
+                    <span class="text-warning title-on-hover" title="funds have been transferred but not consolidated">{{ invoice.paymentDate|date('F d, Y') }}</span>
+                {% endif %}
+
+            </div>
         </div>
         <div class="field-group">
             <div class="caption">Description</div>

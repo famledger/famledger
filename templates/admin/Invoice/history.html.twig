@@ -124,7 +124,7 @@
                                         {{ invoiceNumber }}
                                     </td>
                                     <td class="nowrap">{{ invoice.issueDate|date('d-M-y') }}</td>
-                                    <td class="nowrap">
+                                    <td class="nowrap" data-invoice-id="{{ invoice.id }}">
                                         {% if transaction is not null %}
                                             {% if invoice.payment is not null %}
                                                 {{ invoice.payment.series }}-{{ invoice.payment.number }}
@@ -138,7 +138,14 @@
                                                 {% endif %}
                                             {% endif %}
                                         {% elseif invoice.status == 'vigente' %}
-                                            <span class="badge badge-warning">pending</span>
+                                            <a href="#"><i class="fa fa-pencil"></i></a>
+                                            {% if invoice.paymentDate is null %}
+                                                <span class="badge badge-warning">pending</span>
+                                            {% else %}
+                                                <span class="badge badge-warning title-on-hover"
+                                                      title="funds have been transferred but not consolidated">{{ invoice.paymentDate|date('d-M-y') }}</span>
+                                            {% endif %}
+
                                         {% endif %}
                                     </td>
                                     <td class="text-right">{{ invoice.amount|cent_amount }}</td>
