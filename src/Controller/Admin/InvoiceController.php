@@ -2,8 +2,10 @@
 
 namespace App\Controller\Admin;
 
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -37,6 +39,25 @@ class InvoiceController extends AbstractController
             'invoicesByYear' => $invoiceRepo->getHistory($activeSeries, $year ? (int)$year : null),
             'customers'      => $customerRepository->getOptions()
         ]);
+    }
+
+    #[Route('/{invoice}/paymentDate', name: 'admin_invoice_paymentDate')]
+    public function paymentDate(
+        Invoice                $invoice,
+        Request                $request,
+        EntityManagerInterface $em
+    ): Response|JsonResponse {
+        $paymentDate = $request->request->get('paymentDate');
+        $paymentDate = !empty($paymentDate) ? new DateTime($paymentDate) : null;
+        $invoice->setPaymentDate($paymentDate);
+        $em->flush();
+
+        $html = $this->renderView('admin/Invoice/_invoicePaymentDate.html.twig', [
+            'invoice'     => $invoice,
+            'transaction' => $invoice->getDocument()?->getTransaction(),
+        ]);
+
+        return new JsonResponse(['html' => $html, 'id' => $invoice->getId()]);
     }
 
     #[Route('/fetch', name: 'admin_invoice_fetch')]

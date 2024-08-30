@@ -1,0 +1,30 @@
+<td class="nowrap invoice-date-cell" id="payment-cell-{{ invoice.id }}">
+    {% if transaction is not null %}
+        {% if invoice.payment is not null %}
+            {{ invoice.payment.series }}-{{ invoice.payment.number }}
+        {% else %}
+            {% set paymentMonth = transaction.valueDate|date('m') %}
+            {% if paymentMonth == month %}
+                {{ transaction.valueDate|date('d-M-y') }}
+            {% else %}
+                {% set diffClass = transaction.valueDate < invoice.issueDate ? 'text-success' : 'text-warning' %}
+                <span class="{{ diffClass }}">{{ transaction.valueDate|date('d-M-y') }}</span>
+            {% endif %}
+        {% endif %}
+    {% elseif invoice.status|lower == 'vigente' %}
+        <a href="javascript:void(0)"  class="edit-date-link"><i class="fa fa-pencil"></i></a>
+        {% if invoice.paymentDate is null %}
+            <span class="badge badge-warning">pending</span>
+        {% else %}
+            <span class="badge badge-info title-on-hover"
+                  title="funds have been transferred but not consolidated">{{ invoice.paymentDate|date('d-M-y') }}</span>
+        {% endif %}
+    {% endif %}
+    <div class="edit-date-form" style="display: none;">
+        <form id="payment-date-form" action="{{ path('admin_invoice_paymentDate', { invoice: invoice.id }) }}" method="post" data-cell-selector=".invoice-date-cell">
+            <input type="date" name="paymentDate" value="{{ invoice.paymentDate|date('Y-m-d') }}">
+            <button type="submit">Submit</button>
+            <button type="button" class="cancel-edit">Cancel</button>
+        </form>
+    </div>
+</td>

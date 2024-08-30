@@ -124,30 +124,7 @@
                                         {{ invoiceNumber }}
                                     </td>
                                     <td class="nowrap">{{ invoice.issueDate|date('d-M-y') }}</td>
-                                    <td class="nowrap" data-invoice-id="{{ invoice.id }}">
-                                        {% if transaction is not null %}
-                                            {% if invoice.payment is not null %}
-                                                {{ invoice.payment.series }}-{{ invoice.payment.number }}
-                                            {% else %}
-                                                {% set paymentMonth = transaction.valueDate|date('m') %}
-                                                {% if paymentMonth == month %}
-                                                    {{ transaction.valueDate|date('d-M-y') }}
-                                                {% else %}
-                                                    {% set diffClass = transaction.valueDate < invoice.issueDate ? 'text-success' : 'text-warning' %}
-                                                    <span class="{{ diffClass }}">{{ transaction.valueDate|date('d-M-y') }}</span>
-                                                {% endif %}
-                                            {% endif %}
-                                        {% elseif invoice.status == 'vigente' %}
-                                            <a href="#"><i class="fa fa-pencil"></i></a>
-                                            {% if invoice.paymentDate is null %}
-                                                <span class="badge badge-warning">pending</span>
-                                            {% else %}
-                                                <span class="badge badge-warning title-on-hover"
-                                                      title="funds have been transferred but not consolidated">{{ invoice.paymentDate|date('d-M-y') }}</span>
-                                            {% endif %}
-
-                                        {% endif %}
-                                    </td>
+                                    {{ include('admin/Invoice/_invoicePaymentDate.html.twig') }}
                                     <td class="text-right">{{ invoice.amount|cent_amount }}</td>
                                     <td class="text-center">{{ invoice.status|invoice_status }}</td>
                                     <td class="text-center">{{ invoice.liveMode|livemode_status }}</td>
@@ -185,58 +162,121 @@
         </div> <!-- End of card -->
     {% endfor %}
 
+    <style>
+        .invoice-date-cell {
+            position: relative;
+        }
+
+        .edit-date-form {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .edit-date-link {
+            cursor: pointer;
+        }
+
+        .cancel-edit {
+            margin-left: 10px;
+        }
+    </style>
+
     <script>
-      document.addEventListener("DOMContentLoaded", function() {
-        const customerSelector = document.getElementById("customer-selector")
+      $(document).ready(function() {
+        // Bind click event for edit-date-link elements using delegated event handling
+        $('table.invoice-history').on('click', '.edit-date-link', function(event) {
+          event.preventDefault();
+
+          var $cell = $(this).closest('.invoice-date-cell');
+          var $form = $cell.find('.edit-date-form');
+          var isVisible = $form.is(':visible');
+
+          // Hide all other forms
+          $('.edit-date-form').hide();
+
+          // Toggle the clicked form
+          $form.toggle(!isVisible);
+        });
+
+        // Bind click event for cancel-edit elements using delegated event handling
+        $('table.invoice-history').on('click', '.cancel-edit', function() {
+          $(this).closest('.edit-date-form').hide();
+        });
+
+        // Bind submit event for payment-date-form elements using delegated event handling
+        $('table.invoice-history').on('submit', '#payment-date-form', function(event) {
+          event.preventDefault();
+
+          var $form = $(this);
+          var actionUrl = $form.attr('action');
+
+          $.ajax({
+            type: 'POST',
+            url: actionUrl,
+            data: $form.serialize(),
+            success: function(response) {
+              if (response.html) {
+                var $cell = $('#payment-cell-' + response.id);
+                if ($cell.length) {
+                  $cell.replaceWith(response.html);
+                }
+              }
+            },
+            error: function() {
+              console.error('An error occurred!');
+            }
+          });
+        });
 
         // Load the selected customer from local storage on page load
-        const savedCustomer = localStorage.getItem('selectedCustomer')
+        var savedCustomer = localStorage.getItem('selectedCustomer');
         if (savedCustomer) {
-          customerSelector.value = savedCustomer
-          filterRows(savedCustomer)
+          $('#customer-selector').val(savedCustomer);
+          filterRows(savedCustomer);
         }
 
-        customerSelector.addEventListener("change", function() {
-          const selectedCustomer = this.value
+        // Bind change event for customer-selector using delegated event handling
+        $('#customer-selector').on('change', function() {
+          var selectedCustomer = $(this).val();
 
           // Save the selected customer to local storage
-          localStorage.setItem('selectedCustomer', selectedCustomer)
+          localStorage.setItem('selectedCustomer', selectedCustomer);
 
-          filterRows(selectedCustomer)
-        })
+          filterRows(selectedCustomer);
+        });
 
-        // Get the clear button element by its id
-        const clearButton = document.getElementById("clear-customer-selector")
-
-        // Add click event listener to clear button
-        clearButton.addEventListener("click", function() {
+        // Bind click event for clear-customer-selector using delegated event handling
+        $('#clear-customer-selector').on('click', function() {
           // Check if the customer selector has a selected customer
-          if (customerSelector.selectedIndex !== 0) {
+          if ($('#customer-selector').prop('selectedIndex') !== 0) {
             // Remove the selected customer from local storage
-            localStorage.removeItem('selectedCustomer')
+            localStorage.removeItem('selectedCustomer');
 
             // Clear the select element
-            customerSelector.selectedIndex = 0
+            $('#customer-selector').prop('selectedIndex', 0);
 
             // Reload the page
-            location.reload()
+            location.reload();
           }
-        })
+        });
 
         function filterRows(selectedCustomer) {
-          const invoiceRows = document.querySelectorAll(".invoice-row")
-
-          invoiceRows.forEach(function(row) {
-            const rowCustomer = row.getAttribute("data-customer")
+          $('.invoice-row').each(function() {
+            var rowCustomer = $(this).data('customer');
 
             if (selectedCustomer === "" || rowCustomer === selectedCustomer) {
-              row.style.display = "" // Show the row
+              $(this).show(); // Show the row
             } else {
-              row.style.display = "none" // Hide the row
+              $(this).hide(); // Hide the row
             }
-          })
+          });
         }
-      })
-
+      });
     </script>
+
 {% endblock %}
