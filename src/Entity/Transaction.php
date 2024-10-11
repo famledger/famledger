@@ -40,10 +40,20 @@ class Transaction implements TenantAwareInterface
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\ManyToOne(targetEntity: Account::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Account $account = null;
+
     #[ORM\ManyToOne(inversedBy: 'transactions')]
     #[ORM\JoinColumn(nullable: false)]
     #[Gedmo\Versioned]
     private ?Statement $statement = null;
+
+    #[ORM\ManyToOne(inversedBy: 'transactions')]
+    private ?Customer $customer = null;
+
+    #[ORM\OneToMany(mappedBy: 'transaction', targetEntity: Document::class)]
+    private Collection $documents;
 
     #[ORM\Column]
     #[Gedmo\Versioned]
@@ -69,9 +79,6 @@ class Transaction implements TenantAwareInterface
     #[Gedmo\Versioned]
     private ?string $description = null;
 
-    #[ORM\OneToMany(mappedBy: 'transaction', targetEntity: Document::class)]
-    private Collection $documents;
-
     #[ORM\Column]
     #[Gedmo\Versioned]
     private bool $isConsolidated = false;
@@ -79,9 +86,6 @@ class Transaction implements TenantAwareInterface
     #[ORM\Column(length: 16)]
     #[Gedmo\Versioned]
     private ?string $status;
-
-    #[ORM\ManyToOne(inversedBy: 'transactions')]
-    private ?Customer $customer = null;
 
     #[ORM\Column(length: 1024, nullable: true)]
     private ?string $comment = null;
@@ -100,6 +104,18 @@ class Transaction implements TenantAwareInterface
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getAccount(): ?Account
+    {
+        return $this->account;
+    }
+
+    public function setAccount(?Account $account): static
+    {
+        $this->account = $account;
+
+        return $this;
     }
 
     public function getStatement(): ?Statement

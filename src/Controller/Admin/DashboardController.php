@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\Transaction;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -132,6 +133,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToCrud('Documents', 'fas fa-file', Document::class);
         yield MenuItem::linkToCrud('Invoices', 'fas fa-file-invoice', Invoice::class);
         yield MenuItem::linkToCrud('Receipts', 'fas fa-file-invoice', Receipt::class);
+        yield MenuItem::linkToCrud('Transactions', 'fas fa-right-left', Transaction::class);
         yield MenuItem::section('Admin');
         yield MenuItem::linkToCrud('Bank Accounts', 'fas fa-bank', Account::class);
         yield MenuItem::linkToCrud('Properties', 'fas fa-building', Property::class);

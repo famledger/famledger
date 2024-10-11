@@ -55,6 +55,7 @@ class BBVACreditCardStrategy implements StrategyInterface
                 ? new PaymentTransaction()
                 : new Transaction();
             $transaction
+                ->setAccount($statement->getAccount())
                 ->setStatement($statement)
                 ->setSequenceNo($idx + 1)
                 ->setBookingDate($transactionData['bookingDate'])

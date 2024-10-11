@@ -56,6 +56,7 @@ class BBVAStatementStrategy implements StrategyInterface
                 : new Transaction();
             $transaction
                 ->setStatement($statement)
+                ->setAccount($statement->getAccount())
                 ->setSequenceNo($idx + 1)
                 ->setBookingDate($transactionData['bookingDate'])
                 ->setValueDate($transactionData['valueDate'])
