@@ -15,19 +15,20 @@
         "easycorp/easyadmin-bundle": "4.7.7",
         "eclipxe/cfdiutils": "^2.25",
         "lelyfoto/twig-instanceof": "*",
+        "phpoffice/phpspreadsheet": "^3.3",
         "sensio/framework-extra-bundle": "^6.2",
         "sentry/sentry-symfony": "^4.12",
         "stof/doctrine-extensions-bundle": "^1.8",
-        "symfony/console": "6.3.*",
-        "symfony/dotenv": "6.3.*",
+        "symfony/console": "6.4.*",
+        "symfony/dotenv": "6.4.*",
         "symfony/flex": "^2",
-        "symfony/framework-bundle": "6.3.*",
-        "symfony/http-client": "6.3.*",
-        "symfony/mime": "6.3.*",
+        "symfony/framework-bundle": "6.4.*",
+        "symfony/http-client": "6.4.*",
+        "symfony/mime": "6.4.*",
         "symfony/monolog-bundle": "^3.8",
-        "symfony/runtime": "6.3.*",
+        "symfony/runtime": "6.4.*",
         "symfony/webpack-encore-bundle": "^2.1",
-        "symfony/yaml": "6.3.*",
+        "symfony/yaml": "6.4.*",
         "twig/extra-bundle": "^3.7",
         "twig/intl-extra": "^3.7"
     },
@@ -75,12 +76,12 @@
     "extra": {
         "symfony": {
             "allow-contrib": false,
-            "require": "6.3.*"
+            "require": "6.4.*"
         }
     },
     "require-dev": {
         "hautelook/alice-bundle": "^2.12",
         "symfony/maker-bundle": "^1.51",
-        "symfony/web-profiler-bundle": "6.3.*"
+        "symfony/web-profiler-bundle": "6.4.*"
     }
 }

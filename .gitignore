@@ -8,6 +8,7 @@
 /var/
 /vendor/
 /.idea/
+/auth.json
 ###< symfony/framework-bundle ###
 
 ###> symfony/webpack-encore-bundle ###
