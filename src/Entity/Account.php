@@ -18,7 +18,8 @@ use App\Repository\AccountRepository;
 #[Gedmo\Loggable]
 class Account implements TenantAwareInterface
 {
-    use LoggableTrait;
+    use LoggableTrait,
+        TenantAwareTrait;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]

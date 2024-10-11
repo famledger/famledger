@@ -9,6 +9,8 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
+use App\Annotation\TenantDependent;
+use App\Annotation\TenantFilterable;
 use App\Constant\AccountType;
 use App\Constant\DocumentType;
 use App\Constant\InvoiceStatus;
@@ -21,10 +23,13 @@ use App\Repository\TransactionRepository;
     'transaction'         => Transaction::class,
     'payment-transaction' => PaymentTransaction::class,
 ])]
+#[TenantDependent(tenantFieldName: 'tenant_id')]
+#[TenantFilterable(tenantFieldName: 'tenant_id')]
 #[Gedmo\Loggable]
-class Transaction
+class Transaction implements TenantAwareInterface
 {
-    use LoggableTrait;
+    use LoggableTrait,
+        TenantAwareTrait;
 
     const STATUS_AMOUNT_MISMATCH = 'amount-mismatch';
     const STATUS_PENDING         = 'pending';

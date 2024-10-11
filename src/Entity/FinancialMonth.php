@@ -9,7 +9,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Exception;
 use Gedmo\Mapping\Annotation as Gedmo;
 use IntlDateFormatter;
 
@@ -22,7 +21,8 @@ use App\Repository\FinancialMonthRepository;
 #[Gedmo\Loggable]
 class FinancialMonth implements TenantAwareInterface
 {
-    use LoggableTrait;
+    use LoggableTrait,
+        TenantAwareTrait;
 
     const STATUS_PENDING  = 'pending';
     const STATUS_COMPLETE = 'complete';
@@ -31,11 +31,6 @@ class FinancialMonth implements TenantAwareInterface
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Gedmo\Versioned]
-    private ?Tenant $tenant = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
     #[Gedmo\Versioned]
@@ -77,18 +72,6 @@ class FinancialMonth implements TenantAwareInterface
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getTenant(): ?Tenant
-    {
-        return $this->tenant;
-    }
-
-    public function setTenant(?Tenant $tenant): static
-    {
-        $this->tenant = $tenant;
-
-        return $this;
     }
 
     public function getYear(): ?string

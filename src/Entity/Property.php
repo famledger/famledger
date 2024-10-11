@@ -17,17 +17,13 @@ use App\Repository\PropertyRepository;
 #[Gedmo\Loggable]
 class Property implements TenantAwareInterface, FileOwnerInterface
 {
-    use LoggableTrait;
+    use LoggableTrait,
+        TenantAwareTrait;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Gedmo\Versioned]
-    private ?Tenant $tenant = null;
 
     #[ORM\Column(length: 255)]
     #[Gedmo\Versioned]
@@ -79,18 +75,6 @@ class Property implements TenantAwareInterface, FileOwnerInterface
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getTenant(): ?Tenant
-    {
-        return $this->tenant;
-    }
-
-    public function setTenant(?Tenant $tenant): static
-    {
-        $this->tenant = $tenant;
-
-        return $this;
     }
 
     public function getCaption(): ?string

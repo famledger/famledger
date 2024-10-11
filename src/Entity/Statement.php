@@ -28,7 +28,8 @@ class Statement implements TenantAwareInterface, FileOwnerInterface
         );
     }
 
-    use LoggableTrait;
+    use LoggableTrait,
+        TenantAwareTrait;
 
     const STATUS_PENDING      = 'pending';
     const STATUS_CONSOLIDATED = 'consolidated';
@@ -40,11 +41,6 @@ class Statement implements TenantAwareInterface, FileOwnerInterface
 
     #[ORM\OneToMany(mappedBy: 'statement', targetEntity: Transaction::class, cascade: ['persist'])]
     private Collection $transactions;
-
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Gedmo\Versioned]
-    private ?Tenant $tenant = null;
 
     #[ORM\Column]
     #[Gedmo\Versioned]
@@ -111,22 +107,9 @@ class Statement implements TenantAwareInterface, FileOwnerInterface
         );
     }
 
-
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getTenant(): ?Tenant
-    {
-        return $this->tenant;
-    }
-
-    public function setTenant(?Tenant $tenant): static
-    {
-        $this->tenant = $tenant;
-
-        return $this;
     }
 
     public function getStartingBalance(): ?int

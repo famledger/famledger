@@ -17,16 +17,13 @@ use App\Repository\SeriesRepository;
 #[Gedmo\Loggable]
 class Series implements TenantAwareInterface
 {
-    use LoggableTrait;
+    use LoggableTrait,
+        TenantAwareTrait;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-
-    #[ORM\ManyToOne]
-    #[Gedmo\Versioned]
-    private ?Tenant $tenant = null;
 
     #[ORM\Column(length: 4)]
     #[Gedmo\Versioned]
@@ -54,18 +51,6 @@ class Series implements TenantAwareInterface
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getTenant(): ?Tenant
-    {
-        return $this->tenant;
-    }
-
-    public function setTenant(?Tenant $tenant): static
-    {
-        $this->tenant = $tenant;
-
-        return $this;
     }
 
     public function getCode(): ?string

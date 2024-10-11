@@ -19,7 +19,8 @@ use App\Repository\InvoiceScheduleRepository;
 #[Gedmo\Loggable]
 class InvoiceSchedule implements TenantAwareInterface
 {
-    use LoggableTrait;
+    use LoggableTrait,
+        TenantAwareTrait;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -74,10 +75,6 @@ class InvoiceSchedule implements TenantAwareInterface
     #[ORM\JoinColumn(nullable: false)]
     #[Gedmo\Versioned]
     private ?Customer $customer = null;
-
-    #[ORM\ManyToOne]
-    #[Gedmo\Versioned]
-    private ?Tenant $tenant = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
@@ -274,18 +271,6 @@ class InvoiceSchedule implements TenantAwareInterface
     public function setCustomer(?Customer $customer): static
     {
         $this->customer = $customer;
-
-        return $this;
-    }
-
-    public function getTenant(): ?Tenant
-    {
-        return $this->tenant;
-    }
-
-    public function setTenant(?Tenant $tenant): static
-    {
-        $this->tenant = $tenant;
 
         return $this;
     }

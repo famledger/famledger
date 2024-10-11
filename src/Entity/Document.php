@@ -28,17 +28,13 @@ use App\Repository\DocumentRepository;
 #[Gedmo\Loggable]
 class Document implements TenantAwareInterface
 {
-    use LoggableTrait;
+    use LoggableTrait,
+        TenantAwareTrait;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['access' => 'PROPERTY'])]
     protected ?int $id = null;
-
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Gedmo\Versioned]
-    private ?Tenant $tenant = null;
 
     #[ORM\Column(length: 32)]
     #[Gedmo\Versioned]
@@ -116,18 +112,6 @@ class Document implements TenantAwareInterface
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getTenant(): ?Tenant
-    {
-        return $this->tenant;
-    }
-
-    public function setTenant(?Tenant $tenant): static
-    {
-        $this->tenant = $tenant;
-
-        return $this;
     }
 
     public function getType(): ?DocumentType

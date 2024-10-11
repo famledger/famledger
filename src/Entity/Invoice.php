@@ -34,6 +34,8 @@ use App\Service\Strategies\StrategyHelper;
 #[Gedmo\Loggable]
 class Invoice implements TenantAwareInterface, LiveModeAwareInterface, FileOwnerInterface
 {
+    use TenantAwareTrait;
+
     public function getOwnerKey(): ?string
     {
         return sprintf('%s-%s',
@@ -48,11 +50,6 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface, FileOwner
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Gedmo\Versioned]
-    private ?Tenant $tenant = null;
 
     #[ORM\ManyToOne(inversedBy: 'invoices')]
     #[Gedmo\Versioned]
@@ -197,18 +194,6 @@ class Invoice implements TenantAwareInterface, LiveModeAwareInterface, FileOwner
     public function getInvoicePeriod(): string
     {
         return sprintf('%s %s', $this->getYear(), MonthConverter::fromNumericMonth($this->getMonth()));
-    }
-
-    public function getTenant(): ?Tenant
-    {
-        return $this->tenant;
-    }
-
-    public function setTenant(?Tenant $tenant): static
-    {
-        $this->tenant = $tenant;
-
-        return $this;
     }
 
     public function getHID(): ?string

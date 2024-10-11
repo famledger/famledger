@@ -22,7 +22,8 @@ use App\Repository\ReceiptTaskRepository;
 #[Gedmo\Loggable]
 class ReceiptTask implements LiveModeAwareInterface, TenantAwareInterface
 {
-    use LoggableTrait;
+    use LoggableTrait,
+        TenantAwareTrait;
 
     const STATUS_PENDING   = 'pending';
     const STATUS_FAILED    = 'failed';
@@ -58,10 +59,6 @@ class ReceiptTask implements LiveModeAwareInterface, TenantAwareInterface
     #[ORM\JoinColumn(nullable: false)]
     #[Gedmo\Versioned]
     private ?Customer $customer = null;
-
-    #[ORM\ManyToOne]
-    #[Gedmo\Versioned]
-    private ?Tenant $tenant = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
@@ -174,18 +171,6 @@ class ReceiptTask implements LiveModeAwareInterface, TenantAwareInterface
     public function setCustomer(?Customer $customer): static
     {
         $this->customer = $customer;
-
-        return $this;
-    }
-
-    public function getTenant(): ?Tenant
-    {
-        return $this->tenant;
-    }
-
-    public function setTenant(?Tenant $tenant): static
-    {
-        $this->tenant = $tenant;
 
         return $this;
     }

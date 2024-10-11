@@ -18,7 +18,9 @@ use App\Repository\EDocRepository;
 #[ORM\UniqueConstraint(name: 'edoc_checksum', columns: ['checksum'])]
 class EDoc implements TenantAwareInterface, FileOwnerInterface
 {
-    use FileOwnerTrait, LoggableTrait;
+    use FileOwnerTrait,
+        LoggableTrait,
+        TenantAwareTrait;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -44,10 +46,6 @@ class EDoc implements TenantAwareInterface, FileOwnerInterface
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Gedmo\Versioned]
     private ?DateTime $issueDate = null;
-
-    #[ORM\ManyToOne]
-    #[Gedmo\Versioned]
-    private ?Tenant $tenant = null;
 
     public function __toString(): string
     {
@@ -120,18 +118,6 @@ class EDoc implements TenantAwareInterface, FileOwnerInterface
     public function setIssueDate(?DateTime $issueDate): static
     {
         $this->issueDate = $issueDate;
-
-        return $this;
-    }
-
-    public function getTenant(): ?Tenant
-    {
-        return $this->tenant;
-    }
-
-    public function setTenant(?Tenant $tenant): static
-    {
-        $this->tenant = $tenant;
 
         return $this;
     }
