@@ -219,7 +219,7 @@ class InvoiceTaskCrudController extends AbstractCrudController
             CentAmountField::new('amount'),
             IntegerField::new('year'),
             IntegerField::new('month')->setTemplatePath('admin/fields/monthAsString.html.twig'),
-            TextField::new('concept')->hideOnForm(),
+            TextField::new('concept'),
             DateField::new('lastExecuted')->hideOnForm(),
             TextField::new('status')->hideOnForm()
                 ->setTemplatePath('admin/fields/invoiceTaskStatus.html.twig'),

@@ -17,7 +17,6 @@ use App\Entity\Receipt;
 
 class PaymentCrudController extends AbstractCrudController
 {
-
     public function __construct(
         private readonly AdminUrlGenerator $adminUrlGenerator,
     ) {

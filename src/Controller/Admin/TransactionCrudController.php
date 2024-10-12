@@ -3,7 +3,6 @@
 namespace App\Controller\Admin;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -14,6 +13,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,9 +25,9 @@ use App\Entity\Transaction;
 
 class TransactionCrudController extends AbstractCrudController
 {
-
     public function __construct(
-        private readonly EntityManagerInterface $em
+        private readonly AdminUrlGenerator      $adminUrlGenerator,
+        private readonly EntityManagerInterface $em,
     ) {
     }
 
@@ -49,12 +49,12 @@ class TransactionCrudController extends AbstractCrudController
         return $filters
             ->add('account')
             ->add('amount')
-            ->add('description');
+            ->add('description')
+            ->add('type');
     }
 
     public function configureFields(string $pageName): iterable
     {
-        yield AssociationField::new('statement');
         yield AssociationField::new('account')->setFormTypeOption('query_builder', function ($repository) {
             return $repository->createQueryBuilder('a')->orderBy('a.caption', 'ASC');
         });
@@ -72,6 +72,23 @@ class TransactionCrudController extends AbstractCrudController
 
     public function configureActions(Actions $actions): Actions
     {
+        $statementDetailAction = Action::new('statementDetail', 'View Statement')
+            ->setIcon('fa fa-balance-scale')
+            ->linkToUrl(function (?Transaction $transaction) {
+                $hash = (null == $transaction)
+                    ? ''
+                    : '#position_' . $transaction->getSequenceNo();
+
+                return $this->adminUrlGenerator
+                           ->setController(StatementCrudController::class)
+                           ->setAction(Action::DETAIL)
+                           ->setEntityId($transaction->getStatement()?->getId())
+                           ->generateUrl() . $hash;
+            })
+            ->displayIf(function (?Transaction $transaction) {
+                return null !== $transaction->getStatement()?->getId();
+            });
+
         $exportAction = Action::new('export', 'Export')
             ->setIcon('fa fa-file-export')
             ->linkToCrudAction('exportData')
@@ -79,7 +96,8 @@ class TransactionCrudController extends AbstractCrudController
 
         return $actions
             ->remove(Crud::PAGE_INDEX, Action::NEW)
-            ->add(Crud::PAGE_INDEX, $exportAction);
+            ->add(Crud::PAGE_INDEX, $exportAction)
+            ->add(Crud::PAGE_INDEX, $statementDetailAction);
     }
 
     public function exportData(AdminContext $context): Response
