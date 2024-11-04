@@ -144,6 +144,9 @@ class DocumentEventListener
             ->setDocument($document)
             ->setFinancialMonth($document->getFinancialMonth())
             ->setAccount($account);
+        foreach ($statement->getTransactions() as $transaction) {
+            $transaction->setAccount($account);
+        }
 
         $this->em->persist($statement);
     }
