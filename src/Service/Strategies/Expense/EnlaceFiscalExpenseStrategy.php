@@ -11,7 +11,8 @@ class EnlaceFiscalExpenseStrategy extends BaseBBVAExpenseStrategy
 {
     protected function specificMatchLogic(array $properties, string $content): bool
     {
-        return str_contains($content, 'FACTURACION ELECTRONICA');
+        return str_contains($content, 'FACTURACION ELECTRONICA')
+               or str_contains($content, 'Número de convenio: 1422286');
     }
 
     /**

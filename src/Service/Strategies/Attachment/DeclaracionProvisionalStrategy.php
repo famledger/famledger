@@ -12,19 +12,20 @@ class DeclaracionProvisionalStrategy implements StrategyInterface
 {
     public function matches(string $content, ?string $filePath = null): bool
     {
-        return str_contains($content, 'DECLARACIÓN PROVISIONAL O DEFINITIVA DE IMPUESTOS FEDERALES');
+        return str_contains($content, 'DECLARACIÓN PROVISIONAL O DEFINITIVA DE IMPUESTOS FEDERALES')
+            or str_contains($content, 'ión Provisional o Definitiva de Impuestos Federales');
     }
 
     public function parse(string $content, ?string $filePath = null): ?BaseDocumentSpecs
     {
         // match 'PERIODO  Enero'
-        if (false === preg_match('/PERIODO\s+([A-Za-z]+)/', $content, $matches)) {
+        if (false === preg_match('/Período de la declaración:\s+([A-Za-z]+)/', $content, $matches)) {
             return null;
         }
         $month = StrategyHelper::convertMonthToInt($matches[1]);
 
         // match 'EJERCICIO  2023
-        if (false === preg_match('/EJERCICIO\s+([0-9]+)/', $content, $matches)) {
+        if (false === preg_match('/Ejercicio:\s+([0-9]+)/', $content, $matches)) {
             return null;
         }
         $year = $matches[1];

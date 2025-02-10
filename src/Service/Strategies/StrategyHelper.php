@@ -94,6 +94,27 @@ class StrategyHelper
         throw new DocumentMatchException('Could not match month and year in description', '');
     }
 
+    static public function monthAbbreviationToNumber(string $month): ?int
+    {
+        // Mapping Spanish abbreviated month names to numbers
+        $months = [
+            'ENE' => 1,
+            'FEB' => 2,
+            'MAR' => 3,
+            'ABR' => 4,
+            'MAY' => 5,
+            'JUN' => 6,
+            'JUL' => 7,
+            'AGO' => 8,
+            'SEP' => 9,
+            'OCT' => 10,
+            'NOV' => 11,
+            'DIC' => 12,
+        ];
+
+        return $months[strtoupper($month)] ?? null;
+    }
+
     public static function extractBlock(string $pattern, string $content, int $width, int $lines): ?string
     {
         if (preg_match($pattern, $content, $matches, PREG_OFFSET_CAPTURE)) {

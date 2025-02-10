@@ -85,9 +85,12 @@ class ExpenseXmlAttachmentStrategy extends BaseCfdiStrategy
             default:
                 break;
         }
-        if ('MOPM670510J8A' === $cfdiData['recipientRfc']) {
-            $accountNumber = '1447391412';
-        }
+
+        $accountNumber = match ($cfdiData['recipientRfc']) {
+            'MOPM670510J8A' => '1447391412',
+            'MIJO620503Q60' => '1447302029',
+            default         => null,
+        };
 
         return (new AttachmentSpecs())
             ->setAmount($cfdiData['amount'])

@@ -4,6 +4,7 @@ namespace App\Service\Detectors;
 
 use App\Constant\DocumentType;
 use App\Service\Strategies\Statement\BBVACreditCardStrategy;
+use App\Service\Strategies\Statement\BBVACreditCardStrategy2025;
 use App\Service\Strategies\Statement\BBVAStatementStrategy;
 
 class StatementDetector extends BaseDetector
@@ -12,6 +13,7 @@ class StatementDetector extends BaseDetector
     {
         return [
             new BBVACreditCardStrategy(),
+            new BBVACreditCardStrategy2025(),
             new BBVAStatementStrategy(),
         ];
     }
