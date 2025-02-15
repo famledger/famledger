@@ -35,8 +35,8 @@ class TaxPaymentWarningExtension extends AbstractExtension
         $taxPayment = $this->em->getRepository(TaxPayment::class)->findOneBy([], ['year' => 'DESC', 'month' => 'DESC']);
         $taxNotice  = $this->em->getRepository(TaxNotice::class)->findOneBy([], ['year' => 'DESC', 'month' => 'DESC']);
 
-        $paymentMonth      = $taxPayment->getYear() . $taxPayment->getMonth();
-        $noticeMonth       = $taxNotice->getYear() . $taxNotice->getMonth();
+        $paymentMonth      = $taxPayment->getYear() . str_pad($taxPayment->getMonth(), 2, '0', STR_PAD_LEFT);
+        $noticeMonth       = $taxNotice->getYear() . str_pad($taxNotice->getMonth(), 2, '0', STR_PAD_LEFT);
         $lastPaidMonth     = $paymentMonth;
         $isZeroDeclaration = false;
         if ($noticeMonth > $paymentMonth and $taxNotice->getAmount() === 0) {
