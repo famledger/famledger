@@ -76,16 +76,22 @@ class DashboardController extends AbstractDashboardController
         // Usually it's better to call the parent method because that gives you a
         // user menu with some menu items already created ("sign out", "exit impersonation", etc.)
         // if you prefer to create the user menu from scratch, use: return UserMenu::new()->...
+        $menuItems = [
+            MenuItem::linkToRoute('Arrendamiento', 'fa fa-building', 'tenantSwitch', ['tenant' => 1]),
+            MenuItem::linkToRoute('Bodas', 'fa fa-church', 'tenantSwitch', ['tenant' => 2]),
+        ];
+
         return parent::configureUserMenu($user)
             ->setName($user->getUserIdentifier())
             ->displayUserName()
+            ->addMenuItems($menuItems);
+
 //            ->setAvatarUrl('https://avatars1.githubusercontent.com/u/1295390?s=60&v=4')
 //            //->setAvatarUrl($user->getProfileImageUrl())
 //            // use this method if you don't want to display the user image
 //            ->displayUserAvatar(false)
-            // you can also pass an email address to use gravatar's service
-            //->setGravatarEmail($user->getMainEmailAddress())
-            ;
+        // you can also pass an email address to use gravatar's service
+        //->setGravatarEmail($user->getMainEmailAddress())
     }
 
     public function configureAssets(): Assets
