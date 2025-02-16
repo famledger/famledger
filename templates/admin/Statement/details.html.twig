@@ -23,17 +23,17 @@
     <div>{{ statement_navigation(statement, 12) }}</div>
     <div class="row">
         <!-- Left column of cards -->
-        <div class="col-md-6">
+        <div class="col-12 col-md-6">
             {{ include('admin/Statement/_cardStatement.html.twig') }}
         </div>
         <!-- Right column of cards -->
-        <div class="col-md-6">
+        <div class="col-12 col-md-6">
             {{ include('admin/Statement/_cardAssociations.html.twig') }}
         </div>
     </div>
 
     <div class="row">
-        <div class="col-sm-6">
+        <div class="col-12 col-md-6">
             {% embed 'admin/_common/collapsible_card.twig' with {
                 icon:'fa fa-paperclip',
                 title: 'Transactions',
@@ -67,7 +67,7 @@
                 {% endblock %}
             {% endembed %}
         </div>
-        <div class="col-sm-6">
+        <div class="col-12 col-md-6">
             {{ include('admin/Statement/_cardOther.html.twig') }}
             {{ include('admin/Statement/_cardInvoices.html.twig') }}
             {{ include('admin/Statement/_cardAttachments.html.twig') }}

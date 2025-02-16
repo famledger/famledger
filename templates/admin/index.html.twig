@@ -7,14 +7,14 @@
 
 {% block main %}
     <div class="row">
-        <div class="col-6">
+        <div class="col-12 col-md-6">
             {% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-cash-register', title: 'Tax Payment Status' } %}
                 {% block card_body %}
                     {{ tax_payment_warning() }}
                 {% endblock %}
             {% endembed %}
         </div>
-        <div class="col-6">
+        <div class="col-12 col-md-6">
             {% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-balance-scale', title: 'Statements by Account' } %}
                 {% block card_body %}
                     <!-- Tab Headers -->
@@ -61,7 +61,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-6">
+        <div class="col-12 col-md-6">
             {% embed 'admin/_common/collapsible_card.twig' with { icon:'fa-fw fas fa-tasks', title: 'Invoice Tasks (pending)' } %}
                 {% block card_body %}
                     <table class="table table-condensed table-hover">
@@ -74,9 +74,13 @@
                         </tr>
                         </thead>
                         {% for invoiceTask in invoiceTasks %}
+                            {% set customer = invoiceTask.customer %}
+                            {% set invoiceSchedule = invoiceTask.invoiceSchedule %}
+                            {% set monthlyPaymentDate = invoiceTask.year ~ '-' ~ invoiceTask.month ~ '-' ~ invoiceSchedule.monthlyPaymentDay %}
+                            {% set pending = monthlyPaymentDate|date('U') < 'now'|date('U') %}
                             <tr>
-                                <td>{{ invoiceTask.customer }}</td>
-                                <td>{{ invoiceTask.year }} {{ invoiceTask.month|month_name }}</td>
+                                <td style="background-color: {{ customer.color }}">{{ invoiceTask.customer }}</td>
+                                <td class="{% if pending %}text-danger{% else %}text-success{% endif %}">{{ invoiceTask.year }} {{ invoiceTask.month|month_name }}</td>
                                 <td>{{ invoiceTask.concept }}</td>
                                 <td><a href="{{ ea_url()
                                         .setController('App\\Controller\\Admin\\InvoiceTaskCrudController')
@@ -89,34 +93,38 @@
                 {% endblock %}
             {% endembed %}
         </div>
-        <div class="col-6">
-            {% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-file-invoice', title: 'Invoices(issued this and last month and not assigned)' } %}
+        <div class="col-12 col-md-6">
+            {% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-file-invoice', title: 'Invoices(issued this and last month and not yet assigned to a statement)' } %}
                 {% block card_body %}
                     <table class="table table-condensed table-hover">
                         <thead>
                         <tr>
                             <th></th>
                             <th>Customer</th>
+                            <th>Year Month</th>
                             <th>Issue Date</th>
                             <th>Payment Date</th>
-                            <th>Status</th>
+                            <th class="text-center">Status</th>
                             <th>Amount</th>
                             <th></th>
-                            {% for invoice in invoices %}
-                        <tr>
+                        </tr>
+                        {% for invoice in invoices %}
+                            {% set customer = invoice.customer %}
                             <td style="white-space: nowrap">{{ invoice }}</td>
-                            <td>{{ invoice.customer }}</td>
+                            <td style="background-color: {{ customer.color }}">{{ invoice.customer }}</td>
+                            <td>{{ invoice.year }} {{ invoice.month|month_name }}</td>
                             <td>{{ invoice.issueDate|format_date() }}</td>
                             <td>{% if invoice.paymentDate %}{{ invoice.paymentDate|format_date }}{% endif %}</td>
-                            <td class="text-right">{{ invoice.displayStatus|invoice_status }}</td>
+                            <td class="text-center">{{ invoice.displayStatus|invoice_status }}</td>
                             <td>{{ invoice.amount|cent_amount(true) }}</td>
-                            <td><a href="#" data-bs-toggle="tooltip" data-bs-title="{{ invoice.description }}"><i class="fa fa-info-circle"></i></a></td>
+                            <td><a href="#" data-bs-toggle="tooltip" data-bs-title="{{ invoice.description }}"><i
+                                            class="fa fa-info-circle"></i></a></td>
                             <td><a href="{{ ea_url()
                                     .setController('App\\Controller\\Admin\\InvoiceCrudController')
                                     .setAction('detail')
                                     .setEntityId(invoice.id) }}"><i class="fa fa-external-link"></i></a>
                             </td>
-                        </tr>
+                            </tr>
                         {% endfor %}
                     </table>
                 {% endblock %}
