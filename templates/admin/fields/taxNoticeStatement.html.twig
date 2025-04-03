@@ -9,7 +9,10 @@
 {% else %}
     {% set statement = taxNotice.statement %}
     {% if statement is not null %}
-        <a href="{{ statement_url(statement.year, statement.month) }}"><i
+        <a href="{{ ea_url()
+            .setController('App\\Controller\\Admin\\StatementCrudController')
+            .setAction('detail')
+            .setEntityId(statement.id) }}"><i
                     class="fa fa-balance-scale"></i> {{ statement.year }}-{{ statement.month|month_name }}</a>
     {% endif %}
 {% endif %}
