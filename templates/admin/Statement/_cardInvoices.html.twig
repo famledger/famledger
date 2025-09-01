@@ -1,6 +1,7 @@
 {% embed 'admin/_common/collapsible_card.twig' with {
     icon:'fa fa-file-invoice',
     title: 'Invoices',
+    collapsed: otherDocuments|length == 0,
 } %}
     {% block card_body %}
 
@@ -77,7 +78,7 @@
                 {% endfor %}
             </table>
         {% else %}
-            <div class="alert alert-info">No invoices found.</div>
+            - none -
         {% endif %}
 
     {% endblock %}

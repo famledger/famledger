@@ -48,9 +48,9 @@ class TransactionCrudController extends AbstractCrudController
     {
         return $filters
             ->add('account')
-            ->add('amount')
-            ->add('description')
-            ->add('type');
+            ->add('bookingDate')
+            ->add('type')
+            ->add('description');
     }
 
     public function configureFields(string $pageName): iterable
@@ -127,17 +127,20 @@ class TransactionCrudController extends AbstractCrudController
         $sheet->setCellValue('A1', 'ID')
             ->setCellValue('B1', 'Account')
             ->setCellValue('C1', 'Amount')
-            ->setCellValue('D1', 'Booking Date')
-            ->setCellValue('E1', 'Description');
+            ->setCellValue('D1', 'Type')
+            ->setCellValue('E1', 'Booking Date')
+            ->setCellValue('F1', 'Description');
 
         // Loop through transactions and write them to the spreadsheet
         $row = 2; // Start from the second row
         foreach ($transactions as $transaction) {
+            $documentType = $transaction->getType();
             $sheet->setCellValue('A' . $row, $transaction->getId())
                 ->setCellValue('B' . $row, $transaction->getAccount()?->getCaption())
                 ->setCellValue('C' . $row, $transaction->getAmount())
-                ->setCellValue('D' . $row, $transaction->getBookingDate()?->format('Y-m-d'))
-                ->setCellValue('E' . $row, $transaction->getDescription());
+                ->setCellValue('D' . $row, $documentType ? $documentType->value : null)
+                ->setCellValue('E' . $row, $transaction->getBookingDate()?->format('Y-m-d'))
+                ->setCellValue('F' . $row, $transaction->getDescription());
             $row++;
         }
 

@@ -148,7 +148,7 @@ class InvoiceRepository extends ServiceEntityRepository
             ->where($qb->expr()->andX()
                 // invoices for customer 'Servicios Empresariales de Alta Calidad' (5) were not created
                 // consistently and could not be associated with corresponding transactions, so they are excluded
-                //->add($qb->expr()->notIn('i.customer', [5, 7]))
+                ->add($qb->expr()->notIn('i.customer', [5,16]))
                 ->add($qb->expr()->isNull('d.id'))
                 ->add($qb->expr()->in('i.series', $series))
                 ->add($qb->expr()->neq('i.status', $qb->expr()->literal(InvoiceStatus::ANULADO)))
