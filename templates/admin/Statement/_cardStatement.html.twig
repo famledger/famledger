@@ -7,8 +7,14 @@
         </div>
         <div class="field-group">
             <div class="caption">Balance</div>
-            <div class="value">{{ statement.startingBalance|cent_amount }} - {{ statement.endingBalance|cent_amount }}
-                = {{ (statement.startingBalance - statement.endingBalance)|cent_amount }}</div>
+            <div class="value">
+                {% set diff = statement.startingBalance - statement.endingBalance %}
+                {% if diff > 0 %}
+                    {{ statement.startingBalance|cent_amount }} - {{ diff|cent_amount }}
+                {% else %}
+                    {{ statement.startingBalance|cent_amount }} + {{ (-1 * diff)|cent_amount }}
+                {% endif %}
+                = <strong>{{ statement.endingBalance|cent_amount(true) }}</strong></div>
         </div>
         <div class="field-group">
             <div class="caption">Transactions</div>

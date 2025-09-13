@@ -37,6 +37,13 @@
                                  aria-labelledby="account-tab-{{ account.id }}">
                                 {% set statements = account.latestStatements(3) %}
                                 <table class="table table-condensed table-hover">
+                                    <thead>
+                                    <tr>
+                                        <td style="color: #888; font-size: .9em;">Month</td>
+                                        <td style="color: #888; font-size: .9em;">Created</td>
+                                        <td style="color: #888; font-size: .9em;" class="text-right">Ending Balance</td>
+                                    </tr>
+                                    </thead>
                                     {% for statement in statements %}
                                         <tr>
                                             <td>
@@ -49,7 +56,8 @@
                                                     .setAction('detail')
                                                     .setEntityId(statement.id) }}">{{ statement.month|month_name }} {{ statement.year }}</a>
                                             </td>
-                                            <td>created: {{ statement.created|date }}</td>
+                                            <td>{{ statement.created|date('Y-m-d') }}</td>
+                                            <td class="text-right"><strong>{{ statement.endingBalance|cent_amount(true) }}</strong></td>
                                         </tr>
                                     {% endfor %}
                                 </table>
