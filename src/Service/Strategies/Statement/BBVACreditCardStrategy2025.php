@@ -18,7 +18,10 @@ class BBVACreditCardStrategy2025 implements StrategyInterface
     public function matches(string $content, ?string $filePath = null): bool
     {
         return str_contains($content, 'TARJETA PLATINUM BBVA (PLATINUM)')
-               and str_contains($content, 'Número de tarjeta: 4772143019386206');
+               and (
+                   str_contains($content, 'Número de tarjeta: 4772143019386206') or
+                   str_contains($content, 'Número de tarjeta: 4772143018342580')
+               );
     }
 
     public function suggestFilename(BaseDocumentSpecs $documentSpecs, ?string $filePath = null): string
