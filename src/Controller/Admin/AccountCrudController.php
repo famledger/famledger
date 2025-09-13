@@ -2,11 +2,14 @@
 
 namespace App\Controller\Admin;
 
+use App\Constant\AccountType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
@@ -48,6 +51,10 @@ class AccountCrudController extends AbstractCrudController
         return [
             IdField::new('id')->hideOnForm(),
             AssociationField::new('customer'),
+            ChoiceField::new('type')->setChoices([
+                'Bank Account' => AccountType::BANK_ACCOUNT,
+                'Credit Card'  => AccountType::CREDIT_CARD,
+            ]),
             TextField::new('caption'),
             TextField::new('bankRfc'),
             TextField::new('bankName'),
@@ -55,7 +62,7 @@ class AccountCrudController extends AbstractCrudController
             TextField::new('clabe'),
             TextField::new('bankRfc'),
             TextField::new('bankName'),
-            TextField::new('username'),
+            BooleanField::new('isActive')->setLabel('active')
         ];
     }
 }

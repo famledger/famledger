@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Constant\AccountType;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
@@ -72,6 +73,9 @@ class Account implements TenantAwareInterface
     {
         $this->statements      = new ArrayCollection();
         $this->financialMonths = new ArrayCollection();
+
+        $this->type     = AccountType::BANK_ACCOUNT;
+        $this->isActive = true;
     }
 
     public function __toString(): string
