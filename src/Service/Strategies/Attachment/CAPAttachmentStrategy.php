@@ -22,7 +22,7 @@ class CAPAttachmentStrategy implements StrategyInterface
 
         // Total:     $3,400.01
         $value  = StrategyHelper::extractValue(
-            '/Total:?\s+\$?([0-9,.]+)\s+/',
+            '/(?:Total:?|TOTAL A PAGAR)\s+\$?([0-9,.]+)\s+/',
             $reducedContent,
             $filePath,
             'Total'
@@ -30,9 +30,7 @@ class CAPAttachmentStrategy implements StrategyInterface
         $amount = StrategyHelper::convertToIntegerAmount($value);
 
         $cases = [
-            40 => 2,
-            19 => 4,
-            17 => 5,
+            45 => 2, // find pattern and cut out a block of 45x2 characters
         ];
 
         $year      = null;
@@ -41,7 +39,7 @@ class CAPAttachmentStrategy implements StrategyInterface
         $exception = null;
         foreach ($cases as $width => $height) {
             try {
-                $cellContent = StrategyHelper::extractBlock('/CORRESPONDIENTE|CORREPONDIENTES/', $content, $width, $height);
+                $cellContent = StrategyHelper::extractBlock('/HONORARIOS PROFESIONALES (CORRESPONDIENTE|CORREPONDIENTES)/', $content, $width, $height);
                 // match 'CORRESPONDIENTE AL MES DE OCTUBRE 2023' and extract the month and year
                 [$month, $year] = StrategyHelper::extractValues(
                     '/(ENERO|FEBRERO|MARZO|ABRIL|MAYO|JUNIO|JULIO|AGOSTO|SEPTIEMBRE|OCTUBRE|NOVIEMBRE|DICIEMBRE)(?: del)? (\d{4})/i',

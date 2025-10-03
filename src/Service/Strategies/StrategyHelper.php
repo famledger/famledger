@@ -118,9 +118,10 @@ class StrategyHelper
     public static function extractBlock(string $pattern, string $content, int $width, int $lines): ?string
     {
         if (preg_match($pattern, $content, $matches, PREG_OFFSET_CAPTURE)) {
-            $startPos  = $matches[0][1]; // Get the offset of the matched string
-            $startLine = substr_count(substr($content, 0, $startPos),
-                PHP_EOL); // Count the number of new lines before the match
+            // Get the offset of the matched string
+            $startPos = $matches[0][1];
+            // Count the number of new lines before the match
+            $startLine = substr_count(substr($content, 0, $startPos), PHP_EOL);
 
             $contentLines = explode(PHP_EOL, $content);
             $extracted    = '';
@@ -189,7 +190,7 @@ class StrategyHelper
 
         $englishDateString = str_replace(array_keys($months), array_values($months), $dateString);
 
-        return  DateTime::createFromFormat('d M y', $englishDateString);
+        return DateTime::createFromFormat('d M y', $englishDateString);
 
     }
 
