@@ -102,6 +102,7 @@ class CustomerCrudController extends AbstractCrudController
     {
         yield TextField::new('rfc');
         yield TextField::new('name');
+        yield CollectionField::new('emails');
         yield ColorField::new('color');
         yield AssociationField::new('defaultAddress');
         yield TextareaField::new('comment');
