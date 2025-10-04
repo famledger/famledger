@@ -12,7 +12,12 @@
         caption:'IFE, Constancia fiscal',
         owner: entity.instance,
         icon: 'fa fa-file-document',
-        width: 12
+        width: 6
+    }) }}
+
+    {{ include('admin/contract/customer_contract_edocs_card.html.twig', {
+        customer: entity.instance,
+        width: 6
     }) }}
 
 {% endblock %}

@@ -1,0 +1,41 @@
+{% set contractEDocs = customer_contract_edocs(customer, constant('App\\Constant\\ContractEDocType::CONTRACT_FILE')) %}
+
+<div class="col-md-{{ width|default(6) }}">
+    <div class="card">
+        <div class="card-header bg-light">
+            <i class="fas fa-file-contract"></i> Contract Files
+        </div>
+        <div class="card-body">
+            {% if contractEDocs|length > 0 %}
+                <table class="table table-hover">
+                    {% for eDoc in contractEDocs %}
+                        <tr>
+                            <td>
+                                <i class="fas fa-file text-primary"></i>
+                                {{ eDoc.filename }}
+                                <small class="text-muted d-block">
+                                    Contract #{{ eDoc.ownerId }}
+                                </small>
+                            </td>
+                            <td class="text-right" style="white-space: nowrap">
+                                <a href="{{ path('admin_eDoc_download', {eDoc: eDoc.id}) }}" 
+                                   title="Download" target="_blank">
+                                    <i class="fa fa-download"></i>
+                                </a>
+                                <a href="{{ ea_url()
+                                    .setController('App\\Controller\\Admin\\ContractCrudController')
+                                    .setAction('detail')
+                                    .setEntityId(eDoc.ownerId) }}" 
+                                   title="View Contract">
+                                    <i class="fa fa-external-link"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p class="text-muted">No contract files found for this customer.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,10 @@
+{% set contract = entity.instance %}
+
+<div class="contract-file-section" 
+     id="contract-file-container-{{ contract.id }}" 
+     data-update-method="replace-content">
+    {{ include('admin/contract/contract_file_content.html.twig', {
+        contract: contract
+    }) }}
+</div>
+

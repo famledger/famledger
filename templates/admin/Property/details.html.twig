@@ -67,12 +67,8 @@
         }) }}
     </div>
     <div class="row gx-0 mt-3">
-        {{ include('admin/EDoc/eDocsCard.html.twig', {
-            eDocs: eDocsByType[constant('App\\Constant\\PropertyEDocType::CONTRACT')]|default([]),
-            type:constant('App\\Constant\\PropertyEDocType::CONTRACT'),
-            caption:'Contracts',
-            owner: entity.instance,
-            icon: 'fa fa-file-contract',
+        {{ include('admin/contract/property_contract_edocs_card.html.twig', {
+            property: entity.instance,
             width: 6
         }) }}
         {{ include('admin/EDoc/eDocsCard.html.twig', {

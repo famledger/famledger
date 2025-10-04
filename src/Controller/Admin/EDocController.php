@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -12,11 +13,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+use App\Constant\ContractEDocType;
+use App\Entity\Contract;
 use App\Entity\EDoc;
 use App\Entity\FileOwnerInterface;
 use App\Service\EDocService;
 
-class EDocController extends DashboardController
+class EDocController extends AbstractController
 {
     #[Route('/admin/eDocs/{eDoc}', name: 'admin_eDoc_download', methods: ['GET'])]
     public function download(EDoc $eDoc, EDocService $eDocService): Response
@@ -48,7 +51,7 @@ class EDocController extends DashboardController
     public function delete(
         EDoc        $eDoc,
         Request     $request,
-        EDocService $eDocService
+        EDocService $eDocService,
     ): Response {
 
         $owner = $eDocService->getOwner($eDoc);
@@ -59,6 +62,17 @@ class EDocController extends DashboardController
                 $eDocService->deleteEDoc($eDoc);
             } catch (Exception) {
             }
+        }
+
+        // Check if this is a contract file deletion
+        if ($owner instanceof Contract && $type === ContractEDocType::CONTRACT_FILE) {
+
+            return new JsonResponse([
+                'success'     => true,
+                'updatedHTML' => $this->renderView('admin/contract/contract_file_content.html.twig', [
+                    'contract' => $owner,
+                ])
+            ]);
         }
 
         return new JsonResponse([
@@ -78,7 +92,7 @@ class EDocController extends DashboardController
         string                 $type,
         Request                $request,
         EntityManagerInterface $em,
-        EDocService            $eDocService
+        EDocService            $eDocService,
     ): Response {
         try {
             $file = $request->files->get('file');
@@ -98,6 +112,14 @@ class EDocController extends DashboardController
             }
 
             $eDocService->createAndPersistUploadedEDoc($ownerEntity, $file, $type);
+
+            // Check if this is a contract file upload
+            if ($ownerEntity instanceof Contract && $type === ContractEDocType::CONTRACT_FILE) {
+
+                return $this->render('admin/contract/contract_file_content.html.twig', [
+                    'contract' => $ownerEntity,
+                ]);
+            }
 
             return $this->render('admin/EDoc/eDocsCardBody.html.twig', [
                 'eDocs' => $eDocService->getEDocs($ownerEntity, $type),

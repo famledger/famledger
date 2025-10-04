@@ -2,7 +2,6 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Transaction;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -20,6 +19,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 use App\Entity\Account;
 use App\Entity\Address;
+use App\Entity\Contract;
 use App\Entity\Customer;
 use App\Entity\Document;
 use App\Entity\EDoc;
@@ -37,6 +37,7 @@ use App\Entity\Tenant;
 use App\Entity\User;
 use App\Entity\Vehicle;
 use App\Repository\AccountRepository;
+use App\Repository\ContractRepository;
 use App\Repository\InvoiceRepository;
 use App\Repository\InvoiceTaskRepository;
 use App\Service\LiveModeContext;
@@ -47,11 +48,13 @@ class DashboardController extends AbstractDashboardController
     public function __construct(
         private readonly InvoiceRepository      $invoiceRepository,
         private readonly InvoiceTaskRepository  $invoiceTaskRepository,
+        private readonly ContractRepository     $contractRepository,
         private readonly LiveModeContext        $liveModeContext,
         private readonly RequestStack           $requestStack,
         private readonly AccountRepository      $accountRepository,
         private readonly AdminUrlGenerator      $adminUrlGenerator,
         private readonly EntityManagerInterface $em,
+
     ) {
     }
 
@@ -59,9 +62,10 @@ class DashboardController extends AbstractDashboardController
     public function index(): Response
     {
         return $this->render('admin/index.html.twig', [
-            'invoices'     => $this->invoiceRepository->findLatest(),
-            'invoiceTasks' => $this->invoiceTaskRepository->findPending(),
-            'accounts'     => $this->accountRepository->findActive(),
+            'invoices'          => $this->invoiceRepository->findLatest(),
+            'invoiceTasks'      => $this->invoiceTaskRepository->findPending(),
+            'accounts'          => $this->accountRepository->findActive(),
+            'expiringContracts' => $this->contractRepository->findExpiringSoon(),
         ]);
     }
 
@@ -76,22 +80,16 @@ class DashboardController extends AbstractDashboardController
         // Usually it's better to call the parent method because that gives you a
         // user menu with some menu items already created ("sign out", "exit impersonation", etc.)
         // if you prefer to create the user menu from scratch, use: return UserMenu::new()->...
-        $menuItems = [
-            MenuItem::linkToRoute('Arrendamiento', 'fa fa-building', 'tenantSwitch', ['tenant' => 1]),
-            MenuItem::linkToRoute('Bodas', 'fa fa-church', 'tenantSwitch', ['tenant' => 2]),
-        ];
-
         return parent::configureUserMenu($user)
             ->setName($user->getUserIdentifier())
             ->displayUserName()
-            ->addMenuItems($menuItems);
-
 //            ->setAvatarUrl('https://avatars1.githubusercontent.com/u/1295390?s=60&v=4')
 //            //->setAvatarUrl($user->getProfileImageUrl())
 //            // use this method if you don't want to display the user image
 //            ->displayUserAvatar(false)
-        // you can also pass an email address to use gravatar's service
-        //->setGravatarEmail($user->getMainEmailAddress())
+            // you can also pass an email address to use gravatar's service
+            //->setGravatarEmail($user->getMainEmailAddress())
+            ;
     }
 
     public function configureAssets(): Assets
@@ -119,25 +117,27 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToUrl('Outbox', 'fas fa-sign-out',
             'folderopener:///Volumes/KC3000-2TB/DataStorage/FamLedger/outbox');
         yield MenuItem::section('Invoicing');
+        yield MenuItem::linkToRoute('Invoice History', 'fas fa-history', 'admin_invoice_history',
+            ['year' => date('Y')]);
         yield MenuItem::linkToCrud('Invoice Schedules', 'fa fa-calendar', InvoiceSchedule::class);
         yield MenuItem::linkToCrud('Invoice Tasks', 'fas fa-tasks', InvoiceTask::class);
         yield MenuItem::linkToCrud('Receipt Tasks', 'fas fa-tasks', ReceiptTask::class);
         yield MenuItem::section('Accounting');
-        yield MenuItem::linkToRoute('Invoice History', 'fas fa-history', 'admin_invoice_history',
-            ['year' => date('Y')]);
+        yield MenuItem::linkToRoute('Inbox', 'fas fa-inbox', 'admin_inbox');
+        yield MenuItem::linkToUrl('Outbox', 'fas fa-sign-out',
+            'folderopener:///Volumes/KC3000-2TB/DataStorage/FamLedger/outbox');
+        yield MenuItem::linkToCrud('Statements', 'fas fa-balance-scale', Statement::class);
         yield MenuItem::linkToRoute('Payment History', 'fas fa-history', 'admin_payment_history',
             ['year' => date('Y')]);
-        yield MenuItem::linkToCrud('Tax Payments History', 'fas fa-cash-register', TaxNotice::class);
-        yield MenuItem::linkToCrud('Statements', 'fas fa-balance-scale', Statement::class);
+        yield MenuItem::linkToCrud('Tax Payments', 'fas fa-cash-register', TaxNotice::class);
         yield MenuItem::linkToRoute('Yearly Expenses', 'fas fa-credit-card', 'admin_expense', ['year' => date('Y')]);
-        yield MenuItem::linkToRoute('Yearly Reports', 'fas fa-chart-bar', 'admin_yearlyReport', ['year' => date('Y')]);
 //        yield MenuItem::linkToCrud('Financial Months', 'fas fa-calendar', FinancialMonth::class);
         yield MenuItem::section('Lookup');
         yield MenuItem::linkToCrud('Documents', 'fas fa-file', Document::class);
         yield MenuItem::linkToCrud('Invoices', 'fas fa-file-invoice', Invoice::class);
         yield MenuItem::linkToCrud('Receipts', 'fas fa-file-invoice', Receipt::class);
-        yield MenuItem::linkToCrud('Transactions', 'fas fa-right-left', Transaction::class);
         yield MenuItem::section('Admin');
+        yield MenuItem::linkToCrud('Contracts', 'fas fa-file-contract', Contract::class);
         yield MenuItem::linkToCrud('Bank Accounts', 'fas fa-bank', Account::class);
         yield MenuItem::linkToCrud('Properties', 'fas fa-building', Property::class);
         yield MenuItem::linkToCrud('Customers', 'fas fa-user', Customer::class);

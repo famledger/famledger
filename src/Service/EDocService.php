@@ -2,18 +2,20 @@
 
 namespace App\Service;
 
-use App\Constant\PropertyEDocType;
-use App\Entity\Property;
-use App\Service\DocumentSpecs\BaseDocumentSpecs;
-use App\Service\DocumentSpecs\ReceiptSpecs;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use ReflectionClass;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
+use App\Constant\ContractEDocType;
+use App\Constant\PropertyEDocType;
+use App\Entity\Contract;
+use App\Entity\Customer;
 use App\Entity\EDoc;
 use App\Entity\FileOwnerInterface;
+use App\Entity\Property;
+use App\Service\DocumentSpecs\ReceiptSpecs;
 
 class EDocService
 {
@@ -230,6 +232,54 @@ class EDocService
             $eDoc->getOwnerKey(),
             $eDoc->getType(),
         );
+    }
+
+    public function getContractFile(Contract $contract): ?EDoc
+    {
+        return $this->em->getRepository(EDoc::class)->findOneBy([
+            'ownerId' => $contract->getId(),
+            'ownerType' => 'Contract',
+            'type' => ContractEDocType::CONTRACT_FILE
+        ]);
+    }
+
+    public function hasContractFile(Contract $contract): bool
+    {
+        return $this->getContractFile($contract) !== null;
+    }
+
+    /**
+     * Get contract eDocs related to a Customer
+     */
+    public function getCustomerContractEDocs(Customer $customer, ?string $type = null): array
+    {
+        $contractRepository = $this->em->getRepository(Contract::class);
+        $contracts = $contractRepository->findBy(['customer' => $customer]);
+        
+        $eDocs = [];
+        foreach ($contracts as $contract) {
+            $contractEDocs = $this->getEDocs($contract, $type);
+            $eDocs = array_merge($eDocs, $contractEDocs);
+        }
+        
+        return $eDocs;
+    }
+
+    /**
+     * Get contract eDocs related to a Property
+     */
+    public function getPropertyContractEDocs(Property $property, ?string $type = null): array
+    {
+        $contractRepository = $this->em->getRepository(Contract::class);
+        $contracts = $contractRepository->findBy(['property' => $property]);
+        
+        $eDocs = [];
+        foreach ($contracts as $contract) {
+            $contractEDocs = $this->getEDocs($contract, $type);
+            $eDocs = array_merge($eDocs, $contractEDocs);
+        }
+        
+        return $eDocs;
     }
 
     private function getOwnerType(FileOwnerInterface $owner): string

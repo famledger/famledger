@@ -19,8 +19,8 @@ class UploadCardExtension extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            new TwigFilter('upload_card', [$this, 'uploadCard'], ['is_safe' => ['html']]),
-            new TwigFilter('upload_url', [$this, 'uploadUrl'], ['is_safe' => ['html']])
+            new TwigFilter('upload_card', $this->uploadCard(...), ['is_safe' => ['html']]),
+            new TwigFilter('upload_url', $this->uploadUrl(...), ['is_safe' => ['html']])
         ];
     }
 

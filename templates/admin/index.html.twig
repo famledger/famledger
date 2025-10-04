@@ -15,6 +15,63 @@
             {% endembed %}
         </div>
         <div class="col-12 col-md-6">
+            {% embed 'admin/_common/collapsible_card.twig' with { icon:'fas fa-file-contract', title: 'Expiring Contracts' } %}
+                {% block card_body %}
+                    <table class="table table-condensed table-hover">
+                        <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Property</th>
+                            <th>End Date</th>
+                            <th>Days Left</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        {% for contract in expiringContracts %}
+                            {% set days = contract.daysUntilExpiration %}
+                            <tr {% if days <= 30 %} class="alert alert-danger"{% elseif days <= 60 %} class="alert alert-warning"{% endif %}>
+                                <td>{{ contract.customer.name }}</td>
+                                <td>{{ contract.property.caption }}</td>
+                                <td>{{ contract.endDate|date('Y-m-d') }}</td>
+                                <td>
+                                    {% if days <= 30 %}
+                                        <span class="badge bg-danger text-light">{{ days }} days</span>
+                                    {% elseif days <= 60 %}
+                                        <span class="badge bg-warning text-light">{{ days }} days</span>
+                                    {% else %}
+                                        <span class="badge bg-info text-light">{{ days }} days</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-right">
+                                    {% if has_contract_file(contract) %}
+                                        {% set contractFile = contract_file(contract) %}
+                                        <a href="{{ path('admin_eDoc_download', {eDoc: contractFile.id}) }}"
+                                           title="Download Contract File" target="_blank">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    {% endif %}
+                                    <a href="{{ ea_url()
+                                        .setController('App\\Controller\\Admin\\ContractCrudController')
+                                        .setAction('detail')
+                                        .setEntityId(contract.id) }}"
+                                       title="View Contract Details">
+                                        <i class="fa fa-external-link"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No contracts expiring soon</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endblock %}
+            {% endembed %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-6 col-md-6">
             {% embed 'admin/_common/collapsible_card.twig' with { icon:'fa fa-balance-scale', title: 'Statements by Account' } %}
                 {% block card_body %}
                     <!-- Tab Headers -->
@@ -37,13 +94,6 @@
                                  aria-labelledby="account-tab-{{ account.id }}">
                                 {% set statements = account.latestStatements(3) %}
                                 <table class="table table-condensed table-hover">
-                                    <thead>
-                                    <tr>
-                                        <td style="color: #888; font-size: .9em;">Month</td>
-                                        <td style="color: #888; font-size: .9em;">Created</td>
-                                        <td style="color: #888; font-size: .9em;" class="text-right">Ending Balance</td>
-                                    </tr>
-                                    </thead>
                                     {% for statement in statements %}
                                         <tr>
                                             <td>
@@ -56,8 +106,7 @@
                                                     .setAction('detail')
                                                     .setEntityId(statement.id) }}">{{ statement.month|month_name }} {{ statement.year }}</a>
                                             </td>
-                                            <td>{{ statement.created|date('Y-m-d') }}</td>
-                                            <td class="text-right"><strong>{{ statement.endingBalance|cent_amount(true) }}</strong></td>
+                                            <td>created: {{ statement.created|date }}</td>
                                         </tr>
                                     {% endfor %}
                                 </table>
@@ -68,6 +117,7 @@
             {% endembed %}
         </div>
     </div>
+
     <div class="row">
         <div class="col-12 col-md-6">
             {% embed 'admin/_common/collapsible_card.twig' with { icon:'fa-fw fas fa-tasks', title: 'Invoice Tasks (pending)' } %}
@@ -82,13 +132,9 @@
                         </tr>
                         </thead>
                         {% for invoiceTask in invoiceTasks %}
-                            {% set customer = invoiceTask.customer %}
-                            {% set invoiceSchedule = invoiceTask.invoiceSchedule %}
-                            {% set monthlyPaymentDate = invoiceTask.year ~ '-' ~ invoiceTask.month ~ '-' ~ invoiceSchedule.monthlyPaymentDay %}
-                            {% set pending = monthlyPaymentDate|date('U') < 'now'|date('U') %}
                             <tr>
-                                <td style="background-color: {{ customer.color }}">{{ invoiceTask.customer }}</td>
-                                <td class="{% if pending %}text-danger{% else %}text-success{% endif %}">{{ invoiceTask.year }} {{ invoiceTask.month|month_name }}</td>
+                                <td>{{ invoiceTask.customer }}</td>
+                                <td>{{ invoiceTask.year }} {{ invoiceTask.month|month_name }}</td>
                                 <td>{{ invoiceTask.concept }}</td>
                                 <td><a href="{{ ea_url()
                                         .setController('App\\Controller\\Admin\\InvoiceTaskCrudController')
@@ -109,21 +155,18 @@
                         <tr>
                             <th></th>
                             <th>Customer</th>
-                            <th>Year Month</th>
                             <th>Issue Date</th>
                             <th>Payment Date</th>
-                            <th class="text-center">Status</th>
+                            <th>Status</th>
                             <th>Amount</th>
                             <th></th>
-                        </tr>
-                        {% for invoice in invoices %}
-                            {% set customer = invoice.customer %}
+                            {% for invoice in invoices %}
+                        <tr>
                             <td style="white-space: nowrap">{{ invoice }}</td>
-                            <td style="background-color: {{ customer.color }}">{{ invoice.customer }}</td>
-                            <td>{{ invoice.year }} {{ invoice.month|month_name }}</td>
+                            <td>{{ invoice.customer }}</td>
                             <td>{{ invoice.issueDate|format_date() }}</td>
                             <td>{% if invoice.paymentDate %}{{ invoice.paymentDate|format_date }}{% endif %}</td>
-                            <td class="text-center">{{ invoice.displayStatus|invoice_status }}</td>
+                            <td class="text-right">{{ invoice.displayStatus|invoice_status }}</td>
                             <td>{{ invoice.amount|cent_amount(true) }}</td>
                             <td><a href="#" data-bs-toggle="tooltip" data-bs-title="{{ invoice.description }}"><i
                                             class="fa fa-info-circle"></i></a></td>
@@ -132,7 +175,7 @@
                                     .setAction('detail')
                                     .setEntityId(invoice.id) }}"><i class="fa fa-external-link"></i></a>
                             </td>
-                            </tr>
+                        </tr>
                         {% endfor %}
                     </table>
                 {% endblock %}
@@ -141,42 +184,42 @@
     </div>
 {% endblock %}
 
-{% block body_javascript %}
-    {{ parent() }}
-    <script>
-      document.addEventListener('DOMContentLoaded', (event) => {
-        document.querySelectorAll('.nav-tabs[data-section-name]').forEach(tabSection => {
-          let sectionName = tabSection.getAttribute('data-section-name')
-          let activeTab = localStorage.getItem('activeTab_' + sectionName)
+    {% block body_javascript %}
+        {{ parent() }}
+        <script>
+          document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('.nav-tabs[data-section-name]').forEach(tabSection => {
+              let sectionName = tabSection.getAttribute('data-section-name')
+              let activeTab = localStorage.getItem('activeTab_' + sectionName)
 
-          if (activeTab) {
-            activateTab(activeTab)
-          }
+              if (activeTab) {
+                activateTab(activeTab)
+              }
 
-          tabSection.querySelectorAll('a[data-bs-toggle="tab"]').forEach(tab => {
-            tab.addEventListener('click', function() {
-              localStorage.setItem('activeTab_' + sectionName, this.getAttribute('href'))
+              tabSection.querySelectorAll('a[data-bs-toggle="tab"]').forEach(tab => {
+                tab.addEventListener('click', function() {
+                  localStorage.setItem('activeTab_' + sectionName, this.getAttribute('href'))
+                })
+              })
             })
           })
-        })
-      })
 
-      function activateTab(tabId) {
-        let tab = document.querySelector(`a[href="${tabId}"]`)
-        if (tab) {
-          new bootstrap.Tab(tab).show() // If you are using Bootstrap's JS
-        }
-      }
-    </script>
-{% endblock %}
+          function activateTab(tabId) {
+            let tab = document.querySelector(`a[href="${tabId}"]`)
+            if (tab) {
+              new bootstrap.Tab(tab).show() // If you are using Bootstrap's JS
+            }
+          }
+        </script>
+    {% endblock %}
 
-{% block head_stylesheets %}
-    {{ parent() }}
-    <style>
-        .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
-            background-color: var(--bs-nav-tabs-link-active-bg);
-            border-color: var(--bs-nav-tabs-link-active-border-color);
-            color: #cc7300;
-        }
-    </style>
-{% endblock %}
+    {% block head_stylesheets %}
+        {{ parent() }}
+        <style>
+            .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+                background-color: var(--bs-nav-tabs-link-active-bg);
+                border-color: var(--bs-nav-tabs-link-active-border-color);
+                color: #cc7300;
+            }
+        </style>
+    {% endblock %}

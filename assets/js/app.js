@@ -24,14 +24,20 @@ const initializeDropzones = (container) => {
   console.log('initializing dropzones')
   const dropzoneForms = container.querySelectorAll('form.e-doc.dropzone')
   dropzoneForms.forEach((form) => {
+    // Check if form allows all file types
+    const allowAllFiles = form.getAttribute('data-accept-all-files') === 'true'
+    const acceptedFiles = allowAllFiles ? null : "image/*, application/pdf, .psd, .xml, .doc, .docx"
+
     new Dropzone(form, {
       paramName: "file",
       maxFilesize: 100,
-      acceptedFiles: "image/*, application/pdf, .psd, .xml",
+      acceptedFiles: acceptedFiles,
       addRemoveLinks: true,
       init: function() {
         this.on("success", function(file, responseText) {
           const containerId = form.getAttribute('data-container-id')
+          // console.log('Upload success - Container ID:', containerId)
+          // console.log('Upload success - Response:', responseText)
           updateContainer(containerId, responseText)
         })
       }
@@ -64,6 +70,9 @@ const initializeDeleteButtons = (container) => {
             console.log('Error deleting eDoc')
           }
         })
+        .catch(error => {
+          console.error('Delete eDoc error:', error)
+        })
     })
   })
 }
@@ -74,20 +83,33 @@ const updateContainer = (containerId, updatedHTML) => {
     alert(updatedHTML.message)
     return
   }
+  
   const containerElement = document.getElementById(containerId)
-  // console.log('containerElement: ' + containerElement)
-  // console.log('updatedHTML: ', updatedHTML)
   if (containerElement) {
-    const tempDiv = document.createElement('div')
-    tempDiv.innerHTML = updatedHTML
-    const newContainerElement = tempDiv.firstElementChild // Change this line
+    // Check if container has data attribute indicating update method
+    const updateMethod = containerElement.getAttribute('data-update-method') || 'replace-element'
+    
+    if (updateMethod === 'replace-content') {
+      // Replace innerHTML only - for containers that should keep their wrapper
+      containerElement.innerHTML = updatedHTML
+      initializeDropzones(containerElement)
+      initializeDeleteButtons(containerElement)
+    } else {
+      // Default: replace entire element - for traditional eDocs
+      const tempDiv = document.createElement('div')
+      tempDiv.innerHTML = updatedHTML
+      const newContainerElement = tempDiv.firstElementChild
 
-    // Replace the existing container with the new one
-    containerElement.parentNode.replaceChild(newContainerElement, containerElement)
-
-    // Re-initialize dropzones and delete buttons in the updated container
-    initializeDropzones(newContainerElement) // Pass the new container element
-    initializeDeleteButtons(newContainerElement) // Pass the new container element
+      if (newContainerElement) {
+        containerElement.parentNode.replaceChild(newContainerElement, containerElement)
+        initializeDropzones(newContainerElement)
+        initializeDeleteButtons(newContainerElement)
+      } else {
+        console.error('No valid element found in updatedHTML')
+      }
+    }
+  } else {
+    console.error('Container element not found:', containerId)
   }
 }
 

@@ -1,0 +1,65 @@
+{% set contractFile = contract_file(contract) %}
+
+{% if contractFile %}
+    <div class="existing-file mb-3">
+        <div class="card">
+            <div class="card-header bg-light">
+                <i class="fas fa-file text-primary"></i> Current Contract File
+            </div>
+            <div class="card-body">
+                <table class="table table-hover mb-0">
+                    <tr>
+                        <td>
+                            <strong>{{ contractFile.filename }}</strong>
+                            <small class="text-muted d-block">
+                                Uploaded: {{ contractFile.created|date('Y-m-d H:i') }}
+                            </small>
+                        </td>
+                        <td class="text-right" style="white-space: nowrap">
+                            {#                            <a href="{{ document|ea_url('detail', 'Document') }}"><i class="fa fa-eye"></i></a> #}
+                            {#                            <a href="{{ ea_url() #}
+                            {#                                .setController('App\\Controller\\Admin\\EDocCrudController') #}
+                            {#                                .setAction('edit') #}
+                            {#                                .setEntityId(contractFile.id) }}" #}
+                            {#                               title="Edit file details"> #}
+                            {#                                <i class="fa fa-pencil"></i> #}
+                            {#                            </a> #}
+                            <a href="{{ path('admin_eDoc_download', {eDoc: contractFile.id}) }}"
+                               title="Download" target="_blank">
+                                <i class="fa fa-download"></i>
+                            </a>
+                            <button class="delete-eDoc"
+                                    data-edoc-id="{{ contractFile.id }}"
+                                    data-csrf-token="{{ csrf_token('del-eDoc-' ~ contractFile.id) }}"
+                                    data-container-id="contract-file-container-{{ contract.id }}"
+                                    title="Delete file">
+                                <i class="fa fa-trash text-danger"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<div class="upload-section">
+    <div class="card">
+        <div class="card-header bg-light">
+            <i class="fas fa-upload"></i>
+            {% if contractFile %}Replace{% else %}Upload{% endif %} Contract File
+        </div>
+        <div class="card-body">
+            <form action="{{ contract|upload_url('contract-file') }}"
+                  class="e-doc dropzone"
+                  data-container-id="contract-file-container-{{ contract.id }}"
+                  data-accept-all-files="true">
+                <div class="dz-message">
+                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                    <p>Drop contract file here or click to browse</p>
+                    <small class="text-muted">Any file type is allowed</small>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,12 @@
+{% set contract = field.value %}
+{% if contract and has_contract_file(contract) %}
+    {% set contractFile = contract_file(contract) %}
+    <a href="{{ path('admin_eDoc_download', {eDoc: contractFile.id}) }}" 
+       target="_blank" 
+       class="btn btn-sm btn-outline-primary" 
+       title="Download Contract File">
+        <i class="fas fa-file"></i>
+    </a>
+{% else %}
+    <span class="text-muted">No file</span>
+{% endif %}
