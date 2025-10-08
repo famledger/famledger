@@ -22,6 +22,7 @@
                         <tr>
                             <th>Customer</th>
                             <th>Property</th>
+                            <th>Start Date</th>
                             <th>End Date</th>
                             <th>Days Left</th>
                             <th></th>
@@ -32,6 +33,7 @@
                             <tr {% if days <= 30 %} class="alert alert-danger"{% elseif days <= 60 %} class="alert alert-warning"{% endif %}>
                                 <td>{{ contract.customer.name }}</td>
                                 <td>{{ contract.property.caption }}</td>
+                                <td>{{ contract.startDate|date('Y-m-d') }}</td>
                                 <td>{{ contract.endDate|date('Y-m-d') }}</td>
                                 <td>
                                     {% if days <= 30 %}
