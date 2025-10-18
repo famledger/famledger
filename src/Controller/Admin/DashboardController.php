@@ -34,6 +34,7 @@ use App\Entity\Series;
 use App\Entity\Statement;
 use App\Entity\TaxNotice;
 use App\Entity\Tenant;
+use App\Entity\Transaction;
 use App\Entity\User;
 use App\Entity\Vehicle;
 use App\Repository\AccountRepository;
@@ -134,8 +135,9 @@ class DashboardController extends AbstractDashboardController
 //        yield MenuItem::linkToCrud('Financial Months', 'fas fa-calendar', FinancialMonth::class);
         yield MenuItem::section('Lookup');
         yield MenuItem::linkToCrud('Documents', 'fas fa-file', Document::class);
+        yield MenuItem::linkToCrud('Transactions', 'fas fa-receipt', Transaction::class);
         yield MenuItem::linkToCrud('Invoices', 'fas fa-file-invoice', Invoice::class);
-        yield MenuItem::linkToCrud('Receipts', 'fas fa-file-invoice', Receipt::class);
+        yield MenuItem::linkToCrud('Receipts', 'fas fa-file-text', Receipt::class);
         yield MenuItem::section('Admin');
         yield MenuItem::linkToCrud('Contracts', 'fas fa-file-contract', Contract::class);
         yield MenuItem::linkToCrud('Bank Accounts', 'fas fa-bank', Account::class);
